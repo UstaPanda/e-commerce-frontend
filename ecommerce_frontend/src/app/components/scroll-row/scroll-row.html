@@ -1,0 +1,23 @@
+<div class="relative">
+
+  @if (!hideArrows && showLeft) {
+    <button type="button" (click)="scroll(-1)"
+      [class]="'absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-surface-container-highest shadow flex items-center justify-center active:scale-90 transition-transform ' + arrowClass">
+      <span class="material-symbols-outlined text-on-surface text-lg leading-none">chevron_left</span>
+    </button>
+  }
+
+  <div #scrollEl (scroll)="onScroll()"
+    class="flex overflow-x-auto hide-scrollbar"
+    [ngClass]="rowClass">
+    <ng-content />
+  </div>
+
+  @if (!hideArrows && showRight) {
+    <button type="button" (click)="scroll(1)"
+      [class]="'absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-surface-container-highest shadow flex items-center justify-center active:scale-90 transition-transform ' + arrowClass">
+      <span class="material-symbols-outlined text-on-surface text-lg leading-none">chevron_right</span>
+    </button>
+  }
+
+</div>

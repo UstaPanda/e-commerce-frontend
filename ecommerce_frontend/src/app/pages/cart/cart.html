@@ -1,0 +1,445 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-10 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="relative z-10 flex items-center justify-between">
+      <div>
+        <h1 class="text-white font-extrabold text-2xl"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'CART.TITLE' | translate }}</h1>
+        <p class="text-white/70 text-sm mt-0.5">{{ cartService.itemCount() }} {{ 'PRODUCTS.GENERAL' | translate }}</p>
+      </div>
+      @if (cartService.cart() && cartService.cart()!.items.length > 0) {
+        <button (click)="clearCart()"
+          class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-white text-lg">delete_sweep</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="px-6 -mt-4 relative z-10 md:mt-6 md:-mt-0">
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="space-y-3">
+        @for (i of [1,2,3]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 h-24 animate-pulse"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)"></div>
+        }
+      </div>
+    }
+
+    <!-- Empty cart -->
+    @if (!loading() && (!cartService.cart() || cartService.cart()!.items.length === 0)) {
+      <div class="text-center py-16">
+        <div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-outline text-5xl">shopping_cart</span>
+        </div>
+        <h3 class="text-on-surface font-bold text-lg mb-2"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'CART.EMPTY_TITLE' | translate }}</h3>
+        <p class="text-outline text-sm mb-6">{{ 'CART.EMPTY_DESC' | translate }}</p>
+        <button (click)="goShopping()"
+          class="editorial-gradient text-white font-bold px-8 py-3 rounded-full text-sm active:scale-95 transition-transform"
+          style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+          {{ 'CART.START_SHOPPING' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- Success -->
+    @if (!loading() && checkoutSuccess()) {
+      <div class="bg-secondary-container rounded-3xl p-8 text-center">
+        <span class="material-symbols-outlined text-on-secondary-container text-5xl mb-3 block">check_circle</span>
+        <p class="text-on-secondary-container font-extrabold text-xl mb-1"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'CART.ORDER_RECEIVED' | translate }}</p>
+        <p class="text-on-secondary-container/70 text-sm">{{ 'CART.REDIRECTING' | translate }}</p>
+      </div>
+    }
+
+    <!-- Cart content: mobile single-col, desktop 2-col -->
+    @if (!loading() && !checkoutSuccess() && cartService.cart() && cartService.cart()!.items.length > 0) {
+      <div class="md:grid md:grid-cols-[1fr_360px] md:gap-8 md:items-start">
+
+        <!-- ══ LEFT: Items ══ -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 px-1 mt-0">
+            <span class="material-symbols-outlined text-outline text-base">storefront</span>
+            <span class="text-outline text-sm">{{ cartService.cart()!.storeName }}</span>
+          </div>
+
+          @for (item of cartService.cart()!.items; track item.cartItemId) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-3"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-outline text-2xl">inventory_2</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-on-surface font-bold text-sm truncate">{{ item.productName }}</p>
+                <p class="text-outline text-xs mt-0.5">{{ currency.format(item.unitPrice) }} {{ 'CART.PER_UNIT' | translate }}</p>
+                <p class="text-primary font-bold text-sm mt-1">{{ currency.format(item.subtotal) }}</p>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <div class="flex items-center gap-2 bg-surface-container-low rounded-full p-0.5">
+                  <button (click)="updateQty(item.cartItemId, item.quantity - 1)"
+                    class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+                    <span class="material-symbols-outlined text-sm">remove</span>
+                  </button>
+                  <span class="text-on-surface font-bold text-sm w-5 text-center">{{ item.quantity }}</span>
+                  <button (click)="updateQty(item.cartItemId, item.quantity + 1)"
+                    class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                  </button>
+                </div>
+                <button (click)="removeItem(item.cartItemId)"
+                  class="w-7 h-7 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform">
+                  <span class="material-symbols-outlined text-error text-sm">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Continue shopping (desktop only) -->
+          <button (click)="goShopping()"
+            class="hidden md:flex w-full items-center justify-center gap-2 py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            {{ 'CART.CONTINUE_SHOPPING' | translate }}
+          </button>
+        </div>
+
+        <!-- ══ RIGHT: Order summary + checkout (sticky on desktop) ══ -->
+        <div class="space-y-4 mt-4 md:mt-0 md:sticky md:top-8">
+
+          <!-- Order total -->
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">{{ 'CART.ORDER_SUMMARY' | translate }}</h3>
+            <div class="space-y-2 mb-4">
+              @for (item of cartService.cart()!.items; track item.cartItemId) {
+                <div class="flex justify-between text-sm">
+                  <span class="text-outline truncate max-w-[60%]">{{ item.productName }} × {{ item.quantity }}</span>
+                  <span class="text-on-surface font-medium">{{ currency.format(item.subtotal) }}</span>
+                </div>
+              }
+            </div>
+            <div class="border-t border-outline-variant/20 pt-3 flex justify-between">
+              <span class="text-on-surface font-bold">{{ 'CART.TOTAL' | translate }}</span>
+              <span class="text-primary font-extrabold text-lg"
+                style="font-family:'Plus Jakarta Sans',sans-serif">
+                {{ currency.format(cartService.cart()!.totalPrice) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Shipping address -->
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">{{ 'CART.SHIPPING_ADDRESS' | translate }}</h3>
+
+            @if (savedAddresses().length > 0) {
+              <div class="space-y-2 mb-3">
+                @for (addr of savedAddresses(); track addr.id) {
+                  <button (click)="selectAddress(addr.id)"
+                    class="w-full text-left p-3 rounded-2xl transition-all"
+                    [class.bg-primary]="selectedAddressId() === addr.id"
+                    [class.bg-surface-container-low]="selectedAddressId() !== addr.id">
+                    <div class="flex items-center justify-between mb-0.5">
+                      <p class="text-sm font-bold"
+                        [class.text-on-primary]="selectedAddressId() === addr.id"
+                        [class.text-on-surface]="selectedAddressId() !== addr.id">
+                        {{ addr.title }}
+                      </p>
+                      @if (addr.isDefault) {
+                        <span class="text-[10px] font-bold"
+                          [class.text-on-primary]="selectedAddressId() === addr.id"
+                          [class.text-outline]="selectedAddressId() !== addr.id">
+                          {{ 'CART.DEFAULT' | translate }}
+                        </span>
+                      }
+                    </div>
+                    <p class="text-xs truncate"
+                      [class.text-on-primary/80]="selectedAddressId() === addr.id"
+                      [class.text-outline]="selectedAddressId() !== addr.id">
+                      {{ addr.fullAddress }}, {{ addr.city }}
+                    </p>
+                  </button>
+                }
+              </div>
+              <button (click)="switchToManual()"
+                class="text-primary text-xs font-bold flex items-center gap-1 active:opacity-70 transition-opacity">
+                <span class="material-symbols-outlined text-sm">add_location</span>
+                {{ 'CART.DIFFERENT_ADDRESS' | translate }}
+              </button>
+              @if (useManualAddress()) {
+                <textarea [(ngModel)]="manualAddress" rows="2" [placeholder]="'CART.ADDRESS_PLACEHOLDER' | translate"
+                  class="w-full mt-3 bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none resize-none">
+                </textarea>
+              }
+            } @else {
+              <textarea [(ngModel)]="manualAddress" rows="2" [placeholder]="'CART.DELIVERY_PLACEHOLDER' | translate"
+                class="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none resize-none mb-3">
+              </textarea>
+              <p class="text-outline text-xs">
+                <a routerLink="/app/profile" class="text-primary font-bold">{{ 'COMMON.PROFILE' | translate }}</a> {{ 'CART.ADD_ADDRESS_FROM' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Payment method -->
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">{{ 'CART.PAYMENT_METHOD' | translate }}</h3>
+
+            <!-- Saved methods from profile -->
+            @if (savedPaymentMethods().length > 0) {
+              <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">{{ 'CART.SAVED_METHODS' | translate }}</p>
+              <div class="space-y-2 mb-4">
+                @for (pm of savedPaymentMethods(); track pm.id) {
+                  <button (click)="selectSavedPayment(pm)"
+                    class="w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-left"
+                    [class.bg-primary]="selectedSavedPaymentId() === pm.id"
+                    [class.bg-surface-container-low]="selectedSavedPaymentId() !== pm.id">
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                      [class.border-on-primary]="selectedSavedPaymentId() === pm.id"
+                      [class.border-outline]="selectedSavedPaymentId() !== pm.id">
+                      @if (selectedSavedPaymentId() === pm.id) {
+                        <div class="w-2.5 h-2.5 rounded-full bg-on-primary"></div>
+                      }
+                    </div>
+                    <span class="material-symbols-outlined text-base shrink-0"
+                      [class.text-on-primary]="selectedSavedPaymentId() === pm.id"
+                      [class.text-outline]="selectedSavedPaymentId() !== pm.id">
+                      {{ savedPaymentIcon(pm.type) }}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold truncate"
+                        [class.text-on-primary]="selectedSavedPaymentId() === pm.id"
+                        [class.text-on-surface]="selectedSavedPaymentId() !== pm.id">
+                        {{ pm.label }}
+                      </p>
+                      <p class="text-xs truncate"
+                        [class.text-on-primary/70]="selectedSavedPaymentId() === pm.id"
+                        [class.text-outline]="selectedSavedPaymentId() !== pm.id">
+                        {{ savedPaymentSummary(pm) }}
+                      </p>
+                    </div>
+                    @if (pm.isDefault) {
+                      <span class="text-[10px] font-bold shrink-0"
+                        [class.text-on-primary/60]="selectedSavedPaymentId() === pm.id"
+                        [class.text-outline]="selectedSavedPaymentId() !== pm.id">
+                        {{ 'COMMON.DEFAULT' | translate }}
+                      </span>
+                    }
+                  </button>
+                }
+              </div>
+              <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">{{ 'CART.OTHER_OPTIONS' | translate }}</p>
+            }
+
+            <!-- Standard options -->
+            <div class="space-y-2">
+              @for (pm of otherPaymentOptions; track pm.value) {
+                <button (click)="onPaymentMethodChange(pm.value)"
+                  class="w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-left"
+                  [class.bg-primary]="paymentMethod === pm.value"
+                  [class.bg-surface-container-low]="paymentMethod !== pm.value">
+                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                    [class.border-on-primary]="paymentMethod === pm.value"
+                    [class.border-outline]="paymentMethod !== pm.value">
+                    @if (paymentMethod === pm.value) {
+                      <div class="w-2.5 h-2.5 rounded-full bg-on-primary"></div>
+                    }
+                  </div>
+                  <span class="material-symbols-outlined text-base shrink-0"
+                    [class.text-on-primary]="paymentMethod === pm.value"
+                    [class.text-outline]="paymentMethod !== pm.value">
+                    {{ pm.icon }}
+                  </span>
+                  <span class="text-sm font-bold"
+                    [class.text-on-primary]="paymentMethod === pm.value"
+                    [class.text-on-surface]="paymentMethod !== pm.value">
+                    {{ pm.labelKey | translate }}
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Crypto wallet panel -->
+          @if (paymentMethod === 'CRYPTO_WALLET' || selectedSavedPayment?.type === 'CRYPTO') {
+            <div class="bg-surface-container-lowest rounded-3xl p-5"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">{{ 'CART.CRYPTO_WALLET' | translate }}</h3>
+
+              @if (!walletAddress()) {
+                @if (discoveredWallets().length > 0) {
+                  <p class="text-outline text-xs font-bold uppercase tracking-wider mb-2">{{ 'CART.INSTALLED_WALLETS' | translate }}</p>
+                  <div class="grid grid-cols-2 gap-2 mb-4">
+                    @for (wallet of discoveredWallets(); track wallet.info.rdns) {
+                      <button (click)="connectWallet(wallet)" [disabled]="walletConnecting()"
+                        class="flex items-center gap-2 p-3 rounded-2xl bg-surface-container-low active:scale-95 transition-transform disabled:opacity-50">
+                        <img [src]="wallet.info.icon" [alt]="wallet.info.name"
+                          class="w-8 h-8 rounded-xl shrink-0 object-contain">
+                        <div class="min-w-0">
+                          <p class="text-on-surface text-xs font-bold truncate">{{ wallet.info.name }}</p>
+                          <p class="text-outline text-[10px]">{{ 'CART.CONNECT' | translate }}</p>
+                        </div>
+                      </button>
+                    }
+                  </div>
+                }
+
+                @if (notInstalledWallets.length > 0) {
+                  <p class="text-outline text-xs font-bold uppercase tracking-wider mb-2">
+                    {{ discoveredWallets().length > 0 ? ('CART.OTHER_WALLETS' | translate) : ('CART.POPULAR_WALLETS' | translate) }}
+                  </p>
+                  <div class="grid grid-cols-2 gap-2 mb-4">
+                    @for (wallet of notInstalledWallets; track wallet.rdns) {
+                      <a [href]="wallet.installUrl" target="_blank" rel="noopener noreferrer"
+                        class="flex items-center gap-2 p-3 rounded-2xl bg-surface-container-low opacity-60 active:scale-95 transition-transform">
+                        <div class="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-white text-sm font-bold"
+                          [style.background-color]="wallet.color">
+                          {{ wallet.name[0] }}
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-on-surface text-xs font-bold truncate">{{ wallet.name }}</p>
+                          <p class="text-primary text-[10px]">{{ 'CART.INSTALL' | translate }}</p>
+                        </div>
+                      </a>
+                    }
+                  </div>
+                }
+
+                @if (walletConnecting()) {
+                  <div class="flex items-center gap-2 text-outline text-sm">
+                    <div class="w-4 h-4 border-2 border-outline border-t-transparent rounded-full animate-spin"></div>
+                    {{ 'CART.CONNECTING_WALLET' | translate }}
+                  </div>
+                }
+                @if (walletError()) {
+                  <p class="text-error text-xs mt-2">{{ walletError() }}</p>
+                }
+
+              } @else {
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    @if (activeProvider(); as wp) {
+                      <img [src]="wp.info.icon" [alt]="wp.info.name" class="w-5 h-5 rounded-md object-contain">
+                    }
+                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                    <span class="text-secondary text-xs font-bold">{{ activeProvider()?.info?.name ?? ('CART.CRYPTO_WALLET' | translate) }} {{ 'CART.CONNECTED' | translate }}</span>
+                  </div>
+                  <button (click)="disconnectWallet()"
+                    [disabled]="txStatus() === 'sending' || txStatus() === 'mining'"
+                    class="text-error text-xs font-bold disabled:opacity-40 active:opacity-70 transition-opacity">
+                    {{ 'CART.DISCONNECT' | translate }}
+                  </button>
+                </div>
+
+                <div class="bg-surface-container-low rounded-2xl p-4 space-y-2 mb-3">
+                  <div class="flex justify-between text-xs">
+                    <span class="text-outline">{{ 'CART.ADDRESS_LABEL' | translate }}</span>
+                    <span class="text-on-surface font-mono">{{ maskWallet(walletAddress()!) }}</span>
+                  </div>
+                  @if (walletChainId()) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-outline">{{ 'CART.NETWORK' | translate }}</span>
+                      <span class="text-primary font-bold">{{ walletChainId() }}</span>
+                    </div>
+                  }
+                  <div class="border-t border-outline-variant/20 pt-2 flex justify-between text-xs">
+                    <span class="text-outline">{{ 'CART.TO_PAY' | translate }}</span>
+                    @if (txStatus() === 'fetching-price') {
+                      <div class="flex items-center gap-1 text-outline">
+                        <div class="w-3 h-3 border border-outline border-t-transparent rounded-full animate-spin"></div>
+                        {{ 'CART.CALCULATING' | translate }}
+                      </div>
+                    } @else if (cryptoAmount() > 0) {
+                      <span class="text-on-surface font-bold font-mono">{{ cryptoAmount() | number:'1.4-6' }} {{ coinSymbol }}</span>
+                    } @else {
+                      <span class="text-error">—</span>
+                    }
+                  </div>
+                </div>
+
+                @if (txStatus() === 'sending') {
+                  <div class="flex items-center gap-2 bg-primary/10 rounded-2xl p-3 text-xs text-primary mb-3">
+                    <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0"></div>
+                    {{ 'CART.CONFIRM_WALLET' | translate }}
+                  </div>
+                }
+                @if (txStatus() === 'mining') {
+                  <div class="bg-surface-container-low rounded-2xl p-3 space-y-1.5 mb-3">
+                    <div class="flex items-center gap-2 text-on-surface text-xs">
+                      <div class="w-4 h-4 border-2 border-on-surface border-t-transparent rounded-full animate-spin shrink-0"></div>
+                      {{ 'CART.WAITING_BLOCKCHAIN' | translate }}
+                    </div>
+                    @if (txHash()) {
+                      <p class="text-outline text-[10px] font-mono break-all">{{ txHash() }}</p>
+                    }
+                  </div>
+                }
+                @if (txStatus() === 'confirmed') {
+                  <div class="flex items-center gap-2 bg-secondary-container rounded-2xl p-3 text-sm text-on-secondary-container mb-3">
+                    <span class="material-symbols-outlined text-lg">check_circle</span>
+                    {{ 'CART.TX_CONFIRMED' | translate }}
+                  </div>
+                }
+                @if (txStatus() === 'error' && txError()) {
+                  <div class="bg-error-container rounded-2xl p-3 mb-3">
+                    <p class="text-on-error-container text-xs">{{ txError() }}</p>
+                    @if (txHash()) {
+                      <p class="text-on-error-container/60 text-[10px] mt-1 font-mono break-all">{{ txHash() }}</p>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <!-- Error -->
+          @if (checkoutError()) {
+            <div class="flex items-center gap-2 bg-error-container rounded-2xl p-4">
+              <span class="material-symbols-outlined text-error text-lg">error</span>
+              <p class="text-on-error-container text-sm">{{ checkoutError() }}</p>
+            </div>
+          }
+
+          <!-- Checkout button -->
+          <button (click)="checkout()"
+            [disabled]="checkingOut() || txStatus() === 'sending' || txStatus() === 'mining' || txStatus() === 'confirmed'"
+            class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+            @if (checkingOut() || txStatus() === 'confirmed') {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {{ 'CART.SAVING_ORDER' | translate }}
+            } @else if (txStatus() === 'sending') {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {{ 'CART.WALLET_CONFIRMATION' | translate }}
+            } @else if (txStatus() === 'mining') {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {{ 'CART.BLOCKCHAIN_CONFIRMATION' | translate }}
+            } @else if ((paymentMethod === 'CRYPTO_WALLET' || selectedSavedPayment?.type === 'CRYPTO') && walletAddress() && cryptoAmount() > 0) {
+              <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+              {{ cryptoAmount() | number:'1.4-6' }} {{ coinSymbol }}
+            } @else {
+              <span class="material-symbols-outlined text-lg">shopping_bag</span>
+              {{ 'CART.PLACE_ORDER' | translate }}
+            }
+          </button>
+
+          <!-- Continue shopping (mobile only) -->
+          <button (click)="goShopping()"
+            class="md:hidden w-full py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+            {{ 'CART.CONTINUE_SHOPPING' | translate }}
+          </button>
+
+        </div>
+        <!-- end right col -->
+
+      </div>
+      <!-- end grid -->
+    }
+
+  </div>
+</div>

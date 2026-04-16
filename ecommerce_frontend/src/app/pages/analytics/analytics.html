@@ -1,0 +1,228 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-16 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+    <div class="relative z-10">
+      <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">{{ 'ANALYTICS.SUMMARY' | translate }}</p>
+      <h1 class="text-white font-extrabold text-2xl"
+        style="font-family:'Plus Jakarta Sans',sans-serif">{{ roleLabel() | translate }}</h1>
+    </div>
+
+    <!-- Corporate: Date preset filter -->
+    @if (role === 'CORPORATE') {
+      <div class="relative z-10 mt-4 flex gap-2 flex-wrap">
+        @for (p of presets; track p.key) {
+          <button (click)="setPreset(p.key)"
+            class="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
+            [class.bg-white]="datePreset() === p.key"
+            [class.text-primary]="datePreset() === p.key"
+            [class.bg-white/20]="datePreset() !== p.key"
+            [class.text-white]="datePreset() !== p.key">
+            {{ p.label }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Corporate: Store switcher -->
+    @if (role === 'CORPORATE' && stores().length > 1) {
+      <div class="relative z-10 mt-3">
+        <app-scroll-row rowClass="gap-2">
+          @for (store of stores(); track store.id) {
+            <button (click)="switchStore(store.id)"
+              class="flex-none px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap"
+              [class.bg-white]="activeStoreId() === store.id"
+              [class.text-primary]="activeStoreId() === store.id"
+              [class.bg-white/20]="activeStoreId() !== store.id"
+              [class.text-white]="activeStoreId() !== store.id">
+              {{ store.name }}
+            </button>
+          }
+        </app-scroll-row>
+      </div>
+    }
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="mx-6 -mt-8 relative z-10">
+    @if (loading()) {
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5 animate-pulse"
+            style="box-shadow:0 8px 24px rgba(26,27,34,0.10)">
+            <div class="w-8 h-8 bg-surface-container-high rounded-xl mb-3"></div>
+            <div class="h-2 bg-surface-container-high rounded w-2/3 mb-2"></div>
+            <div class="h-5 bg-surface-container-high rounded w-1/2"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (card of kpiCards(); track card.labelKey) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow:0 8px 24px rgba(26,27,34,0.10)">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xl">{{ card.icon }}</span>
+              </div>
+              @if (card.trendKey && prevData()) {
+                @let trend = getTrend(card.trendKey);
+                @if (trend) {
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                    [class.bg-green-100]="trend.startsWith('+')"
+                    [class.text-green-700]="trend.startsWith('+')"
+                    [class.bg-red-100]="!trend.startsWith('+')"
+                    [class.text-red-600]="!trend.startsWith('+')">
+                    {{ trend }}
+                  </span>
+                }
+              }
+            </div>
+            <p class="text-outline text-[10px] font-bold uppercase tracking-wider mb-1">
+              {{ card.labelKey | translate }}
+            </p>
+            <p class="text-on-surface text-xl font-extrabold tracking-tight"
+              style="font-family:'Plus Jakarta Sans',sans-serif">{{ card.value }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Charts Section -->
+  @if (!loading()) {
+
+    <!-- INDIVIDUAL Charts -->
+    @if (role === 'INDIVIDUAL' && showOrderCharts()) {
+      <div class="mx-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Monthly Spend Bar -->
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-1">Monthly Spending</p>
+          <p class="text-outline text-xs mb-4">Your spending over the last 6 months</p>
+          <div class="relative h-48">
+            <canvas id="chart-spend"></canvas>
+          </div>
+        </div>
+        <!-- Order Status Doughnut -->
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-1">Order Status</p>
+          <p class="text-outline text-xs mb-4">Distribution of your orders by status</p>
+          <div class="relative h-48">
+            <canvas id="chart-status"></canvas>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CORPORATE Charts -->
+    @if (role === 'CORPORATE') {
+      <div class="mx-6 mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Period Comparison (full width on mobile, 2/3 on desktop) -->
+        <div class="md:col-span-2 bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-1">
+            @if (prevData() && (rawData()?.['totalOrders'] || rawData()?.['totalRevenue'])) {
+              Period Change vs Previous
+            } @else {
+              Current Period Overview
+            }
+          </p>
+          <p class="text-outline text-xs mb-4">
+            @if (prevData() && (rawData()?.['totalOrders'] || rawData()?.['totalRevenue'])) {
+              % change compared to the previous {{ datePreset() === '7d' ? '7 days' : datePreset() === '30d' ? '30 days' : datePreset() === '90d' ? '90 days' : 'year' }}
+            } @else {
+              Selected period: {{ datePreset() === '7d' ? 'Last 7 days' : datePreset() === '30d' ? 'Last 30 days' : datePreset() === '90d' ? 'Last 90 days' : 'Last year' }}
+            }
+          </p>
+          <div class="relative h-52">
+            <canvas id="chart-comparison"></canvas>
+          </div>
+        </div>
+
+        <!-- Rating Gauge (1/3 on desktop) -->
+        <div class="bg-surface-container-lowest rounded-3xl p-5 flex flex-col"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-4">Avg. Rating</p>
+          <div class="flex-1 flex flex-col items-center justify-center gap-3">
+            <div class="relative w-32 h-32">
+              <canvas id="chart-rating"></canvas>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-2xl font-extrabold text-on-surface"
+                  style="font-family:'Plus Jakarta Sans',sans-serif">{{ avgRatingLabel() }}</span>
+                <span class="text-outline text-xs">/ 5.0</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-0.5">
+              @for (s of [1,2,3,4,5]; track s) {
+                <span class="material-symbols-outlined text-lg"
+                  style="font-variation-settings:'FILL' 1"
+                  [class.text-yellow-400]="s <= ratingStars()"
+                  [class.text-outline-variant]="s > ratingStars()">star</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ADMIN Charts -->
+    @if (role === 'ADMIN') {
+      <div class="mx-6 mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Platform Horizontal Bar (2/3) -->
+        <div class="md:col-span-2 bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-1">Platform Overview</p>
+          <p class="text-outline text-xs mb-4">Total count of platform entities</p>
+          <div class="relative h-48">
+            <canvas id="chart-platform"></canvas>
+          </div>
+        </div>
+        <!-- Users vs Stores Doughnut (1/3) -->
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <p class="text-on-surface text-sm font-bold mb-4">Users vs Stores</p>
+          <div class="relative h-48">
+            <canvas id="chart-users-stores"></canvas>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Detailed Breakdown (all roles except individual who gets charts) -->
+  @if (!loading() && rawData() && role !== 'INDIVIDUAL') {
+    <div class="mx-6 mt-6">
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden md:grid md:grid-cols-2"
+        style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+        <div class="px-5 py-4 border-b border-outline-variant/20 md:col-span-2">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">
+            {{ 'ANALYTICS.DETAILED_INFO' | translate }}
+          </h3>
+        </div>
+        @for (entry of dataEntries(); track entry.key) {
+          <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/10 last:border-0">
+            <span class="text-outline text-sm">{{ entry.key | translate }}</span>
+            <span class="text-on-surface text-sm font-bold">{{ formatValue(entry.value) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && kpiCards().length === 0) {
+    <div class="text-center py-16 px-6">
+      <div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-outline text-5xl">analytics</span>
+      </div>
+      <h3 class="text-on-surface font-bold text-lg mb-2"
+        style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'ANALYTICS.NO_DATA' | translate }}</h3>
+      <p class="text-outline text-sm">{{ 'ANALYTICS.NO_DATA_DESC' | translate }}</p>
+    </div>
+  }
+
+</div>

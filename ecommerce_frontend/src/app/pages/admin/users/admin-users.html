@@ -1,0 +1,168 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-12 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="relative z-10">
+      <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">{{ 'ADMIN.LABEL' | translate }}</p>
+      <h1 class="text-white font-extrabold text-2xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ 'ADMIN.USERS.TITLE' | translate }}
+      </h1>
+      <p class="text-white/60 text-sm mt-1">{{ totalElements() }} {{ 'ADMIN.USERS.COUNT_LABEL' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="mx-6 -mt-5 relative z-10 mb-4">
+    <div class="bg-surface-container-lowest rounded-2xl flex items-center gap-3 px-4 py-3"
+      style="box-shadow: 0 4px 16px rgba(26,27,34,0.08)">
+      <span class="material-symbols-outlined text-outline text-xl">search</span>
+      <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()"
+        [placeholder]="'ADMIN.USERS.SEARCH_PLACEHOLDER' | translate"
+        class="flex-1 bg-transparent text-on-surface text-sm outline-none placeholder:text-outline" />
+      @if (searchQuery) {
+        <button (click)="searchQuery = ''; onSearch()" class="text-outline hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="mx-6 space-y-3">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="bg-surface-container-lowest rounded-3xl p-4 animate-pulse flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-high shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3 bg-surface-container-high rounded w-1/3"></div>
+            <div class="h-2 bg-surface-container-high rounded w-1/2"></div>
+          </div>
+          <div class="w-16 h-6 bg-surface-container-high rounded-full"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- User list -->
+  @if (!loading()) {
+    @if (users().length === 0) {
+      <div class="text-center py-16 px-6">
+        <div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-outline text-5xl">group_off</span>
+        </div>
+        <h3 class="text-on-surface font-bold text-lg mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+          {{ 'ADMIN.USERS.EMPTY' | translate }}
+        </h3>
+      </div>
+    } @else {
+      <div class="mx-6 space-y-3">
+        @for (user of users(); track user.id) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-4"
+            style="box-shadow: 0 2px 12px rgba(26,27,34,0.05)">
+            <!-- Avatar -->
+            <div class="w-10 h-10 rounded-full editorial-gradient flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {{ user.name?.charAt(0)?.toUpperCase() ?? '?' }}
+            </div>
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <p class="text-on-surface text-sm font-bold truncate">{{ user.name }}</p>
+              <p class="text-outline text-xs truncate">{{ user.email }}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="roleBadgeClass(user.role)">
+                  {{ user.role }}
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="statusBadgeClass(user.status)">
+                  {{ user.status }}
+                </span>
+              </div>
+            </div>
+            <!-- Actions -->
+            @if (actionLoading() === user.id) {
+              <div class="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></div>
+            } @else {
+              <div class="flex items-center gap-2">
+                @if (user.status === 'ACTIVE' && user.role !== 'ADMIN') {
+                  <button (click)="openConfirm(user, 'suspend')"
+                    class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors active:scale-90"
+                    [title]="'ADMIN.USERS.SUSPEND' | translate">
+                    <span class="material-symbols-outlined text-base">block</span>
+                  </button>
+                }
+                @if (user.status === 'SUSPENDED') {
+                  <button (click)="openConfirm(user, 'activate')"
+                    class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-colors active:scale-90"
+                    [title]="'ADMIN.USERS.ACTIVATE' | translate">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                  </button>
+                }
+                @if (user.role !== 'ADMIN') {
+                  <button (click)="openConfirm(user, 'delete')"
+                    class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-error/10 hover:text-error transition-colors active:scale-90"
+                    [title]="'COMMON.DELETE' | translate">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mx-6 mt-4 flex items-center justify-between">
+          <button (click)="prevPage()" [disabled]="currentPage() === 0"
+            class="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all disabled:opacity-40"
+            [class.bg-surface-container-low]="currentPage() > 0"
+            [class.text-on-surface]="currentPage() > 0">
+            <span class="material-symbols-outlined text-base">chevron_left</span>
+            {{ 'COMMON.BACK' | translate }}
+          </button>
+          <span class="text-outline text-xs font-bold">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+          <button (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1"
+            class="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all disabled:opacity-40"
+            [class.bg-surface-container-low]="currentPage() < totalPages() - 1"
+            [class.text-on-surface]="currentPage() < totalPages() - 1">
+            <span class="material-symbols-outlined text-base">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  }
+
+</div>
+
+<!-- Confirm Modal -->
+@if (confirmModal()) {
+  <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" (click)="closeConfirm()"></div>
+    <div class="relative bg-surface-container-lowest rounded-3xl p-6 w-full max-w-sm z-10"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)">
+      <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+        [class]="confirmModal()!.action === 'delete' ? 'bg-error/10' : confirmModal()!.action === 'suspend' ? 'bg-error/10' : 'bg-secondary/10'">
+        <span class="material-symbols-outlined text-2xl"
+          [class]="confirmModal()!.action === 'delete' ? 'text-error' : confirmModal()!.action === 'suspend' ? 'text-error' : 'text-secondary'">
+          {{ confirmModal()!.action === 'delete' ? 'delete' : confirmModal()!.action === 'suspend' ? 'block' : 'check_circle' }}
+        </span>
+      </div>
+      <h3 class="text-on-surface font-extrabold text-lg text-center mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ 'ADMIN.USERS.CONFIRM_' + confirmModal()!.action.toUpperCase() | translate }}
+      </h3>
+      <p class="text-outline text-sm text-center mb-6">
+        {{ confirmModal()!.user.name }}
+      </p>
+      <div class="flex gap-3">
+        <button (click)="closeConfirm()"
+          class="flex-1 py-3 rounded-2xl bg-surface-container-low text-on-surface font-bold text-sm transition-all active:scale-95">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button (click)="confirmAction()"
+          class="flex-1 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+          [class]="confirmModal()!.action === 'activate' ? 'bg-secondary text-white' : 'bg-error text-white'">
+          {{ 'COMMON.APPLY' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

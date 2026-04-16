@@ -1,0 +1,78 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-16 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+    <div class="relative z-10">
+      <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">{{ 'ADMIN.DASHBOARD.SUBTITLE' | translate }}</p>
+      <h1 class="text-white font-extrabold text-2xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ 'ADMIN.DASHBOARD.TITLE' | translate }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="mx-6 -mt-8 relative z-10">
+    @if (loading()) {
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5 animate-pulse" style="box-shadow: 0 8px 24px rgba(26,27,34,0.10)">
+            <div class="w-8 h-8 bg-surface-container-high rounded-xl mb-3"></div>
+            <div class="h-2 bg-surface-container-high rounded w-2/3 mb-2"></div>
+            <div class="h-5 bg-surface-container-high rounded w-1/2"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (card of kpiCards(); track card.labelKey) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5" style="box-shadow: 0 8px 24px rgba(26,27,34,0.10)">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center mb-3" [class]="card.color">
+              <span class="material-symbols-outlined text-xl">{{ card.icon }}</span>
+            </div>
+            <p class="text-outline text-[10px] font-bold uppercase tracking-wider mb-1">{{ card.labelKey | translate }}</p>
+            <p class="text-on-surface text-xl font-extrabold tracking-tight" style="font-family:'Plus Jakarta Sans',sans-serif">{{ card.value }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="mx-6 mt-6">
+    <h2 class="text-on-surface text-sm font-bold uppercase tracking-widest mb-4">{{ 'ADMIN.DASHBOARD.QUICK_ACTIONS' | translate }}</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      @for (action of quickActions; track action.route) {
+        <a [routerLink]="action.route"
+          class="bg-surface-container-lowest rounded-3xl p-5 flex flex-col items-center gap-3 hover:bg-surface-container transition-colors active:scale-95 transition-transform cursor-pointer"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center" [class]="action.color">
+            <span class="material-symbols-outlined text-2xl">{{ action.icon }}</span>
+          </div>
+          <p class="text-on-surface text-sm font-bold text-center">{{ action.labelKey | translate }}</p>
+        </a>
+      }
+    </div>
+  </div>
+
+  <!-- Detailed Breakdown -->
+  @if (!loading() && rawData()) {
+    <div class="mx-6 mt-6">
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+        <div class="px-5 py-4 border-b border-outline-variant/20">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">{{ 'ANALYTICS.DETAILED_INFO' | translate }}</h3>
+        </div>
+        <div class="divide-y divide-outline-variant/10">
+          @for (entry of rawData() | keyvalue; track entry.key) {
+            <div class="flex items-center justify-between px-5 py-4">
+              <span class="text-outline text-sm capitalize">{{ entry.key }}</span>
+              <span class="text-on-surface text-sm font-bold">{{ entry.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

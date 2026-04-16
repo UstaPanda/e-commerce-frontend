@@ -1,0 +1,30 @@
+<div class="relative">
+  <button (click)="toggle()"
+    class="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-surface-container-low text-on-surface-variant text-sm font-bold hover:bg-surface-container transition-colors w-full">
+    <span class="material-symbols-outlined text-lg">language</span>
+    <span class="flex-1 text-left">{{ currentLanguage().flag }} {{ currentLanguage().label }}</span>
+    <span class="material-symbols-outlined text-sm">expand_more</span>
+  </button>
+
+  @if (showMenu()) {
+    <div class="fixed inset-0 z-40" (click)="showMenu.set(false)"></div>
+    <div class="absolute bottom-full left-0 right-0 mb-2 bg-surface-container-lowest rounded-3xl shadow-xl z-50 overflow-hidden border border-outline-variant/20">
+      <div class="px-4 py-3 border-b border-surface-container-high">
+        <p class="text-xs font-bold uppercase tracking-widest text-outline">{{ 'LANG.SWITCHER' | translate }}</p>
+      </div>
+      @for (language of languages; track language.code) {
+        <button (click)="select(language.code)"
+          class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container-low transition-colors"
+          [class.text-primary]="lang.currentLang() === language.code"
+          [class.font-bold]="lang.currentLang() === language.code"
+          [class.text-on-surface-variant]="lang.currentLang() !== language.code">
+          <span class="text-lg">{{ language.flag }}</span>
+          <span class="flex-1 text-left">{{ language.label }}</span>
+          @if (lang.currentLang() === language.code) {
+            <span class="material-symbols-outlined text-primary text-base">check</span>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>
