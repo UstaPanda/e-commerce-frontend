@@ -211,7 +211,16 @@
     "WALLET_CONFIRMATION": "Cüzdan Onayı Bekleniyor...",
     "BLOCKCHAIN_CONFIRMATION": "Blockchain Onayı Bekleniyor...",
     "CASH_ON_DELIVERY": "Kapıda Ödeme",
-    "BANK_TRANSFER": "Havale / EFT"
+    "BANK_TRANSFER": "Havale / EFT",
+    "NO_SAVED_CARD": "Kayıtlı kart yok",
+    "ADD_CARD_HINT": "Bu seçeneği kullanmak için profilinden bir kredi kartı ekle.",
+    "ADD_PAYPAL_HINT": "Bu seçeneği kullanmak için profilinden PayPal hesabını bağla.",
+    "GO_TO_PROFILE": "Profile Git",
+    "SHOPPING_COLLECTION": "Alışveriş Koleksiyonu",
+    "CLEAR_ALL": "Tümünü Temizle",
+    "SHIPPING": "Kargo",
+    "DISCOUNT": "İndirim",
+    "REMOVE": "Kaldır"
   },
   "ORDERS": {
     "TITLE": "Siparişlerim",
@@ -224,6 +233,12 @@
     "UNIT": "adet",
     "CREDIT_CARD": "Kredi Kartı",
     "DEBIT_CARD": "Banka Kartı",
+    "FILTER_ALL": "Tümü",
+    "FILTER_ACTIVE": "Aktif",
+    "FILTER_COMPLETED": "Tamamlanan",
+    "ITEMS": "Ürünler",
+    "DETAILS": "Detaylar",
+    "TRACK_SHIPMENTS": "Kargolarımı Takip Et",
     "STATUS": {
       "PENDING": "Bekliyor",
       "CONFIRMED": "Onaylandı",

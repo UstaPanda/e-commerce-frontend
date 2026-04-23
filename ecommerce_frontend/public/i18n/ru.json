@@ -211,7 +211,16 @@
     "WALLET_CONFIRMATION": "Ожидание подтверждения кошелька...",
     "BLOCKCHAIN_CONFIRMATION": "Ожидание подтверждения блокчейна...",
     "CASH_ON_DELIVERY": "Оплата при получении",
-    "BANK_TRANSFER": "Банковский перевод"
+    "BANK_TRANSFER": "Банковский перевод",
+    "NO_SAVED_CARD": "Нет сохранённой карты",
+    "ADD_CARD_HINT": "Добавьте кредитную карту в профиле, чтобы использовать её здесь.",
+    "ADD_PAYPAL_HINT": "Привяжите аккаунт PayPal в профиле, чтобы использовать его здесь.",
+    "GO_TO_PROFILE": "Перейти в профиль",
+    "SHOPPING_COLLECTION": "Коллекция покупок",
+    "CLEAR_ALL": "Очистить всё",
+    "SHIPPING": "Доставка",
+    "DISCOUNT": "Скидка",
+    "REMOVE": "Удалить"
   },
   "ORDERS": {
     "TITLE": "Мои заказы",
@@ -224,6 +233,12 @@
     "UNIT": "шт.",
     "CREDIT_CARD": "Кредитная карта",
     "DEBIT_CARD": "Дебетовая карта",
+    "FILTER_ALL": "Все",
+    "FILTER_ACTIVE": "Активные",
+    "FILTER_COMPLETED": "Завершённые",
+    "ITEMS": "Товары",
+    "DETAILS": "Детали",
+    "TRACK_SHIPMENTS": "Отследить посылки",
     "STATUS": {
       "PENDING": "Ожидает",
       "CONFIRMED": "Подтверждён",

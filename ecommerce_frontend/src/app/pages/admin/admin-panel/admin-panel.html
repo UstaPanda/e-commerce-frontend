@@ -1,0 +1,829 @@
+<!-- ═══════════════════════════════════════════════════
+     ADMIN PANEL — Header
+════════════════════════════════════════════════════ -->
+<div class="editorial-gradient px-6 pt-6 pb-10 md:rounded-3xl relative overflow-hidden">
+  <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+  <div class="relative z-10">
+    <div class="flex items-center gap-3 mb-1">
+      <span class="material-symbols-outlined text-white text-2xl">admin_panel_settings</span>
+      <h1 class="text-white font-extrabold text-2xl" style="font-family:'Plus Jakarta Sans',sans-serif">Admin Paneli</h1>
+    </div>
+    <p class="text-white/70 text-sm">Platform yönetim merkezi</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     TAB BAR
+════════════════════════════════════════════════════ -->
+<div class="px-6 md:px-0 -mt-4 relative z-10 mb-4">
+  <div class="overflow-x-auto">
+    <div class="flex gap-1 p-1 bg-surface-container-lowest rounded-2xl w-fit shadow-sm" style="box-shadow: 0 4px 16px rgba(26,27,34,0.08)">
+      @for (tab of [
+        {id:'analytics', icon:'bar_chart', label:'Analitik'},
+        {id:'ai-support', icon:'smart_toy', label:'AI Destek'},
+        {id:'stores', icon:'storefront', label:'Mağazalar'},
+        {id:'orders', icon:'receipt_long', label:'Siparişler'},
+        {id:'products', icon:'inventory_2', label:'Ürünler'},
+        {id:'users', icon:'group', label:'Kullanıcılar'}
+      ]; track tab.id) {
+        <button (click)="selectTab($any(tab.id))"
+          class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
+          [class.editorial-gradient]="activeTab() === tab.id"
+          [class.text-white]="activeTab() === tab.id"
+          [class.shadow-sm]="activeTab() === tab.id"
+          [class.text-on-surface-variant]="activeTab() !== tab.id">
+          <span class="material-symbols-outlined text-base"
+            [class.material-symbols-filled]="activeTab() === tab.id">{{ tab.icon }}</span>
+          <span class="hidden sm:inline">{{ tab.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: ANALYTICS
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'analytics') {
+  <div class="px-6 md:px-0 pb-8 space-y-6">
+
+    @if (analyticsLoading()) {
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5 h-28 animate-pulse"></div>
+        }
+      </div>
+    } @else if (analytics()) {
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (card of [
+          {label:'Toplam Kullanıcı', value: analytics().totalUsers, icon:'group', color:'bg-primary/10 text-primary'},
+          {label:'Toplam Mağaza', value: analytics().totalStores, icon:'storefront', color:'bg-secondary/10 text-secondary'},
+          {label:'Toplam Sipariş', value: analytics().totalOrders, icon:'receipt_long', color:'bg-tertiary/10 text-tertiary'},
+          {label:'Toplam Gelir', value: currency.format(analytics().totalRevenue), icon:'payments', color:'bg-primary/10 text-primary'}
+        ]; track card.label) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="w-10 h-10 rounded-2xl mb-3 flex items-center justify-center" [class]="card.color">
+              <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">{{ card.icon }}</span>
+            </div>
+            <p class="text-xl font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">{{ card.value }}</p>
+            <p class="text-outline text-xs mt-0.5">{{ card.label }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Secondary stats -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @for (card of [
+          {label:'Bireysel Kullanıcı', value: analytics().individualUsers, icon:'person', color:'bg-surface-container-high text-on-surface-variant'},
+          {label:'Kurumsal Kullanıcı', value: analytics().corporateUsers, icon:'business', color:'bg-surface-container-high text-on-surface-variant'},
+          {label:'Aktif Mağaza', value: analytics().activeStores, icon:'store', color:'bg-secondary/10 text-secondary'},
+          {label:'Bekleyen Mağaza', value: analytics().pendingStores, icon:'pending', color:'bg-tertiary/10 text-tertiary'},
+          {label:'Bekleyen Sipariş', value: analytics().pendingOrders, icon:'hourglass', color:'bg-tertiary/10 text-tertiary'},
+          {label:'İptal Sipariş', value: analytics().cancelledOrders, icon:'cancel', color:'bg-error/10 text-error'},
+          {label:'Toplam Ürün', value: analytics().totalProducts, icon:'inventory_2', color:'bg-primary/10 text-primary'},
+          {label:'Toplam Yorum', value: analytics().totalReviews, icon:'reviews', color:'bg-secondary/10 text-secondary'}
+        ]; track card.label) {
+          <div class="bg-surface-container-lowest rounded-2xl p-4 flex items-center gap-3" style="box-shadow: 0 2px 8px rgba(26,27,34,0.04)">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" [class]="card.color">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1">{{ card.icon }}</span>
+            </div>
+            <div>
+              <p class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">{{ card.value }}</p>
+              <p class="text-outline text-xs">{{ card.label }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Store Revenue Comparison -->
+      @if (analytics().storeComparison?.length > 0) {
+        <div class="bg-surface-container-lowest rounded-3xl p-5" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">Mağaza Gelir Sıralaması</h3>
+          <div class="space-y-3">
+            @for (entry of analytics().storeComparison.slice(0,10); track entry.storeId) {
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings:'FILL' 1">storefront</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-baseline mb-1">
+                    <p class="text-sm font-bold text-on-surface truncate">{{ entry.storeName }}</p>
+                    <p class="text-primary font-bold text-sm shrink-0 ml-2">{{ currency.format(entry.revenue) }}</p>
+                  </div>
+                  <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="h-full editorial-gradient rounded-full"
+                      [style.width.%]="analytics().storeComparison[0]?.revenue > 0
+                        ? (entry.revenue / analytics().storeComparison[0].revenue * 100)
+                        : 0">
+                    </div>
+                  </div>
+                </div>
+                <p class="text-outline text-xs shrink-0 w-12 text-right">{{ entry.orderCount }} sipariş</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: AI SUPPORT
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'ai-support') {
+  <div class="px-6 md:px-0 pb-8 flex flex-col" style="height: calc(100vh - 280px); min-height: 400px">
+    <div class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1">
+      @if (aiMessages().length === 0) {
+        <div class="text-center py-16">
+          <div class="w-20 h-20 editorial-gradient rounded-3xl flex items-center justify-center mx-auto mb-4"
+            style="box-shadow: 0 8px 32px rgba(43,56,150,0.25)">
+            <span class="material-symbols-outlined text-white text-4xl">smart_toy</span>
+          </div>
+          <h3 class="text-on-surface font-extrabold text-lg mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">AI Destek</h3>
+          <p class="text-outline text-sm">Platform yönetimiyle ilgili sorularınızı sorun.</p>
+        </div>
+      }
+      @for (msg of aiMessages(); track $index) {
+        <div class="flex" [class.justify-end]="msg.role === 'user'">
+          <div class="max-w-[80%] rounded-3xl px-4 py-3 text-sm leading-relaxed"
+            [class.editorial-gradient]="msg.role === 'user'"
+            [class.text-white]="msg.role === 'user'"
+            [class.bg-surface-container-lowest]="msg.role === 'assistant'"
+            [class.text-on-surface]="msg.role === 'assistant'"
+            style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+            {{ msg.text }}
+          </div>
+        </div>
+      }
+      @if (aiLoading()) {
+        <div class="flex">
+          <div class="bg-surface-container-lowest rounded-3xl px-4 py-3 flex items-center gap-2">
+            @for (i of [1,2,3]; track i) {
+              <div class="w-2 h-2 rounded-full bg-outline animate-bounce" [style.animation-delay]="(i * 0.15) + 's'"></div>
+            }
+          </div>
+        </div>
+      }
+      @if (aiError()) {
+        <p class="text-error text-xs text-center">{{ aiError() }}</p>
+      }
+    </div>
+    <div class="flex gap-2">
+      <textarea [(ngModel)]="aiInput" (keydown)="handleAiKey($event)"
+        placeholder="Mesajınızı yazın…" rows="2"
+        class="flex-1 bg-surface-container-lowest text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline resize-none"
+        style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+      </textarea>
+      <button (click)="sendAiMessage()" [disabled]="!aiInput.trim() || aiLoading()"
+        class="editorial-gradient text-white rounded-2xl px-4 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-40"
+        style="box-shadow: 0 4px 16px rgba(43,56,150,0.25)">
+        <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">send</span>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: STORES
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'stores') {
+  <div class="px-6 md:px-0 pb-8 space-y-6">
+
+    <!-- Stores section -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+          Mağazalar <span class="text-outline text-sm font-normal ml-1">{{ storesTotal() }}</span>
+        </h2>
+        <div class="flex items-center gap-2 bg-surface-container-lowest rounded-2xl px-3 py-2" style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+          <span class="material-symbols-outlined text-outline text-base">search</span>
+          <input type="text" [(ngModel)]="storesSearch" (keydown.enter)="loadStores(0)"
+            placeholder="Mağaza ara…" class="bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none w-32 md:w-48">
+        </div>
+      </div>
+
+      @if (storesLoading()) {
+        <div class="space-y-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4 h-20 animate-pulse"></div>
+          }
+        </div>
+      } @else if (stores().length === 0) {
+        <div class="text-center py-12">
+          <span class="material-symbols-outlined text-outline text-4xl mb-2 block">storefront</span>
+          <p class="text-outline text-sm">Mağaza bulunamadı.</p>
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (store of stores(); track store.id) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl editorial-gradient flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings:'FILL' 1">storefront</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="text-sm font-bold text-on-surface">{{ store.name }}</p>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="storeStatusBadge(store.status)">{{ store.status }}</span>
+                  </div>
+                  <p class="text-xs text-outline mt-0.5 truncate">{{ store.ownerName }} · {{ store.ownerEmail }}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button (click)="openCouponModal(store)"
+                    class="w-8 h-8 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center active:scale-90 transition-transform"
+                    title="Kupon ekle">
+                    <span class="material-symbols-outlined text-sm">local_offer</span>
+                  </button>
+                  @if (store.status !== 'OPEN') {
+                    <button (click)="openStoreConfirm(store, 'open')"
+                      [disabled]="storeActionLoading() === store.id"
+                      class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40"
+                      title="Mağazayı aç">
+                      <span class="material-symbols-outlined text-sm">store</span>
+                    </button>
+                  } @else {
+                    <button (click)="openStoreConfirm(store, 'close')"
+                      [disabled]="storeActionLoading() === store.id"
+                      class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40"
+                      title="Mağazayı kapat">
+                      <span class="material-symbols-outlined text-sm">store_mall_directory</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <!-- Pagination -->
+        @if (storesPages() > 1) {
+          <div class="flex items-center justify-center gap-2 mt-4">
+            <button (click)="loadStores(storesPage() - 1)" [disabled]="storesPage() === 0"
+              class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+              <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+            @for (p of pages(storesPages(), storesPage()); track p) {
+              <button (click)="loadStores(p)"
+                class="w-9 h-9 rounded-full text-sm font-bold transition-colors"
+                [class.editorial-gradient]="p === storesPage()"
+                [class.text-white]="p === storesPage()"
+                [class.bg-surface-container-low]="p !== storesPage()"
+                [class.text-on-surface-variant]="p !== storesPage()">{{ p + 1 }}</button>
+            }
+            <button (click)="loadStores(storesPage() + 1)" [disabled]="storesPage() === storesPages() - 1"
+              class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Coupons section -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+          Kuponlar <span class="text-outline text-sm font-normal ml-1">{{ couponsTotal() }}</span>
+        </h2>
+        <button (click)="openCouponModal()"
+          class="editorial-gradient text-white text-sm font-bold px-4 py-2 rounded-2xl flex items-center gap-1 active:scale-95 transition-transform"
+          style="box-shadow: 0 4px 16px rgba(43,56,150,0.2)">
+          <span class="material-symbols-outlined text-base">add</span>
+          Kupon Ekle
+        </button>
+      </div>
+
+      @if (couponsLoading()) {
+        <div class="space-y-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4 h-16 animate-pulse"></div>
+          }
+        </div>
+      } @else if (coupons().length === 0) {
+        <div class="bg-surface-container-lowest rounded-3xl p-10 text-center" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <span class="material-symbols-outlined text-outline text-4xl mb-2 block">local_offer</span>
+          <p class="text-outline text-sm">Henüz kupon yok.</p>
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (coupon of coupons(); track coupon.id) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+                  [class.editorial-gradient]="coupon.active"
+                  [class.bg-surface-container-high]="!coupon.active">
+                  <span class="material-symbols-outlined text-lg"
+                    [class.text-white]="coupon.active"
+                    [class.text-outline]="!coupon.active"
+                    style="font-variation-settings:'FILL' 1">local_offer</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="text-sm font-bold text-on-surface font-mono">{{ coupon.code }}</p>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      [class.bg-secondary/10]="coupon.active"
+                      [class.text-secondary]="coupon.active"
+                      [class.bg-surface-container-high]="!coupon.active"
+                      [class.text-outline]="!coupon.active">
+                      {{ coupon.active ? 'Aktif' : 'Pasif' }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-outline mt-0.5">
+                    {{ coupon.discountType === 'PERCENTAGE' ? '%' + coupon.discountValue : currency.format(coupon.discountValue) + ' indirim' }}
+                    @if (coupon.storeName) { · {{ coupon.storeName }} }
+                    @if (!coupon.storeName) { · Tüm mağazalar }
+                    · {{ coupon.usedCount }}{{ coupon.maxUses ? '/' + coupon.maxUses : '' }} kullanım
+                  </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button (click)="toggleCoupon(coupon.id)"
+                    [disabled]="couponActionLoading() === coupon.id"
+                    class="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40"
+                    [class.bg-secondary/10]="!coupon.active"
+                    [class.text-secondary]="!coupon.active"
+                    [class.bg-surface-container-high]="coupon.active"
+                    [class.text-outline]="coupon.active">
+                    <span class="material-symbols-outlined text-sm">{{ coupon.active ? 'toggle_on' : 'toggle_off' }}</span>
+                  </button>
+                  <button (click)="deleteCoupon(coupon.id)"
+                    [disabled]="couponActionLoading() === coupon.id"
+                    class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: ORDERS
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'orders') {
+  <div class="px-6 md:px-0 pb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+        Tüm Siparişler <span class="text-outline text-sm font-normal ml-1">{{ ordersTotal() }}</span>
+      </h2>
+      <div class="relative">
+        <select [(ngModel)]="ordersStatusFilter" (change)="loadOrders(0)"
+          class="appearance-none bg-surface-container-lowest text-on-surface text-xs font-bold rounded-2xl px-4 py-2 pr-8 focus:outline-none cursor-pointer"
+          style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+          <option value="">Tüm Durumlar</option>
+          @for (s of orderStatuses; track s) {
+            <option [value]="s">{{ orderStatusLabels[s] ?? s }}</option>
+          }
+        </select>
+        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-sm pointer-events-none">expand_more</span>
+      </div>
+    </div>
+
+    @if (ordersLoading()) {
+      <div class="space-y-3">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 h-20 animate-pulse"></div>
+        }
+      </div>
+    } @else if (orders().length === 0) {
+      <div class="text-center py-12">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2 block">receipt_long</span>
+        <p class="text-outline text-sm">Sipariş bulunamadı.</p>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (order of orders(); track order.id) {
+          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="p-4 cursor-pointer" (click)="toggleOrder(order.id)">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl editorial-gradient flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings:'FILL' 1">receipt_long</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="text-sm font-bold text-on-surface">#{{ order.id }}</p>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="orderStatusBadge(order.status)">
+                      {{ orderStatusLabels[order.status] ?? order.status }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-outline mt-0.5 truncate">{{ order.userEmail }} · {{ order.storeName }}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="text-primary font-bold text-sm">{{ currency.format(order.grandTotal) }}</p>
+                  <p class="text-outline text-[10px] mt-0.5">{{ formatDate(order.createdAt) }}</p>
+                </div>
+                <span class="material-symbols-outlined text-outline text-lg shrink-0 transition-transform"
+                  [class.rotate-180]="expandedOrderId() === order.id">expand_more</span>
+              </div>
+            </div>
+
+            @if (expandedOrderId() === order.id) {
+              <div class="border-t border-outline-variant/10 px-4 pb-4 pt-3">
+                <!-- Order items -->
+                <div class="space-y-2 mb-3">
+                  @for (item of order.items; track item.id) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-outline truncate max-w-[60%]">{{ item.productName }} × {{ item.quantity }}</span>
+                      <span class="text-on-surface font-medium">{{ currency.format(item.subtotal) }}</span>
+                    </div>
+                  }
+                </div>
+                <p class="text-xs text-outline mb-3">
+                  <span class="font-bold">Adres:</span> {{ order.shippingAddress }}
+                </p>
+                <!-- Status update -->
+                <div class="flex items-center gap-2">
+                  <p class="text-xs font-bold text-outline uppercase tracking-wider">Durum Güncelle:</p>
+                  <div class="relative flex-1">
+                    <select [value]="order.status"
+                      (change)="updateOrderStatus(order.id, $any($event.target).value)"
+                      [disabled]="orderActionLoading() === order.id"
+                      class="w-full appearance-none bg-surface-container-low text-on-surface text-xs font-bold rounded-xl px-3 py-1.5 pr-7 focus:outline-none cursor-pointer disabled:opacity-50">
+                      @for (s of orderStatuses; track s) {
+                        <option [value]="s" [selected]="order.status === s">{{ orderStatusLabels[s] ?? s }}</option>
+                      }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-xs pointer-events-none">expand_more</span>
+                  </div>
+                  @if (orderActionLoading() === order.id) {
+                    <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0"></div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (ordersPages() > 1) {
+        <div class="flex items-center justify-center gap-2 mt-4">
+          <button (click)="loadOrders(ordersPage() - 1)" [disabled]="ordersPage() === 0"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          @for (p of pages(ordersPages(), ordersPage()); track p) {
+            <button (click)="loadOrders(p)"
+              class="w-9 h-9 rounded-full text-sm font-bold transition-colors"
+              [class.editorial-gradient]="p === ordersPage()"
+              [class.text-white]="p === ordersPage()"
+              [class.bg-surface-container-low]="p !== ordersPage()"
+              [class.text-on-surface-variant]="p !== ordersPage()">{{ p + 1 }}</button>
+          }
+          <button (click)="loadOrders(ordersPage() + 1)" [disabled]="ordersPage() === ordersPages() - 1"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: PRODUCTS
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'products') {
+  <div class="px-6 md:px-0 pb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+        Tüm Ürünler <span class="text-outline text-sm font-normal ml-1">{{ productsTotal() }}</span>
+      </h2>
+      <div class="flex items-center gap-2 bg-surface-container-lowest rounded-2xl px-3 py-2" style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+        <span class="material-symbols-outlined text-outline text-base">search</span>
+        <input type="text" [(ngModel)]="productsSearch" (keydown.enter)="loadProducts(0)"
+          placeholder="Ürün ara…" class="bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none w-32 md:w-48">
+      </div>
+    </div>
+
+    @if (productsLoading()) {
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl h-40 animate-pulse"></div>
+        }
+      </div>
+    } @else if (products().length === 0) {
+      <div class="text-center py-12">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2 block">inventory_2</span>
+        <p class="text-outline text-sm">Ürün bulunamadı.</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @for (product of products(); track product.id) {
+          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="aspect-square bg-surface-container-low flex items-center justify-center relative">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover">
+              } @else {
+                <span class="material-symbols-outlined text-outline text-4xl">image</span>
+              }
+              <span class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                [class]="product.stockQuantity > 10
+                  ? 'bg-secondary-container text-on-secondary-container'
+                  : product.stockQuantity > 0
+                  ? 'bg-tertiary-container text-on-tertiary-container'
+                  : 'bg-error-container text-on-error-container'">
+                {{ product.stockQuantity }} stok
+              </span>
+            </div>
+            <div class="p-3">
+              <p class="text-sm font-bold text-on-surface truncate" style="font-family:'Plus Jakarta Sans',sans-serif">{{ product.name }}</p>
+              <p class="text-outline text-xs truncate mt-0.5">{{ product.store?.name }} · {{ product.category?.name ?? 'Kategorisiz' }}</p>
+              <p class="text-primary font-bold text-sm mt-2">{{ currency.format(product.unitPrice) }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (productsPages() > 1) {
+        <div class="flex items-center justify-center gap-2 mt-4">
+          <button (click)="loadProducts(productsPage() - 1)" [disabled]="productsPage() === 0"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          @for (p of pages(productsPages(), productsPage()); track p) {
+            <button (click)="loadProducts(p)"
+              class="w-9 h-9 rounded-full text-sm font-bold transition-colors"
+              [class.editorial-gradient]="p === productsPage()"
+              [class.text-white]="p === productsPage()"
+              [class.bg-surface-container-low]="p !== productsPage()"
+              [class.text-on-surface-variant]="p !== productsPage()">{{ p + 1 }}</button>
+          }
+          <button (click)="loadProducts(productsPage() + 1)" [disabled]="productsPage() === productsPages() - 1"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     TAB: USERS
+════════════════════════════════════════════════════ -->
+@if (activeTab() === 'users') {
+  <div class="px-6 md:px-0 pb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+        Kullanıcılar <span class="text-outline text-sm font-normal ml-1">{{ usersTotal() }}</span>
+      </h2>
+      <div class="flex items-center gap-2 bg-surface-container-lowest rounded-2xl px-3 py-2" style="box-shadow: 0 2px 8px rgba(26,27,34,0.06)">
+        <span class="material-symbols-outlined text-outline text-base">search</span>
+        <input type="text" [(ngModel)]="usersSearch" (keydown.enter)="loadUsers(0)"
+          placeholder="Kullanıcı ara…" class="bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none w-32 md:w-48">
+      </div>
+    </div>
+
+    @if (usersLoading()) {
+      <div class="space-y-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 h-20 animate-pulse"></div>
+        }
+      </div>
+    } @else if (users().length === 0) {
+      <div class="text-center py-12">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2 block">group</span>
+        <p class="text-outline text-sm">Kullanıcı bulunamadı.</p>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (user of users(); track user.id) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4" style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full editorial-gradient flex items-center justify-center shrink-0 text-white font-bold text-sm">
+                {{ user.name?.charAt(0)?.toUpperCase() ?? '?' }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-sm font-bold text-on-surface">{{ user.name }}</p>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="userRoleBadge(user.role)">{{ user.role }}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="userStatusBadge(user.status)">
+                    {{ user.status === 'SUSPENDED' ? 'Donduruldu' : 'Aktif' }}
+                  </span>
+                </div>
+                <p class="text-xs text-outline mt-0.5 truncate">{{ user.email }}</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                @if (userActionLoading() === user.id) {
+                  <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                } @else {
+                  @if (!isSuspended(user)) {
+                    <button (click)="openUserConfirm(user, 'suspend')"
+                      class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center active:scale-90 transition-transform"
+                      title="Dondur">
+                      <span class="material-symbols-outlined text-sm">lock</span>
+                    </button>
+                  } @else {
+                    <button (click)="openUserConfirm(user, 'unsuspend')"
+                      class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center active:scale-90 transition-transform"
+                      title="Aktif et">
+                      <span class="material-symbols-outlined text-sm">lock_open</span>
+                    </button>
+                  }
+                  <button (click)="openUserConfirm(user, 'delete')"
+                    class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center active:scale-90 transition-transform"
+                    title="Sil">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (usersPages() > 1) {
+        <div class="flex items-center justify-center gap-2 mt-4">
+          <button (click)="loadUsers(usersPage() - 1)" [disabled]="usersPage() === 0"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          @for (p of pages(usersPages(), usersPage()); track p) {
+            <button (click)="loadUsers(p)"
+              class="w-9 h-9 rounded-full text-sm font-bold transition-colors"
+              [class.editorial-gradient]="p === usersPage()"
+              [class.text-white]="p === usersPage()"
+              [class.bg-surface-container-low]="p !== usersPage()"
+              [class.text-on-surface-variant]="p !== usersPage()">{{ p + 1 }}</button>
+          }
+          <button (click)="loadUsers(usersPage() + 1)" [disabled]="usersPage() === usersPages() - 1"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center disabled:opacity-30 active:scale-90">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: STORE CONFIRM
+════════════════════════════════════════════════════ -->
+@if (storeConfirm()) {
+  <div class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6"
+    (click)="storeConfirm.set(null)">
+    <div class="w-full md:max-w-sm bg-surface-container-lowest rounded-t-3xl md:rounded-3xl overflow-hidden"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)" (click)="$event.stopPropagation()">
+      <div class="px-6 py-5">
+        <h3 class="text-base font-extrabold text-on-surface mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+          Mağaza Durumu Güncelle
+        </h3>
+        <p class="text-sm text-on-surface-variant">
+          <span class="font-bold">{{ storeConfirm()!.store.name }}</span> mağazasını
+          {{ storeConfirm()!.action === 'open' ? 'açmak' : 'kapatmak' }} istediğinize emin misiniz?
+        </p>
+      </div>
+      <div class="px-6 pb-6 flex gap-3">
+        <button (click)="storeConfirm.set(null)"
+          class="flex-1 bg-surface-container-high text-on-surface text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform">
+          İptal
+        </button>
+        <button (click)="confirmStoreAction()"
+          class="flex-1 text-white text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform"
+          [class.editorial-gradient]="storeConfirm()!.action === 'open'"
+          [class.bg-error]="storeConfirm()!.action === 'close'">
+          Onayla
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: USER CONFIRM
+════════════════════════════════════════════════════ -->
+@if (userConfirm()) {
+  <div class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6"
+    (click)="userConfirm.set(null)">
+    <div class="w-full md:max-w-sm bg-surface-container-lowest rounded-t-3xl md:rounded-3xl overflow-hidden"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)" (click)="$event.stopPropagation()">
+      <div class="px-6 py-5">
+        <h3 class="text-base font-extrabold text-on-surface mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+          {{ userConfirm()!.action === 'delete' ? 'Kullanıcıyı Sil' : userConfirm()!.action === 'suspend' ? 'Hesabı Dondur' : 'Hesabı Aktif Et' }}
+        </h3>
+        <p class="text-sm text-on-surface-variant">
+          <span class="font-bold">{{ userConfirm()!.user.name }}</span> kullanıcısını
+          {{ userConfirm()!.action === 'delete' ? 'silmek' : userConfirm()!.action === 'suspend' ? 'dondurmak' : 'aktif etmek' }}
+          istediğinize emin misiniz?
+        </p>
+      </div>
+      <div class="px-6 pb-6 flex gap-3">
+        <button (click)="userConfirm.set(null)"
+          class="flex-1 bg-surface-container-high text-on-surface text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform">
+          İptal
+        </button>
+        <button (click)="confirmUserAction()"
+          class="flex-1 text-white text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform"
+          [class.editorial-gradient]="userConfirm()!.action === 'unsuspend'"
+          [class.bg-error]="userConfirm()!.action !== 'unsuspend'">
+          Onayla
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: COUPON CREATE
+════════════════════════════════════════════════════ -->
+@if (showCouponModal()) {
+  <div class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6"
+    (click)="closeCouponModal()">
+    <div class="w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl overflow-hidden"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)" (click)="$event.stopPropagation()">
+
+      <div class="px-6 py-5 border-b border-outline-variant/10 flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+          Kupon Oluştur
+          @if (selectedStoreForCoupon()) { <span class="text-primary"> — {{ selectedStoreForCoupon()!.name }}</span> }
+        </h2>
+        <button (click)="closeCouponModal()" class="text-outline hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Kupon Kodu</label>
+          <input type="text" [(ngModel)]="couponForm.code" placeholder="Örn: YAZA20"
+            class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline font-mono uppercase">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">İndirim Türü</label>
+            <div class="relative">
+              <select [(ngModel)]="couponForm.discountType"
+                class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+                <option value="PERCENTAGE">Yüzde (%)</option>
+                <option value="FIXED">Sabit (TL)</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">
+              {{ couponForm.discountType === 'PERCENTAGE' ? 'Yüzde (%)' : 'Tutar' }}
+            </label>
+            <input type="number" [(ngModel)]="couponForm.discountValue" placeholder="10" min="0"
+              class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Maks. Kullanım</label>
+            <input type="number" [(ngModel)]="couponForm.maxUses" placeholder="Sınırsız" min="1"
+              class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline">
+          </div>
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Son Kullanım</label>
+            <input type="date" [(ngModel)]="couponForm.expiresAt"
+              class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary">
+          </div>
+        </div>
+
+        @if (!selectedStoreForCoupon()) {
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Mağaza (boş = tümü)</label>
+            <div class="relative">
+              <select [(ngModel)]="couponForm.storeId"
+                class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+                <option [ngValue]="null">Tüm mağazalar</option>
+                @for (store of stores(); track store.id) {
+                  <option [ngValue]="store.id">{{ store.name }}</option>
+                }
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+          </div>
+        }
+
+        @if (couponError()) {
+          <p class="text-error text-sm font-medium">{{ couponError() }}</p>
+        }
+      </div>
+
+      <div class="px-6 py-5 border-t border-outline-variant/10 flex gap-3">
+        <button (click)="closeCouponModal()"
+          class="flex-1 bg-surface-container-high text-on-surface text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform">
+          İptal
+        </button>
+        <button (click)="saveCoupon()" [disabled]="couponSaving() || !couponForm.code?.trim()"
+          class="flex-1 editorial-gradient text-white text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform disabled:opacity-40 flex items-center justify-center gap-2">
+          @if (couponSaving()) {
+            <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+          }
+          Oluştur
+        </button>
+      </div>
+    </div>
+  </div>
+}

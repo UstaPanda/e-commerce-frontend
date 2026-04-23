@@ -20,6 +20,9 @@ export interface ReviewResponse {
   createdAt: string;
 }
 
+/** Kullanıcının bir yoruma verdiği oy durumu */
+export type VoteState = 'liked' | 'disliked' | null;
+
 @Injectable({ providedIn: 'root' })
 export class ReviewService {
   private http = inject(HttpClient);
@@ -36,5 +39,11 @@ export class ReviewService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/reviews/${id}`);
+  }
+
+  vote(id: number, helpful: boolean): Observable<ReviewResponse> {
+    return this.http.post<ReviewResponse>(
+      `${environment.apiUrl}/reviews/${id}/vote?helpful=${helpful}`, {}
+    );
   }
 }

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ScrollRowComponent } from '../../components/scroll-row/scroll-row';
 import { AnalyticsService } from '../../services/analytics.service';
-import { ProductService, Product, ProductRequest } from '../../services/product.service';
+import { ProductService, Product, ProductRequest, buildProductImageUrl } from '../../services/product.service';
 import { StoreService, StoreRequest } from '../../services/store.service';
 import { CurrencyService } from '../../services/currency.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -71,6 +71,7 @@ export class MyStoreComponent implements OnInit {
   editingProduct = signal<Product | null>(null);
   savingProduct = signal(false);
   productError = signal('');
+  imagePreviewError = signal(false);
 
   productForm: ProductRequest = this.emptyProductForm();
 
@@ -269,12 +270,14 @@ export class MyStoreComponent implements OnInit {
     this.editingProduct.set(null);
     this.productForm = this.emptyProductForm();
     this.productError.set('');
+    this.imagePreviewError.set(false);
     this.showProductModal.set(true);
   }
 
   openEditModal(product: Product, event: Event) {
     event.stopPropagation();
     this.editingProduct.set(product);
+    this.imagePreviewError.set(false);
     this.productForm = {
       name: product.name,
       sku: product.sku,
@@ -282,9 +285,20 @@ export class MyStoreComponent implements OnInit {
       unitPrice: product.unitPrice,
       stockQuantity: product.stockQuantity,
       categoryId: product.category?.id,
+      imageUrl: product.imageUrl ?? '',
     };
     this.productError.set('');
     this.showProductModal.set(true);
+  }
+
+  autoGenerateImage() {
+    const catName = this.categories().find(c => c.id === this.productForm.categoryId)?.name;
+    this.productForm.imageUrl = buildProductImageUrl(this.productForm.name, catName);
+    this.imagePreviewError.set(false);
+  }
+
+  onImagePreviewError() {
+    this.imagePreviewError.set(true);
   }
 
   closeProductModal() {
@@ -352,6 +366,7 @@ export class MyStoreComponent implements OnInit {
       unitPrice: 0,
       stockQuantity: 0,
       categoryId: undefined,
+      imageUrl: '',
     };
   }
 

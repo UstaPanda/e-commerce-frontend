@@ -211,7 +211,16 @@
     "WALLET_CONFIRMATION": "انتظار تأكيد المحفظة...",
     "BLOCKCHAIN_CONFIRMATION": "انتظار تأكيد البلوكتشين...",
     "CASH_ON_DELIVERY": "الدفع عند الاستلام",
-    "BANK_TRANSFER": "التحويل البنكي"
+    "BANK_TRANSFER": "التحويل البنكي",
+    "NO_SAVED_CARD": "لا توجد بطاقة محفوظة",
+    "ADD_CARD_HINT": "أضف بطاقة ائتمان في ملفك الشخصي لاستخدامها هنا.",
+    "ADD_PAYPAL_HINT": "اربط حساب PayPal في ملفك الشخصي لاستخدامه هنا.",
+    "GO_TO_PROFILE": "الذهاب إلى الملف الشخصي",
+    "SHOPPING_COLLECTION": "مجموعة التسوق",
+    "CLEAR_ALL": "مسح الكل",
+    "SHIPPING": "الشحن",
+    "DISCOUNT": "خصم",
+    "REMOVE": "إزالة"
   },
   "ORDERS": {
     "TITLE": "طلباتي",
@@ -224,6 +233,12 @@
     "UNIT": "قطعة",
     "CREDIT_CARD": "بطاقة ائتمان",
     "DEBIT_CARD": "بطاقة خصم",
+    "FILTER_ALL": "الكل",
+    "FILTER_ACTIVE": "نشط",
+    "FILTER_COMPLETED": "مكتمل",
+    "ITEMS": "المنتجات",
+    "DETAILS": "التفاصيل",
+    "TRACK_SHIPMENTS": "تتبع شحناتي",
     "STATUS": {
       "PENDING": "قيد الانتظار",
       "CONFIRMED": "مؤكد",

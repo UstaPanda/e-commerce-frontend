@@ -211,7 +211,16 @@
     "WALLET_CONFIRMATION": "Waiting for Wallet Confirmation...",
     "BLOCKCHAIN_CONFIRMATION": "Waiting for Blockchain Confirmation...",
     "CASH_ON_DELIVERY": "Cash on Delivery",
-    "BANK_TRANSFER": "Bank Transfer"
+    "BANK_TRANSFER": "Bank Transfer",
+    "NO_SAVED_CARD": "No saved card",
+    "ADD_CARD_HINT": "Add a credit card in your profile to use it here.",
+    "ADD_PAYPAL_HINT": "Link your PayPal account in your profile to use it here.",
+    "GO_TO_PROFILE": "Go to Profile",
+    "SHOPPING_COLLECTION": "Shopping Collection",
+    "CLEAR_ALL": "Clear All",
+    "SHIPPING": "Shipping",
+    "DISCOUNT": "Discount",
+    "REMOVE": "Remove"
   },
   "ORDERS": {
     "TITLE": "My Orders",
@@ -224,6 +233,12 @@
     "UNIT": "units",
     "CREDIT_CARD": "Credit Card",
     "DEBIT_CARD": "Debit Card",
+    "FILTER_ALL": "All",
+    "FILTER_ACTIVE": "Active",
+    "FILTER_COMPLETED": "Completed",
+    "ITEMS": "Items",
+    "DETAILS": "Details",
+    "TRACK_SHIPMENTS": "Track My Shipments",
     "STATUS": {
       "PENDING": "Pending",
       "CONFIRMED": "Confirmed",

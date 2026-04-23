@@ -5,9 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollRowComponent } from '../../components/scroll-row/scroll-row';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { catchError, debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
-import { Product, ProductService } from '../../services/product.service';
+import { Product, Category, ProductService, getProductImage } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
 import { CurrencyService } from '../../services/currency.service';
+import { CartService } from '../../services/cart.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -23,18 +24,22 @@ export class ProductsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
   currency = inject(CurrencyService);
+  cartService = inject(CartService);
 
   // View state: 'browse' = ana sayfa, 'category' = kategori ürünleri
   view = signal<'browse' | 'category'>('browse');
 
   // Browse data
   popularProducts = signal<Product[]>([]);
-  categories = signal<{ id: number; name: string }[]>([]);
+  categories = signal<Category[]>([]);
   stores = signal<{ id: number; name: string; description: string }[]>([]);
   browseLoading = signal(true);
 
+  // Category accordion (sidebar)
+  expandedCategoryId = signal<number | null>(null);
+
   // Category view data
-  selectedCategory = signal<{ id: number; name: string } | null>(null);
+  selectedCategory = signal<Category | null>(null);
   products = signal<Product[]>([]);
   initialLoading = signal(true);
   searching = signal(false);
@@ -106,7 +111,7 @@ export class ProductsComponent implements OnInit {
     this.productService.getStores().subscribe(res => this.stores.set(res.content));
   }
 
-  selectCategory(cat: { id: number; name: string } | null) {
+  selectCategory(cat: Category | null) {
     this.selectedCategory.set(cat);
     this.selectedCategoryId = cat?.id ?? null;
     this.view.set('category');
@@ -254,6 +259,14 @@ export class ProductsComponent implements OnInit {
     return range;
   }
 
+  addToCart(product: Product, event: Event) {
+    event.stopPropagation();
+    this.cartService.addItem(product.id).subscribe({
+      next: () => this.router.navigate(['/app/cart']),
+      error: () => {},
+    });
+  }
+
   goToProduct(id: number) {
     this.router.navigate(['/app/products', id]);
   }
@@ -277,5 +290,36 @@ export class ProductsComponent implements OnInit {
   // Kategori için icon harfi
   categoryInitial(name: string): string {
     return name.charAt(0).toUpperCase();
+  }
+
+  // Sadece kök (parent=null) kategoriler
+  get rootCategories(): Category[] {
+    return this.categories().filter(c => !c.parent);
+  }
+
+  // Belirli bir kök kategorinin alt kategorileri
+  childrenFor(parentId: number): Category[] {
+    return this.categories().filter(c => c.parent?.id === parentId);
+  }
+
+  toggleCategoryExpand(catId: number) {
+    this.expandedCategoryId.set(this.expandedCategoryId() === catId ? null : catId);
+  }
+
+  // Ürün kartı için kategori etiketi: (Ana Kategori, Alt Kategori) formatı
+  getCategoryDisplayName(cat: Category | null): string {
+    if (!cat) return '';
+    if (cat.parent?.name) return `${cat.parent.name}, ${cat.name}`;
+    return cat.name;
+  }
+
+  getProductImage(product: Product): string {
+    return getProductImage(product);
+  }
+
+  onImgError(event: Event, product: Product): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://loremflickr.com/600/450/product?lock=${product.id}`;
   }
 }

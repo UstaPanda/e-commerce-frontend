@@ -1,12 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { CartService } from '../../services/cart.service';
 import { CurrencyService } from '../../services/currency.service';
-import { AddressService, UserAddress } from '../../services/address.service';
+import { AddressService, UserAddress, UserAddressRequest } from '../../services/address.service';
 import { PaymentMethodService, SavedPaymentMethod } from '../../services/payment-method.service';
+import { getProductImage } from '../../services/product.service';
 import { environment } from '../../../enviroments/enviroments';
 
 // ─── EIP-6963: Multi-wallet discovery standard ────────────────────────────────
@@ -19,7 +22,7 @@ interface EIP6963ProviderInfo {
   rdns: string;
   uuid: string;
   name: string;
-  icon: string; // data URI supplied by the wallet extension
+  icon: string;
 }
 
 interface EIP6963ProviderDetail {
@@ -30,6 +33,11 @@ interface EIP6963ProviderDetail {
 declare global {
   interface Window { ethereum?: EIP1193Provider; }
 }
+
+// ─── Stripe global (loaded via CDN in index.html) ─────────────────────────────
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare const Stripe: ((key: string) => any) | undefined;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ─── Well-known wallets shown as install suggestions ──────────────────────────
 const POPULAR_WALLETS = [
@@ -61,10 +69,11 @@ type TxStatus = 'idle' | 'fetching-price' | 'sending' | 'mining' | 'confirmed' |
   imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
   templateUrl: './cart.html',
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnDestroy {
   cartService    = inject(CartService);
   currency       = inject(CurrencyService);
   private router = inject(Router);
+  http           = inject(HttpClient);
   private addressService = inject(AddressService);
   private paymentMethodService = inject(PaymentMethodService);
 
@@ -73,17 +82,24 @@ export class CartComponent implements OnInit {
   checkoutError   = signal('');
   checkoutSuccess = signal(false);
 
-  // ─── Address selection ────────────────────────────────────
+  // ─── Address selection (BehaviorSubject ile senkronize) ──
   savedAddresses    = signal<UserAddress[]>([]);
   selectedAddressId = signal<number | null>(null);
-  manualAddress     = '';
-  useManualAddress  = signal(false);
+
+  // Yeni adres formu modal
+  showAddressModal  = signal(false);
+  addingAddress     = signal(false);
+  newAddrTitle      = '';
+  newAddrFullAddress = '';
+  newAddrCity       = '';
+  newAddrDistrict   = '';
+  newAddrPostalCode = '';
+  addressFormError  = signal('');
 
   get shippingAddress(): string {
-    if (this.useManualAddress()) return this.manualAddress;
-    const addr = this.savedAddresses().find(a => a.id === this.selectedAddressId());
+    const addr = this.addressService.getSelectedAddress();
     if (!addr) return '';
-    return [addr.fullAddress, addr.district, addr.city, addr.postalCode, addr.phone]
+    return [addr.fullAddress, addr.district, addr.city, addr.postalCode]
       .filter(Boolean).join(', ');
   }
 
@@ -115,7 +131,7 @@ export class CartComponent implements OnInit {
   get effectivePaymentMethodString(): string {
     const saved = this.selectedSavedPayment;
     if (saved) {
-      if (saved.type === 'STRIPE')  return `STRIPE:${saved.cardBrand ?? ''}:${saved.cardLast4 ?? ''}`.replace(/:+$/, '');
+      if (saved.type === 'STRIPE')  return `STRIPE:${saved.stripePaymentMethodId ?? saved.cardBrand ?? ''}:${saved.cardLast4 ?? ''}`.replace(/:+$/, '');
       if (saved.type === 'PAYPAL')  return `PAYPAL:${saved.paypalEmail ?? saved.label}`;
       if (saved.type === 'CRYPTO')  return `CRYPTO_WALLET:${this.walletAddress() ?? saved.walletAddress ?? ''}`;
     }
@@ -124,6 +140,215 @@ export class CartComponent implements OnInit {
 
   // ─── Payment method ───────────────────────────────────────
   paymentMethod = '';
+  showAddPaymentPrompt = signal(false);
+  promptPaymentType = signal('');
+
+  get savedStripeMethod(): SavedPaymentMethod | null {
+    return this.savedPaymentMethods().find(m => m.type === 'STRIPE') ?? null;
+  }
+
+  get savedPaypalMethod(): SavedPaymentMethod | null {
+    return this.savedPaymentMethods().find(m => m.type === 'PAYPAL') ?? null;
+  }
+
+  get savedCryptoMethod(): SavedPaymentMethod | null {
+    return this.savedPaymentMethods().find(m => m.type === 'CRYPTO') ?? null;
+  }
+
+  isTypeSelected(type: string): boolean {
+    const saved = this.selectedSavedPayment;
+    if (saved) {
+      if (type === 'CREDIT_CARD') return saved.type === 'STRIPE';
+      if (type === 'PAYPAL')      return saved.type === 'PAYPAL';
+      if (type === 'CRYPTO_WALLET') return saved.type === 'CRYPTO';
+      return false;
+    }
+    return this.paymentMethod === type;
+  }
+
+  // ─── Stripe Elements ──────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  stripeInstance = signal<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  stripeCardEl   = signal<any>(null);
+  stripeReady    = signal(false);
+  stripeError    = signal('');
+
+  async initStripe() {
+    if (typeof Stripe === 'undefined') return;
+    const key = environment.stripePublishableKey;
+    if (!key || key.startsWith('pk_test_XXXX')) return;
+    try {
+      const stripe   = Stripe(key);
+      const elements = stripe.elements();
+      const card = elements.create('card', {
+        style: {
+          base: {
+            color: '#1a1b22',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontSize: '14px',
+            '::placeholder': { color: '#89898f' },
+          },
+          invalid: { color: '#ef4444' },
+        },
+      });
+      this.stripeInstance.set(stripe);
+      this.stripeCardEl.set(card);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      card.on('change', (event: any) => {
+        this.stripeError.set(event.error?.message ?? '');
+      });
+      setTimeout(() => {
+        const el = document.getElementById('stripe-card-element');
+        if (el) { card.mount('#stripe-card-element'); this.stripeReady.set(true); }
+      }, 150);
+    } catch { /* Stripe SDK unavailable */ }
+  }
+
+  async checkoutWithStripe(addr: string) {
+    const stripe = this.stripeInstance();
+    const card   = this.stripeCardEl();
+    if (!stripe || !card) { this.checkoutError.set('Stripe yüklenemedi.'); return; }
+
+    this.checkingOut.set(true);
+    this.checkoutError.set('');
+    this.stripeError.set('');
+
+    const result = await stripe.createPaymentMethod({ type: 'card', card });
+    if (result.error) {
+      this.stripeError.set(result.error.message ?? 'Kart doğrulanamadı.');
+      this.checkingOut.set(false);
+      return;
+    }
+
+    const pmId = result.paymentMethod.id as string;
+    this.cartService
+      .checkout(`STRIPE_PM:${pmId}`, addr, undefined, undefined, this.couponApplied() ? this.couponCode : undefined)
+      .subscribe({
+        next: () => {
+          this.checkingOut.set(false);
+          this.checkoutSuccess.set(true);
+          this.cartService.resetCart();
+          setTimeout(() => this.router.navigate(['/app/orders']), 2000);
+        },
+        error: (err) => {
+          this.checkingOut.set(false);
+          this.checkoutError.set(err?.error?.message ?? 'Ödeme tamamlanamadı.');
+        },
+      });
+  }
+
+  // ─── PayPal ───────────────────────────────────────────────
+  paypalReady      = signal(false);
+  paypalError      = signal('');
+  paypalProcessing = signal(false);
+
+  async loadPayPal() {
+    const clientId = environment.paypalClientId;
+    if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID') return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).paypal) { setTimeout(() => this.renderPayPalButtons(), 100); return; }
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+    script.onload  = () => setTimeout(() => this.renderPayPalButtons(), 100);
+    script.onerror = () => this.paypalError.set('PayPal SDK yüklenemedi.');
+    document.body.appendChild(script);
+  }
+
+  renderPayPalButtons() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pp = (window as any).paypal;
+    if (!pp) return;
+    const container = document.getElementById('paypal-button-container');
+    if (!container || container.children.length > 0) return;
+
+    pp.Buttons({
+      style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay' },
+      createOrder: async () => {
+        const res = await firstValueFrom(
+          this.http.post<{ id: string }>(`${environment.apiUrl}/payments/paypal/create-order`, {
+            amount: this.cartService.cart()?.totalPrice ?? 0,
+          })
+        );
+        return res.id;
+      },
+      onApprove: async (data: { orderID: string }) => {
+        this.paypalProcessing.set(true);
+        this.checkoutError.set('');
+        try {
+          await firstValueFrom(
+            this.http.post(`${environment.apiUrl}/payments/paypal/capture`, { orderId: data.orderID })
+          );
+          const addr = this.shippingAddress.trim();
+          if (!addr) { this.checkoutError.set('Teslimat adresi gerekli.'); this.paypalProcessing.set(false); return; }
+          this.cartService
+            .checkout(`PAYPAL:${data.orderID}`, addr, undefined, undefined, this.couponApplied() ? this.couponCode : undefined)
+            .subscribe({
+              next: () => {
+                this.paypalProcessing.set(false);
+                this.checkoutSuccess.set(true);
+                this.cartService.resetCart();
+                setTimeout(() => this.router.navigate(['/app/orders']), 2000);
+              },
+              error: (err) => {
+                this.paypalProcessing.set(false);
+                this.checkoutError.set(err?.error?.message ?? 'Sipariş tamamlanamadı.');
+              },
+            });
+        } catch (err: unknown) {
+          this.paypalProcessing.set(false);
+          const e = err as { error?: { message?: string } };
+          this.paypalError.set(e?.error?.message ?? 'PayPal ödemesi tamamlanamadı.');
+        }
+      },
+      onError: (err: Error) => {
+        this.paypalError.set(err.message ?? 'PayPal hatası oluştu.');
+      },
+    }).render('#paypal-button-container');
+    this.paypalReady.set(true);
+  }
+
+  // Main Place Order button is hidden when PayPal (no saved) handles it via its own button
+  get showPlaceOrderBtn(): boolean {
+    return !(this.isTypeSelected('PAYPAL') && !this.savedPaypalMethod);
+  }
+
+  selectPaymentType(type: string) {
+    this.showAddPaymentPrompt.set(false);
+    this.promptPaymentType.set('');
+    if (type === 'CREDIT_CARD') {
+      const saved = this.savedStripeMethod;
+      if (saved) {
+        this.selectSavedPayment(saved);
+      } else {
+        this.selectedSavedPaymentId.set(null);
+        this.paymentMethod = 'CREDIT_CARD';
+        this.stripeCardEl()?.destroy();
+        this.stripeCardEl.set(null);
+        this.stripeReady.set(false);
+        this.stripeError.set('');
+        setTimeout(() => this.initStripe(), 50);
+      }
+    } else if (type === 'PAYPAL') {
+      const saved = this.savedPaypalMethod;
+      if (saved) {
+        this.selectSavedPayment(saved);
+      } else {
+        this.selectedSavedPaymentId.set(null);
+        this.paymentMethod = 'PAYPAL';
+        this.paypalReady.set(false);
+        this.paypalError.set('');
+        setTimeout(() => this.loadPayPal(), 50);
+      }
+    } else if (type === 'CRYPTO_WALLET') {
+      const saved = this.savedCryptoMethod;
+      if (saved) { this.selectSavedPayment(saved); }
+      else { this.selectedSavedPaymentId.set(null); this.paymentMethod = 'CRYPTO_WALLET'; this.discoverWallets(); }
+    } else {
+      this.selectedSavedPaymentId.set(null);
+      this.paymentMethod = type;
+    }
+  }
 
   readonly otherPaymentOptions = [
     { value: 'CASH_ON_DELIVERY', labelKey: 'CART.CASH_ON_DELIVERY', icon: 'local_shipping' },
@@ -165,15 +390,22 @@ export class CartComponent implements OnInit {
   walletConnecting = signal(false);
   walletAddress    = signal<string | null>(null);
   walletError      = signal('');
-  walletChainId    = signal<string | null>(null);   // human-readable name
-  currentChainId   = signal<number>(1);             // numeric ID
+  walletChainId    = signal<string | null>(null);
+  currentChainId   = signal<number>(1);
   activeProvider   = signal<EIP6963ProviderDetail | null>(null);
 
   // ─── On-chain payment state ───────────────────────────────
-  cryptoAmount = signal<number>(0);   // amount to send in native token
+  cryptoAmount = signal<number>(0);
   txHash       = signal<string | null>(null);
   txStatus     = signal<TxStatus>('idle');
   txError      = signal('');
+
+  // ─── Coupon ───────────────────────────────────────────────
+  couponCode    = '';
+  couponApplied = signal(false);
+  couponDiscount = signal(0);
+  couponLoading = signal(false);
+  couponError   = signal('');
 
   get coinSymbol(): string {
     return COIN_SYMBOLS[this.currentChainId()] ?? 'TOKEN';
@@ -188,8 +420,11 @@ export class CartComponent implements OnInit {
     this.addressService.getAll().subscribe({
       next: list => {
         this.savedAddresses.set(list);
-        const def = list.find(a => a.isDefault);
-        if (def) this.selectedAddressId.set(def.id);
+        const def = list.find(a => a.isDefault) ?? list[0] ?? null;
+        if (def) {
+          this.selectedAddressId.set(def.id);
+          this.addressService.selectAddress(def);
+        }
       },
     });
     this.paymentMethodService.getAll().subscribe({
@@ -205,14 +440,58 @@ export class CartComponent implements OnInit {
     this.discoverWallets();
   }
 
-  selectAddress(id: number) {
-    this.selectedAddressId.set(id);
-    this.useManualAddress.set(false);
+  ngOnDestroy() {
+    this.stripeCardEl()?.destroy();
   }
 
-  switchToManual() {
-    this.selectedAddressId.set(null);
-    this.useManualAddress.set(true);
+  selectAddress(id: number) {
+    this.selectedAddressId.set(id);
+    const addr = this.savedAddresses().find(a => a.id === id) ?? null;
+    this.addressService.selectAddress(addr);
+  }
+
+  openAddressModal() {
+    this.newAddrTitle = '';
+    this.newAddrFullAddress = '';
+    this.newAddrCity = '';
+    this.newAddrDistrict = '';
+    this.newAddrPostalCode = '';
+    this.addressFormError.set('');
+    this.showAddressModal.set(true);
+  }
+
+  closeAddressModal() {
+    this.showAddressModal.set(false);
+  }
+
+  submitNewAddress() {
+    if (!this.newAddrTitle.trim() || !this.newAddrFullAddress.trim() || !this.newAddrCity.trim()) {
+      this.addressFormError.set('Başlık, adres ve şehir alanları zorunludur.');
+      return;
+    }
+    this.addingAddress.set(true);
+    this.addressFormError.set('');
+    const req: UserAddressRequest = {
+      title: this.newAddrTitle.trim(),
+      fullAddress: this.newAddrFullAddress.trim(),
+      city: this.newAddrCity.trim(),
+      district: this.newAddrDistrict.trim() || undefined,
+      postalCode: this.newAddrPostalCode.trim() || undefined,
+      isDefault: this.savedAddresses().length === 0,
+    };
+    this.addressService.create(req).subscribe({
+      next: (addr) => {
+        this.savedAddresses.update(list => [...list, addr]);
+        this.selectedAddressId.set(addr.id);
+        // BehaviorSubject create() tap'inde zaten güncellendi
+        this.addingAddress.set(false);
+        this.showAddressModal.set(false);
+      },
+      error: () => {
+        this.addressFormError.set('Adres kaydedilemedi. Tekrar deneyin.');
+        this.addingAddress.set(false);
+      },
+    });
   }
 
   // ─── Connect wallet ───────────────────────────────────────
@@ -229,17 +508,14 @@ export class CartComponent implements OnInit {
       this.currentChainId.set(chainNum);
       this.walletChainId.set(this.chainName(chainNum));
 
-      // Reset tx state on wallet change
       this.txHash.set(null);
       this.txStatus.set('idle');
       this.txError.set('');
 
-      // Sync address if user switches account inside the extension
       detail.provider.on('accountsChanged', (accs: unknown) => {
         this.walletAddress.set((accs as string[])[0] ?? null);
       });
 
-      // Fetch how much crypto the user needs to send
       await this.fetchCryptoAmount();
     } catch (err: unknown) {
       const e = err as { code?: number; message?: string };
@@ -285,7 +561,6 @@ export class CartComponent implements OnInit {
     this.txStatus.set('fetching-price');
     this.txError.set('');
 
-    // Sepolia testnet: use a tiny fixed amount for testing
     if (this.currentChainId() === 11155111) {
       this.cryptoAmount.set(0.001);
       this.txStatus.set('idle');
@@ -301,7 +576,6 @@ export class CartComponent implements OnInit {
       const price = data[coinId]?.usd ?? 0;
 
       if (price > 0) {
-        // 6 decimal places → enough precision for any EVM chain
         this.cryptoAmount.set(Math.ceil((total / price) * 1e6) / 1e6);
       } else {
         this.txError.set('Token fiyatı alınamadı. Sayfayı yenileyip tekrar deneyin.');
@@ -323,7 +597,6 @@ export class CartComponent implements OnInit {
     this.checkoutError.set('');
 
     try {
-      // Convert native token amount to Wei (hex) — use BigInt for precision
       const weiAmount = BigInt(Math.round(this.cryptoAmount() * 1e18));
       const valueHex  = '0x' + weiAmount.toString(16);
 
@@ -339,16 +612,14 @@ export class CartComponent implements OnInit {
       this.txHash.set(hash);
       this.txStatus.set('mining');
 
-      // Poll for receipt — up to 3 minutes (60 × 3 s)
       await this.waitForReceipt(provider, hash);
 
       this.txStatus.set('confirmed');
 
-      // Backend: verify on-chain + create order
       const paymentInfo = `CRYPTO_WALLET:${this.walletAddress()}`;
       this.checkingOut.set(true);
       this.cartService
-        .checkout(paymentInfo, shippingAddr, hash, this.currentChainId())
+        .checkout(paymentInfo, shippingAddr, hash, this.currentChainId(), this.couponApplied() ? this.couponCode : undefined)
         .subscribe({
           next: () => {
             this.checkingOut.set(false);
@@ -376,7 +647,6 @@ export class CartComponent implements OnInit {
     }
   }
 
-  /** Poll eth_getTransactionReceipt until mined (max ~3 min) */
   private async waitForReceipt(detail: EIP6963ProviderDetail, hash: string): Promise<void> {
     for (let i = 0; i < 60; i++) {
       const receipt = await detail.provider.request({
@@ -417,12 +687,19 @@ export class CartComponent implements OnInit {
       return;
     }
 
+    // New card via Stripe Elements (no saved Stripe method)
+    if (!this.savedStripeMethod && this.paymentMethod === 'CREDIT_CARD') {
+      if (!this.stripeReady()) { this.checkoutError.set('Kart formu yükleniyor, lütfen bekleyin.'); return; }
+      this.checkoutWithStripe(addr);
+      return;
+    }
+
     const pmString = this.effectivePaymentMethodString;
     if (!pmString) { this.checkoutError.set('Ödeme yöntemi seçiniz.'); return; }
 
     this.checkingOut.set(true);
     this.checkoutError.set('');
-    this.cartService.checkout(pmString, addr).subscribe({
+    this.cartService.checkout(pmString, addr, undefined, undefined, this.couponApplied() ? this.couponCode : undefined).subscribe({
       next: () => {
         this.checkingOut.set(false);
         this.checkoutSuccess.set(true);
@@ -436,7 +713,52 @@ export class CartComponent implements OnInit {
     });
   }
 
+  // ─── Coupon methods ───────────────────────────────────────
+  applyCoupon() {
+    const code = this.couponCode.trim().toUpperCase();
+    if (!code) return;
+    this.couponLoading.set(true);
+    this.couponError.set('');
+    this.http.post<{ valid: boolean; discountAmount: number; message?: string }>(
+      `${environment.apiUrl}/coupons/validate`,
+      { code, total: this.cartService.cart()?.totalPrice ?? 0 }
+    ).subscribe({
+      next: (res) => {
+        this.couponApplied.set(true);
+        this.couponDiscount.set(res.discountAmount ?? 0);
+        this.couponLoading.set(false);
+      },
+      error: (err) => {
+        this.couponError.set(err?.error?.message ?? 'Geçersiz kupon kodu.');
+        this.couponLoading.set(false);
+      },
+    });
+  }
+
+  removeCoupon() {
+    this.couponCode = '';
+    this.couponApplied.set(false);
+    this.couponDiscount.set(0);
+    this.couponError.set('');
+  }
+
   goShopping() {
     this.router.navigate(['/app/products']);
+  }
+
+  getItemImg(imageUrl: string | null, productId: number, name: string): string {
+    return getProductImage({
+      id: productId, name, imageUrl,
+      category: null, sku: '', description: '',
+      unitPrice: 0, stockQuantity: 0, productImportance: '',
+      active: true, store: { id: 0, name: '' },
+      avgRating: 0, reviewCount: 0,
+    }, 300);
+  }
+
+  onItemImgError(event: Event, productId: number): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://loremflickr.com/300/225/product?lock=${productId}`;
   }
 }

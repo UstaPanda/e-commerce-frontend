@@ -23,7 +23,7 @@ export const corporateRedirectGuard: CanActivateFn = () => {
     return router.createUrlTree(['/app/my-store']);
   }
   if (auth.getRole() === 'ADMIN') {
-    return router.createUrlTree(['/app/admin/dashboard']);
+    return router.createUrlTree(['/app/admin']);
   }
   return true;
 };

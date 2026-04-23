@@ -87,8 +87,10 @@
                 <div class="space-y-3 mt-4">
                   @for (item of order.items; track item.productId) {
                     <div class="flex items-center gap-3">
-                      <div class="w-12 h-12 rounded-2xl bg-surface-container-low flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-outline text-xl">inventory_2</span>
+                      <div class="w-12 h-12 rounded-2xl bg-surface-container-low shrink-0 overflow-hidden">
+                        <img [src]="getItemImg(item.productId, item.productName)" [alt]="item.productName"
+                          class="w-full h-full object-cover"
+                          (error)="onItemImgError($event, item.productId)">
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="text-on-surface text-sm font-medium truncate">{{ item.productName }}</p>
@@ -131,7 +133,7 @@
         <button (click)="router.navigate(['/app/shipments'])"
           class="mt-2 text-sm text-primary font-bold flex items-center gap-1 hover:opacity-70 transition-opacity">
           <span class="material-symbols-outlined text-base">local_shipping</span>
-          Kargolarımı Takip Et
+          {{ 'ORDERS.TRACK_SHIPMENTS' | translate }}
         </button>
       </div>
       <div class="flex bg-surface-container-low p-1 rounded-full">
@@ -186,8 +188,13 @@
             <button (click)="toggleExpand(order.id)"
               class="w-full p-6 flex items-center justify-between gap-6 text-left hover:bg-surface-container-low/30 transition-colors">
               <div class="flex items-center gap-6">
-                <div class="h-20 w-20 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-outline text-3xl">inventory_2</span>
+                <div class="h-20 w-20 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+                  @if (order.items.length > 0) {
+                    <img [src]="getItemImg(order.items[0].productId, order.items[0].productName)"
+                      [alt]="order.items[0].productName"
+                      class="w-full h-full object-cover"
+                      (error)="onItemImgError($event, order.items[0].productId)">
+                  }
                 </div>
                 <div>
                   <div class="flex items-center gap-3 mb-1">
@@ -231,8 +238,10 @@
                     <h4 class="text-xs font-bold uppercase tracking-widest text-outline mb-4">{{ 'ORDERS.ITEMS' | translate }}</h4>
                     @for (item of order.items; track item.productId) {
                       <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-surface-container-low flex items-center justify-center shrink-0">
-                          <span class="material-symbols-outlined text-outline text-xl">inventory_2</span>
+                        <div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 overflow-hidden">
+                          <img [src]="getItemImg(item.productId, item.productName)" [alt]="item.productName"
+                            class="w-full h-full object-cover"
+                            (error)="onItemImgError($event, item.productId)">
                         </div>
                         <div class="flex-1 min-w-0">
                           <p class="text-on-surface text-sm font-medium truncate">{{ item.productName }}</p>

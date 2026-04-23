@@ -1,7 +1,7 @@
-<div class="bg-surface flex flex-col h-[calc(100vh-7rem)] md:h-[calc(100vh-120px)]">
+<div class="bg-surface flex flex-col" [class]="embedded ? 'h-full' : 'h-[calc(100vh-7rem)] md:h-[calc(100vh-120px)]'">
 
   <!-- Header — mobile only -->
-  <div class="md:hidden editorial-gradient px-6 pt-6 pb-5 relative overflow-hidden shrink-0">
+  <div class="md:hidden editorial-gradient px-6 pt-6 pb-5 relative overflow-hidden shrink-0" [class.hidden]="embedded">
     <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
     <div class="relative z-10 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -10,7 +10,7 @@
         </div>
         <div>
           <h1 class="text-white font-extrabold text-lg leading-none"
-            style="font-family:'Plus Jakarta Sans',sans-serif">Indigo AI</h1>
+            style="font-family:'Plus Jakarta Sans',sans-serif">Zorlu AI</h1>
           <p class="text-white/70 text-xs mt-0.5">{{ 'AI_ASSISTANT.SUBTITLE' | translate }}</p>
         </div>
       </div>
@@ -22,22 +22,24 @@
   </div>
 
   <!-- Desktop header -->
-  <div class="hidden md:flex items-center justify-between px-8 py-6 border-b border-surface-container-high shrink-0 max-w-4xl mx-auto w-full">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-2xl editorial-gradient flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-xl">smart_toy</span>
+  @if (!embedded) {
+    <div class="hidden md:flex items-center justify-between px-8 py-6 border-b border-surface-container-high shrink-0 max-w-4xl mx-auto w-full">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl editorial-gradient flex items-center justify-center">
+          <span class="material-symbols-outlined text-white text-xl">smart_toy</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-headline font-bold text-on-surface">Zorlu AI</h1>
+          <p class="text-sm text-outline font-body">{{ 'AI_ASSISTANT.SUBTITLE' | translate }}</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-xl font-headline font-bold text-on-surface">Indigo AI</h1>
-        <p class="text-sm text-outline font-body">{{ 'AI_ASSISTANT.SUBTITLE' | translate }}</p>
-      </div>
+      <button (click)="clearChat()"
+        class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium hover:bg-surface-container-high transition-colors">
+        <span class="material-symbols-outlined text-base">refresh</span>
+        {{ 'COMMON.CLEAR' | translate }}
+      </button>
     </div>
-    <button (click)="clearChat()"
-      class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-medium hover:bg-surface-container-high transition-colors">
-      <span class="material-symbols-outlined text-base">refresh</span>
-      {{ 'COMMON.CLEAR' | translate }}
-    </button>
-  </div>
+  }
 
   <!-- Messages area -->
   <div #messagesContainer class="flex-1 overflow-y-auto py-4 space-y-4 hide-scrollbar px-4 md:px-8 md:max-w-4xl md:mx-auto md:w-full">
@@ -63,11 +65,23 @@
           <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 mt-0.5">
             <span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
           </div>
-          <div class="max-w-[75%] md:max-w-[65%]">
+          <div class="max-w-[85%] md:max-w-[75%] w-full">
             <div class="bg-surface-container-lowest text-on-surface text-sm px-4 py-3 rounded-3xl rounded-tl-sm leading-relaxed"
+              [class.border]="msg.isOutOfScope"
+              [class.border-outline-variant]="msg.isOutOfScope"
               style="box-shadow: 0 4px 12px rgba(26,27,34,0.06)">
               {{ msg.content }}
             </div>
+
+            <!-- Visualization chart -->
+            @if (msg.visualizationData) {
+              <div class="mt-2 bg-surface-container-lowest rounded-3xl overflow-hidden p-3"
+                style="box-shadow: 0 4px 12px rgba(26,27,34,0.06)">
+                <div [id]="'ai-chart-' + $index" style="min-height: 300px; width: 100%"></div>
+              </div>
+            }
+
+            <!-- SQL query (admin only) -->
             @if (msg.sqlQuery) {
               <details class="mt-1.5 px-1">
                 <summary class="text-[10px] text-outline cursor-pointer select-none hover:text-primary transition-colors flex items-center gap-1">
@@ -77,6 +91,7 @@
                 <pre class="mt-1.5 bg-surface-container-high text-on-surface text-[11px] px-3 py-2.5 rounded-2xl overflow-x-auto leading-relaxed font-mono">{{ msg.sqlQuery }}</pre>
               </details>
             }
+
             <p class="text-outline-variant text-[10px] mt-1 px-1">{{ formatTime(msg.timestamp) }}</p>
           </div>
         </div>

@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import { ProductService, Product } from '../../services/product.service';
+import { ProductService, Product, getProductImage } from '../../services/product.service';
 import { CurrencyService } from '../../services/currency.service';
+import { CartService } from '../../services/cart.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { catchError, debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
 import { ScrollRowComponent } from '../../components/scroll-row/scroll-row';
@@ -20,6 +21,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class DashboardComponent implements OnInit, OnDestroy {
   auth = inject(AuthService);
   currency = inject(CurrencyService);
+  cartService = inject(CartService);
   private analytics = inject(AnalyticsService);
   private productService = inject(ProductService);
   private platformId = inject(PLATFORM_ID);
@@ -250,6 +252,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return !!(this.searchQuery.trim() || this.minPrice != null || this.maxPrice != null || this.selectedCategoryId != null);
   }
 
+  addToCart(product: Product, event: Event) {
+    event.stopPropagation();
+    this.cartService.addItem(product.id).subscribe({
+      next: () => this.router.navigate(['/app/cart']),
+      error: () => {},
+    });
+  }
+
   goToProduct(id: number) {
     this.router.navigate(['/app/products', id]);
   }
@@ -267,6 +277,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   categoryInitial(name: string): string {
     return name.charAt(0).toUpperCase();
+  }
+
+  getProductImage(product: Product, width = 600, height?: number): string {
+    return getProductImage(product, width, height);
+  }
+
+  onImgError(event: Event, product: Product): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://loremflickr.com/600/450/product?lock=${product.id}`;
   }
 
   private loadIndividual() {

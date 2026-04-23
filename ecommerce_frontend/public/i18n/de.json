@@ -211,7 +211,16 @@
     "WALLET_CONFIRMATION": "Warte auf Wallet-Bestätigung...",
     "BLOCKCHAIN_CONFIRMATION": "Warte auf Blockchain-Bestätigung...",
     "CASH_ON_DELIVERY": "Nachnahme",
-    "BANK_TRANSFER": "Banküberweisung"
+    "BANK_TRANSFER": "Banküberweisung",
+    "NO_SAVED_CARD": "Keine gespeicherte Karte",
+    "ADD_CARD_HINT": "Füge in deinem Profil eine Kreditkarte hinzu, um sie hier zu verwenden.",
+    "ADD_PAYPAL_HINT": "Verknüpfe dein PayPal-Konto in deinem Profil, um es hier zu verwenden.",
+    "GO_TO_PROFILE": "Zum Profil",
+    "SHOPPING_COLLECTION": "Einkaufskollektion",
+    "CLEAR_ALL": "Alle entfernen",
+    "SHIPPING": "Versand",
+    "DISCOUNT": "Rabatt",
+    "REMOVE": "Entfernen"
   },
   "ORDERS": {
     "TITLE": "Meine Bestellungen",
@@ -224,6 +233,12 @@
     "UNIT": "Stück",
     "CREDIT_CARD": "Kreditkarte",
     "DEBIT_CARD": "Debitkarte",
+    "FILTER_ALL": "Alle",
+    "FILTER_ACTIVE": "Aktiv",
+    "FILTER_COMPLETED": "Abgeschlossen",
+    "ITEMS": "Artikel",
+    "DETAILS": "Details",
+    "TRACK_SHIPMENTS": "Meine Sendungen verfolgen",
     "STATUS": {
       "PENDING": "Ausstehend",
       "CONFIRMED": "Bestätigt",

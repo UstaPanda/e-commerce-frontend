@@ -115,9 +115,11 @@
             style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)"
             (click)="goToProduct(product.id)">
 
-            <!-- Product image placeholder -->
-            <div class="h-32 bg-surface-container-low flex items-center justify-center">
-              <span class="material-symbols-outlined text-outline-variant text-4xl">inventory_2</span>
+            <!-- Product image -->
+            <div class="h-32 bg-surface-container-low overflow-hidden">
+              <img [src]="getProductImage(product)" [alt]="product.name"
+                   class="w-full h-full object-cover"
+                   (error)="onImgError($event, product)">
             </div>
 
             <div class="p-3">

@@ -75,7 +75,7 @@
           class="text-primary text-sm font-bold hover:opacity-70 transition-opacity">{{ 'PRODUCTS.ALL' | translate }}</button>
       </div>
       <app-scroll-row rowClass="gap-3 px-6 md:px-0 md:flex-wrap md:overflow-x-visible" arrowClass="md:hidden">
-        @for (cat of categories(); track cat.id) {
+        @for (cat of rootCategories; track cat.id) {
           <button (click)="selectCategory(cat)"
             class="flex-none flex flex-col items-center gap-2 min-w-[72px]">
             <div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center transition-colors hover:bg-surface-container"
@@ -104,8 +104,8 @@
             <div class="col-span-2 bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
               (click)="goToProduct(p.id)"
               style="box-shadow: 0 4px 24px rgba(26,27,34,0.06)">
-              <div class="relative aspect-video bg-surface-container-low flex items-center justify-center">
-                <span class="material-symbols-outlined text-outline text-7xl">image</span>
+              <div class="relative aspect-video bg-surface-container-low flex items-center justify-center overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover" (error)="onImgError($event, p)">
                 <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-primary">
                   <span class="material-symbols-outlined text-xl">favorite_border</span>
                 </button>
@@ -124,8 +124,9 @@
                   <p class="text-outline text-sm">{{ p.store.name }}</p>
                   <p class="text-primary font-bold mt-2 text-xl tracking-tight">{{ currency.format(p.unitPrice) }}</p>
                 </div>
-                <button class="bg-secondary-container text-on-secondary-container w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-transform">
-                  <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+                <button (click)="addToCart(p, $event)"
+                  class="w-10 h-10 rounded-full bg-on-surface/8 text-on-surface flex items-center justify-center hover:bg-on-surface/15 active:scale-90 transition-all">
+                  <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">shopping_bag</span>
                 </button>
               </div>
             </div>
@@ -134,8 +135,8 @@
             <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
               (click)="goToProduct(p.id)"
               style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
-              <div class="relative aspect-square bg-surface-container-low flex items-center justify-center">
-                <span class="material-symbols-outlined text-outline text-4xl">image</span>
+              <div class="relative aspect-square bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover" (error)="onImgError($event, p)">
               </div>
               <div class="p-4">
                 @if (p.reviewCount > 0) {
@@ -147,8 +148,9 @@
                 <h4 class="text-sm font-bold text-on-surface truncate"
                   style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
                 <p class="text-primary font-bold text-lg mt-1">{{ currency.format(p.unitPrice) }}</p>
-                <button class="mt-3 w-full bg-surface-container-high text-on-surface text-[10px] font-bold uppercase tracking-widest py-2 rounded-full active:scale-95 transition-transform">
-                  {{ 'PRODUCTS.ADD_TO_CART' | translate }}
+                <button (click)="$event.stopPropagation(); addToCart(p, $event)"
+                  class="mt-3 w-full bg-on-surface/8 text-on-surface flex items-center justify-center py-2 rounded-full hover:bg-on-surface/15 active:scale-95 transition-all">
+                  <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1">shopping_bag</span>
                 </button>
               </div>
             </div>
@@ -219,7 +221,7 @@
           </p>
         </div>
 
-        <!-- Kategori Listesi -->
+        <!-- Kategori Listesi (Accordion) -->
         <div>
           <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-2">{{ 'PRODUCTS.CATEGORY' | translate }}</p>
           <div class="space-y-0.5">
@@ -231,15 +233,45 @@
               [class.hover:bg-surface-container-low]="!!selectedCategoryId">
               {{ 'PRODUCTS.ALL_CATEGORIES' | translate }}
             </button>
-            @for (cat of categories(); track cat.id) {
-              <button (click)="selectCategory(cat)"
-                class="w-full text-left text-sm px-3 py-2 rounded-xl transition-colors font-medium"
-                [class.bg-primary]="selectedCategoryId === cat.id"
-                [class.text-on-primary]="selectedCategoryId === cat.id"
-                [class.text-on-surface-variant]="selectedCategoryId !== cat.id"
-                [class.hover:bg-surface-container-low]="selectedCategoryId !== cat.id">
-                {{ cat.name }}
-              </button>
+            @for (cat of rootCategories; track cat.id) {
+              <!-- Ana Kategori Butonu -->
+              <div>
+                <div class="flex items-center">
+                  <button (click)="selectCategory(cat)"
+                    class="flex-1 text-left text-sm px-3 py-2 rounded-l-xl transition-colors font-medium"
+                    [class.bg-primary]="selectedCategoryId === cat.id"
+                    [class.text-on-primary]="selectedCategoryId === cat.id"
+                    [class.text-on-surface-variant]="selectedCategoryId !== cat.id"
+                    [class.hover:bg-surface-container-low]="selectedCategoryId !== cat.id">
+                    {{ cat.name }}
+                  </button>
+                  @if (childrenFor(cat.id).length > 0) {
+                    <button (click)="toggleCategoryExpand(cat.id)"
+                      class="px-2 py-2 rounded-r-xl transition-colors text-outline hover:text-on-surface"
+                      [class.bg-primary]="selectedCategoryId === cat.id"
+                      [class.text-on-primary]="selectedCategoryId === cat.id"
+                      [class.hover:bg-surface-container-low]="selectedCategoryId !== cat.id">
+                      <span class="material-symbols-outlined text-base transition-transform inline-block"
+                        [class.rotate-180]="expandedCategoryId() === cat.id">expand_more</span>
+                    </button>
+                  }
+                </div>
+                <!-- Alt Kategoriler -->
+                @if (expandedCategoryId() === cat.id) {
+                  <div class="ml-4 mt-0.5 space-y-0.5 border-l-2 border-primary/20 pl-2">
+                    @for (child of childrenFor(cat.id); track child.id) {
+                      <button (click)="selectCategory(child)"
+                        class="w-full text-left text-xs px-3 py-1.5 rounded-xl transition-colors font-medium"
+                        [class.bg-primary]="selectedCategoryId === child.id"
+                        [class.text-on-primary]="selectedCategoryId === child.id"
+                        [class.text-on-surface-variant]="selectedCategoryId !== child.id"
+                        [class.hover:bg-surface-container-low]="selectedCategoryId !== child.id">
+                        {{ child.name }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
             }
           </div>
         </div>
@@ -304,8 +336,11 @@
             (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"
             class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none focus:bg-surface-container cursor-pointer">
             <option [ngValue]="null">{{ 'PRODUCTS.ALL_CATEGORIES' | translate }}</option>
-            @for (cat of categories(); track cat.id) {
+            @for (cat of rootCategories; track cat.id) {
               <option [ngValue]="cat.id">{{ cat.name }}</option>
+              @for (child of childrenFor(cat.id); track child.id) {
+                <option [ngValue]="child.id">— {{ child.name }}</option>
+              }
             }
           </select>
           <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
@@ -368,8 +403,8 @@
             <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group"
               (click)="goToProduct(p.id)"
               style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
-              <div class="relative aspect-square bg-surface-container-low flex items-center justify-center">
-                <span class="material-symbols-outlined text-outline text-4xl">image</span>
+              <div class="relative aspect-square bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" (error)="onImgError($event, p)">
                 <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                   <div class="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
                     <span class="material-symbols-outlined text-primary text-base">favorite_border</span>
@@ -385,7 +420,7 @@
                 }
                 <h4 class="text-sm font-bold text-on-surface truncate"
                   style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
-                <p class="text-outline text-xs truncate mt-0.5">{{ p.category?.name ?? ('PRODUCTS.GENERAL' | translate) }}</p>
+                <p class="text-outline text-xs truncate mt-0.5">{{ p.category ? getCategoryDisplayName(p.category) : ('PRODUCTS.GENERAL' | translate) }}</p>
                 <p class="text-primary font-bold text-base mt-2">{{ currency.format(p.unitPrice) }}</p>
                 @if (canManage) {
                   <div class="flex gap-2 mt-3">

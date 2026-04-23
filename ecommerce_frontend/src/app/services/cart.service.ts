@@ -13,6 +13,7 @@ export interface CartItemResponse {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  imageUrl: string | null;
 }
 
 export interface CartResponse {
@@ -68,12 +69,13 @@ export class CartService {
     );
   }
 
-  checkout(paymentMethod: string, shippingAddress: string, txHash?: string, chainId?: number) {
+  checkout(paymentMethod: string, shippingAddress: string, txHash?: string, chainId?: number, couponCode?: string) {
     let url = `${environment.apiUrl}/cart/checkout`
       + `?paymentMethod=${encodeURIComponent(paymentMethod)}`
       + `&shippingAddress=${encodeURIComponent(shippingAddress)}`;
-    if (txHash)  url += `&txHash=${encodeURIComponent(txHash)}`;
-    if (chainId) url += `&chainId=${chainId}`;
+    if (txHash)     url += `&txHash=${encodeURIComponent(txHash)}`;
+    if (chainId)    url += `&chainId=${chainId}`;
+    if (couponCode) url += `&couponCode=${encodeURIComponent(couponCode)}`;
     return this.http.post(url, {});
   }
 

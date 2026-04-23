@@ -69,6 +69,17 @@ export class OrdersComponent implements OnInit {
     return new Date(date).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
+  getItemImg(productId: number, name: string): string {
+    const kw = name.split(' ').slice(0, 2).join(',');
+    return `https://loremflickr.com/112/112/${encodeURIComponent(kw)}?lock=${productId}`;
+  }
+
+  onItemImgError(event: Event, productId: number): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://loremflickr.com/112/112/product?lock=${productId}`;
+  }
+
   paymentLabelKey(method: string): string {
     const map: Record<string, string> = {
       CREDIT_CARD:      'ORDERS.CREDIT_CARD',
@@ -77,7 +88,9 @@ export class OrdersComponent implements OnInit {
       BANK_TRANSFER:    'CART.BANK_TRANSFER',
       CRYPTO_WALLET:    'CART.CRYPTO_WALLET',
     };
-    if (method.startsWith('CRYPTO_WALLET:')) return 'CART.CRYPTO_WALLET';
+    if (method.startsWith('STRIPE'))       return 'ORDERS.CREDIT_CARD';
+    if (method.startsWith('CRYPTO_WALLET')) return 'CART.CRYPTO_WALLET';
+    if (method.startsWith('PAYPAL'))        return 'PayPal';
     return map[method] ?? method;
   }
 }

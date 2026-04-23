@@ -495,6 +495,24 @@
             class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline resize-none"></textarea>
         </div>
 
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Görsel URL</label>
+          <div class="flex gap-2">
+            <input type="url" [(ngModel)]="productForm.imageUrl" (ngModelChange)="imagePreviewError.set(false)"
+              placeholder="https://... (boş bırakırsanız otomatik seçilir)"
+              class="flex-1 bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline min-w-0" />
+            <button type="button" (click)="autoGenerateImage()" [disabled]="!productForm.name"
+              class="shrink-0 bg-surface-container-high text-on-surface text-xs font-bold px-4 py-3 rounded-2xl active:scale-95 transition-transform disabled:opacity-40 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">auto_awesome</span>
+              Otomatik
+            </button>
+          </div>
+          @if (productForm.imageUrl && !imagePreviewError()) {
+            <img [src]="productForm.imageUrl" (error)="onImagePreviewError()"
+              class="mt-2 w-full h-32 object-cover rounded-xl" alt="Önizleme" />
+          }
+        </div>
+
         @if (productError()) {
           <p class="text-error text-sm font-medium">{{ productError() }}</p>
         }

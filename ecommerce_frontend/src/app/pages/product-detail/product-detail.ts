@@ -2,11 +2,11 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProductService, Product } from '../../services/product.service';
+import { ProductService, Product, getProductImage } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { CurrencyService } from '../../services/currency.service';
 import { AuthService } from '../../services/auth.service';
-import { ReviewService, ReviewResponse } from '../../services/review.service';
+import { ReviewService, ReviewResponse, VoteState } from '../../services/review.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { CollectionService, Collection, CollectionRequest } from '../../services/collection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -69,6 +69,11 @@ export class ProductDetailComponent implements OnInit {
   submittingReview = signal(false);
   reviewError = signal('');
   reviewPosted = signal(false);
+
+  // Vote (like/dislike) — reviewId başına kullanıcının aktif oy durumu
+  votingId = signal<number | null>(null);
+  /** reviewId → 'liked' | 'disliked' | null */
+  private userVoteMap = new Map<number, VoteState>();
 
   role = this.auth.getRole();
   canOrder = this.role === 'INDIVIDUAL';
@@ -212,6 +217,28 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
+  voteReview(reviewId: number, helpful: boolean) {
+    if (this.votingId() !== null) return;
+    this.votingId.set(reviewId);
+
+    const currentVote = this.userVoteMap.get(reviewId) ?? null;
+    const newVote: VoteState = currentVote === (helpful ? 'liked' : 'disliked') ? null
+      : helpful ? 'liked' : 'disliked';
+
+    this.reviewService.vote(reviewId, helpful).subscribe({
+      next: (updated) => {
+        this.reviews.update(list => list.map(r => r.id === reviewId ? updated : r));
+        this.userVoteMap.set(reviewId, newVote);
+        this.votingId.set(null);
+      },
+      error: () => this.votingId.set(null),
+    });
+  }
+
+  getUserVote(reviewId: number): VoteState {
+    return this.userVoteMap.get(reviewId) ?? null;
+  }
+
   addToCart() {
     const p = this.product();
     if (!p || this.quantity < 1) return;
@@ -256,5 +283,20 @@ export class ProductDetailComponent implements OnInit {
     if (s > 10) return 'text-green-400';
     if (s > 0) return 'text-yellow-400';
     return 'text-red-400';
+  }
+
+  getProductImage(product: Product): string {
+    return getProductImage(product, 800);
+  }
+
+  getProductThumb(product: Product): string {
+    return getProductImage(product, 160, 160);
+  }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    const p = this.product();
+    img.src = `https://loremflickr.com/800/600/product?lock=${p?.id ?? 0}`;
   }
 }

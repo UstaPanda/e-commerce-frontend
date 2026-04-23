@@ -13,49 +13,11 @@
         <h1 class="text-white font-extrabold text-xl truncate"
           style="font-family:'Plus Jakarta Sans',sans-serif">{{ user()?.name }}</h1>
         <p class="text-white/70 text-xs mt-0.5 truncate">{{ user()?.email }}</p>
-        @if (!loadingProfile() && profile()) {
-          <span class="inline-flex items-center gap-1.5 mt-2 text-[10px] font-bold uppercase tracking-widest bg-white/20 text-white px-3 py-1 rounded-full">
-            {{ membershipInfo(profile()!.membershipType).icon }} {{ membershipInfo(profile()!.membershipType).label }}
-          </span>
-        }
       </div>
     </div>
   </div>
 
-  <!-- Stats strip — mobile only -->
-  <div class="md:hidden">
-    @if (!isCorporate) {
-      @if (!loadingProfile() && profile()) {
-        <div class="mx-6 -mt-8 relative z-10 bg-surface-container-lowest rounded-3xl p-5 grid grid-cols-3 gap-4 mb-6"
-          style="box-shadow: 0 8px 24px rgba(26,27,34,0.10)">
-          <div class="text-center">
-            <p class="text-primary font-extrabold text-lg" style="font-family:'Plus Jakarta Sans',sans-serif">
-              {{ profile()!.itemsPurchased }}
-            </p>
-            <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.ITEMS_PURCHASED' | translate }}</p>
-          </div>
-          <div class="text-center border-x border-outline-variant">
-            <p class="text-primary font-extrabold text-lg" style="font-family:'Plus Jakarta Sans',sans-serif">
-              {{ currency.format(profile()!.totalSpend) }}
-            </p>
-            <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.SPENDING' | translate }}</p>
-          </div>
-          <div class="text-center">
-            <p class="text-primary font-extrabold text-lg" style="font-family:'Plus Jakarta Sans',sans-serif">
-              {{ profile()!.avgRating.toFixed(1) }}
-            </p>
-            <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.RATING' | translate }}</p>
-          </div>
-        </div>
-      }
-      @if (loadingProfile()) {
-        <div class="mx-6 -mt-8 relative z-10 bg-surface-container-lowest rounded-3xl p-5 animate-pulse h-20 mb-6"
-          style="box-shadow: 0 8px 24px rgba(26,27,34,0.10)"></div>
-      }
-    } @else {
-      <div class="mb-4 mt-2"></div>
-    }
-  </div>
+  <!-- Stats strip — removed -->
 
   <!-- ═══════════════════════════════════════════════════
        LAYOUT WRAPPER — desktop: 12-col grid, mobile: single column
@@ -75,30 +37,7 @@
           </div>
           <h1 class="text-2xl font-headline font-bold text-on-surface tracking-tight">{{ user()?.name }}</h1>
           <p class="text-sm text-outline font-label mt-1">{{ user()?.email }}</p>
-          @if (!isCorporate && !loadingProfile() && profile()) {
-            <span class="inline-flex items-center gap-1.5 mt-3 text-[10px] font-bold uppercase tracking-widest bg-primary-fixed/30 text-primary px-3 py-1 rounded-full">
-              {{ membershipInfo(profile()!.membershipType).icon }} {{ membershipInfo(profile()!.membershipType).label }}
-            </span>
-          }
         </div>
-
-        <!-- Stats — desktop sidebar -->
-        @if (!isCorporate && !loadingProfile() && profile()) {
-          <div class="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-outline-variant/20">
-            <div class="text-center">
-              <p class="text-primary font-extrabold text-lg font-headline">{{ profile()!.itemsPurchased }}</p>
-              <p class="text-outline text-[9px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.ITEMS_PURCHASED' | translate }}</p>
-            </div>
-            <div class="text-center border-x border-outline-variant/20">
-              <p class="text-primary font-extrabold text-sm font-headline">{{ currency.format(profile()!.totalSpend) }}</p>
-              <p class="text-outline text-[9px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.SPENDING' | translate }}</p>
-            </div>
-            <div class="text-center">
-              <p class="text-primary font-extrabold text-lg font-headline">{{ profile()!.avgRating.toFixed(1) }}</p>
-              <p class="text-outline text-[9px] font-bold uppercase tracking-wider mt-0.5">{{ 'PROFILE.RATING' | translate }}</p>
-            </div>
-          </div>
-        }
 
         <!-- Quick links (all tabs) -->
         <div class="mt-8 space-y-1">
@@ -325,7 +264,6 @@
                     <p class="text-on-surface font-bold text-sm">{{ addr.title }}</p>
                     <p class="text-outline text-xs mt-1 leading-relaxed">{{ addr.fullAddress }}</p>
                     <p class="text-outline text-xs">{{ addr.district ? addr.district + ', ' : '' }}{{ addr.city }}{{ addr.postalCode ? ' ' + addr.postalCode : '' }}</p>
-                    @if (addr.phone) { <p class="text-outline text-xs mt-0.5">{{ addr.phone }}</p> }
                   </div>
                 </div>
                 <div class="flex gap-2 pt-3 border-t border-outline-variant/20">
@@ -391,15 +329,6 @@
                 <input [(ngModel)]="formPostalCode" type="text"
                   class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none"
                   placeholder="34000">
-              </div>
-            </div>
-            <div>
-              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_PHONE' | translate }}</label>
-              <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
-                <span class="material-symbols-outlined text-outline text-lg">phone</span>
-                <input [(ngModel)]="formPhone" type="tel"
-                  class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
-                  placeholder="+90 5xx xxx xx xx">
               </div>
             </div>
             <button (click)="formIsDefault = !formIsDefault"
@@ -690,18 +619,6 @@
                 <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.STRIPE_PM_ID' | translate }}</label>
                 <input [(ngModel)]="pmFormStripeId" type="text" placeholder="pm_..."
                   class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none font-mono text-xs">
-              </div>
-            }
-
-            <!-- PAYPAL fields -->
-            @if (pmFormType === 'PAYPAL') {
-              <div>
-                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.PAYPAL_EMAIL_FIELD' | translate }}</label>
-                <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
-                  <span class="material-symbols-outlined text-outline text-lg">mail</span>
-                  <input [(ngModel)]="pmFormPaypalEmail" type="email" placeholder="hesap@paypal.com"
-                    class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none">
-                </div>
               </div>
             }
 

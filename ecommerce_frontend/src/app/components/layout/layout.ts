@@ -7,11 +7,12 @@ import { CurrencyService, SUPPORTED_CURRENCIES } from '../../services/currency.s
 import { CartService } from '../../services/cart.service';
 import { LanguageService } from '../../services/language.service';
 import { LanguageSwitcherComponent } from '../language-switcher/language-switcher';
+import { AiAssistantComponent } from '../../pages/ai-assistant/ai-assistant';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, TranslateModule, LanguageSwitcherComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslateModule, LanguageSwitcherComponent, AiAssistantComponent],
   templateUrl: './layout.html',
 })
 export class LayoutComponent {
@@ -23,6 +24,7 @@ export class LayoutComponent {
   currencies = SUPPORTED_CURRENCIES;
   showCurrencyMenu = false;
   showLangMenu = false;
+  showChatPopup = false;
 
   currentLangFlag(): string {
     return this.langService.getLang(this.langService.currentLang())?.flag ?? '🌐';

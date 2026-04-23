@@ -68,7 +68,6 @@ export class ProfileComponent implements OnInit {
   formCity = '';
   formDistrict = '';
   formPostalCode = '';
-  formPhone = '';
   formIsDefault = false;
 
   // ─── Wishlist ──────────────────────────────────────────────
@@ -135,7 +134,6 @@ export class ProfileComponent implements OnInit {
 
   readonly paymentTypeOptions: { value: PaymentType; labelKey: string; icon: string }[] = [
     { value: 'STRIPE',  labelKey: 'PROFILE.PAYMENT_TYPE_STRIPE', icon: 'credit_card' },
-    { value: 'PAYPAL',  labelKey: 'PROFILE.ACCOUNT_TYPE_PAYPAL', icon: 'account_balance_wallet' },
     { value: 'CRYPTO',  labelKey: 'PROFILE.PAYMENT_TYPE_CRYPTO', icon: 'currency_bitcoin' },
   ];
 
@@ -240,7 +238,6 @@ export class ProfileComponent implements OnInit {
     this.formCity        = addr.city;
     this.formDistrict    = addr.district ?? '';
     this.formPostalCode  = addr.postalCode ?? '';
-    this.formPhone       = addr.phone ?? '';
     this.formIsDefault   = addr.isDefault;
     this.editingAddressId.set(addr.id);
     this.showAddressForm.set(true);
@@ -253,7 +250,7 @@ export class ProfileComponent implements OnInit {
     const req: UserAddressRequest = {
       title: this.formTitle, fullAddress: this.formFullAddress, city: this.formCity,
       district: this.formDistrict || undefined, postalCode: this.formPostalCode || undefined,
-      phone: this.formPhone || undefined, isDefault: this.formIsDefault,
+      isDefault: this.formIsDefault,
     };
     const editId = this.editingAddressId();
     const op = editId ? this.addressService.update(editId, req) : this.addressService.create(req);
@@ -278,7 +275,7 @@ export class ProfileComponent implements OnInit {
 
   private resetAddressForm() {
     this.formTitle = ''; this.formFullAddress = ''; this.formCity = '';
-    this.formDistrict = ''; this.formPostalCode = ''; this.formPhone = ''; this.formIsDefault = false;
+    this.formDistrict = ''; this.formPostalCode = ''; this.formIsDefault = false;
   }
 
   get formValid(): boolean {

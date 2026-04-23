@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { StoreService, StoreDetail, StoreStats } from '../../services/store.service';
-import { ProductService, Product } from '../../services/product.service';
+import { ProductService, Product, getProductImage } from '../../services/product.service';
 import { CurrencyService } from '../../services/currency.service';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -79,6 +79,16 @@ export class StoreDetailComponent implements OnInit {
       if (i === Math.floor(rating) && rating % 1 >= 0.5) return 'half';
       return 'empty';
     });
+  }
+
+  getProductImage(product: Product): string {
+    return getProductImage(product);
+  }
+
+  onImgError(event: Event, product: Product): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://loremflickr.com/600/450/product?lock=${product.id}`;
   }
 
   get pages(): number[] {

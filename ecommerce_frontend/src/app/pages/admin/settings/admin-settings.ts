@@ -37,8 +37,8 @@ export class AdminSettingsComponent implements OnInit {
     requireEmailVerification: true,
     maxOrdersPerUser: 50,
     platformCurrency: 'USD',
-    supportEmail: 'support@indigovault.com',
-    platformName: 'Indigo Vault',
+    supportEmail: 'support@zorlutrading.com',
+    platformName: 'Zorlu Trading',
   });
 
   readonly currencies = [
@@ -85,8 +85,8 @@ export class AdminSettingsComponent implements OnInit {
       requireEmailVerification: true,
       maxOrdersPerUser: 50,
       platformCurrency: 'USD',
-      supportEmail: 'support@indigovault.com',
-      platformName: 'Indigo Vault',
+      supportEmail: 'support@zorlutrading.com',
+      platformName: 'Zorlu Trading',
     });
   }
 }
