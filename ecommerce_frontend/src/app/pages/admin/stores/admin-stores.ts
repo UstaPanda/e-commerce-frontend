@@ -59,7 +59,7 @@ export class AdminStoresComponent implements OnInit {
     this.actionLoading.set(modal.store.id);
     this.confirmModal.set(null);
 
-    const statusMap: Record<string, string> = { open: 'ACTIVE', close: 'INACTIVE', pending: 'PENDING' };
+    const statusMap: Record<string, string> = { open: 'OPEN', close: 'CLOSED', pending: 'PENDING' };
     this.adminService.updateStoreStatus(modal.store.id, statusMap[modal.action]).subscribe({
       next: (updated) => {
         this.stores.update(list => list.map(s => s.id === updated.id ? updated : s));
@@ -78,14 +78,14 @@ export class AdminStoresComponent implements OnInit {
   }
 
   statusBadgeClass(status: string): string {
-    if (status === 'ACTIVE') return 'bg-secondary/10 text-secondary';
-    if (status === 'INACTIVE') return 'bg-error/10 text-error';
+    if (status === 'OPEN') return 'bg-secondary/10 text-secondary';
+    if (status === 'CLOSED') return 'bg-error/10 text-error';
     return 'bg-tertiary/10 text-tertiary';
   }
 
   statusIcon(status: string): string {
-    if (status === 'ACTIVE') return 'store';
-    if (status === 'INACTIVE') return 'store_mall_directory';
+    if (status === 'OPEN') return 'store';
+    if (status === 'CLOSED') return 'store_mall_directory';
     return 'pending';
   }
 }

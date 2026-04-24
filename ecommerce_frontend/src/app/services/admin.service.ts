@@ -101,7 +101,7 @@ export class AdminService {
   // ── Users ──────────────────────────────────────────────
   getUsers(page = 0, size = 20, search = ''): Observable<PageResponse<AdminUser>> {
     let params = new HttpParams().set('page', page).set('size', size);
-    if (search) params = params.set('search', search);
+    if (search) params = params.set('keyword', search);
     return this.http.get<PageResponse<AdminUser>>(`${this.base}/users`, { params });
   }
 
