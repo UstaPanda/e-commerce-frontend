@@ -102,7 +102,7 @@
         </div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface">{{ 'DASHBOARD.ALL' | translate }}</span>
       </button>
-      @for (cat of categories(); track cat.id) {
+      @for (cat of rootCategories(); track cat.id) {
         <button (click)="selectCategory(cat)"
           class="flex-none flex flex-col items-center gap-2 min-w-[68px] active:scale-95 transition-transform">
           <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200"
@@ -410,14 +410,23 @@
                 [class.text-on-surface-variant]="!!selectedCategoryId">
                 {{ 'PRODUCTS.ALL_CATEGORIES' | translate }}
               </button>
-              @for (cat of categories(); track cat.id) {
-                <button (click)="selectCategory(cat)"
+              @for (group of categoriesGrouped; track group.root.id) {
+                <button (click)="selectCategory(group.root)"
                   class="w-full text-left text-sm px-3 py-2 rounded-xl transition-colors font-medium"
-                  [class.bg-primary]="selectedCategoryId === cat.id"
-                  [class.text-on-primary]="selectedCategoryId === cat.id"
-                  [class.text-on-surface-variant]="selectedCategoryId !== cat.id">
-                  {{ cat.name }}
+                  [class.bg-primary]="selectedCategoryId === group.root.id"
+                  [class.text-on-primary]="selectedCategoryId === group.root.id"
+                  [class.text-on-surface-variant]="selectedCategoryId !== group.root.id">
+                  {{ group.root.name }}
                 </button>
+                @for (child of group.children; track child.id) {
+                  <button (click)="selectCategory(child)"
+                    class="w-full text-left text-xs pl-6 pr-3 py-1.5 rounded-xl transition-colors font-medium"
+                    [class.bg-primary]="selectedCategoryId === child.id"
+                    [class.text-on-primary]="selectedCategoryId === child.id"
+                    [class.text-on-surface-variant]="selectedCategoryId !== child.id">
+                    {{ child.name }}
+                  </button>
+                }
               }
             </div>
           </div>
@@ -476,8 +485,17 @@
                 (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"
                 class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
                 <option [ngValue]="null">{{ 'PRODUCTS.ALL_CATEGORIES' | translate }}</option>
-                @for (cat of categories(); track cat.id) {
-                  <option [ngValue]="cat.id">{{ cat.name }}</option>
+                @for (group of categoriesGrouped; track group.root.id) {
+                  @if (group.children.length > 0) {
+                    <optgroup [label]="group.root.name">
+                      <option [ngValue]="group.root.id">{{ group.root.name }}</option>
+                      @for (child of group.children; track child.id) {
+                        <option [ngValue]="child.id">↳ {{ child.name }}</option>
+                      }
+                    </optgroup>
+                  } @else {
+                    <option [ngValue]="group.root.id">{{ group.root.name }}</option>
+                  }
                 }
               </select>
               <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>

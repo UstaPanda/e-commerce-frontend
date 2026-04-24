@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import { ProductService, Product, getProductImage } from '../../services/product.service';
+import { ProductService, Product, Category, getProductImage } from '../../services/product.service';
 import { CurrencyService } from '../../services/currency.service';
 import { CartService } from '../../services/cart.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -37,7 +37,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   view = signal<'browse' | 'search'>('browse');
 
   // Browse data
-  categories = signal<{ id: number; name: string }[]>([]);
+  categories = signal<Category[]>([]);
+  rootCategories = signal<Category[]>([]);
   popularProducts = signal<Product[]>([]);
   stores = signal<{ id: number; name: string; description: string }[]>([]);
   browseLoading = signal(true);
@@ -107,8 +108,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {}
 
+  get categoriesGrouped(): { root: Category; children: Category[] }[] {
+    const all = this.categories();
+    const roots = all.filter(c => !c.parent);
+    return roots.map(root => ({
+      root,
+      children: all.filter(c => c.parent?.id === root.id),
+    }));
+  }
+
   loadBrowseData() {
     this.browseLoading.set(true);
+    this.productService.getRootCategories().subscribe(cats => this.rootCategories.set(cats));
     this.productService.getCategories().subscribe(cats => this.categories.set(cats));
     this.productService.getPopular(8).subscribe(p => {
       this.popularProducts.set(p);
