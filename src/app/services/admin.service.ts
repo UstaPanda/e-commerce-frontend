@@ -51,6 +51,8 @@ export interface AdminOrder {
   storeName: string;
   status: string;
   grandTotal: number;
+  subtotalSum: number;
+  discountAmount: number;
   paymentMethod: string;
   shippingAddress: string;
   items: { id: number; productId: number; productName: string; quantity: number; unitPrice: number; subtotal: number }[];

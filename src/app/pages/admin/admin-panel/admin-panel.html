@@ -476,6 +476,21 @@
                       <span class="text-on-surface font-bold">{{ currency.format(item.subtotal) }}</span>
                     </div>
                   }
+                  
+                  @if (order.discountAmount > 0) {
+                    <div class="flex justify-between text-xs pt-2 border-t border-outline-variant/10">
+                      <span class="text-outline">Ara Toplam</span>
+                      <span class="text-on-surface">{{ currency.format(order.subtotalSum) }}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-error font-bold">
+                      <span>Kupon İndirimi</span>
+                      <span>-{{ currency.format(order.discountAmount) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-black text-primary pt-1">
+                      <span>Genel Toplam</span>
+                      <span>{{ currency.format(order.grandTotal) }}</span>
+                    </div>
+                  }
                 </div>
                 <p class="text-xs text-outline mb-4">
                   <span class="font-bold text-on-surface-variant">Adres:</span> {{ order.shippingAddress }}
