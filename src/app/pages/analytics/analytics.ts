@@ -81,24 +81,24 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
 
   private getDateRange(preset: DatePreset): { from: string | null; to: string } {
     const now = new Date();
-    const to = now.toISOString().split('T')[0];
+    const to = now.toISOString();
     if (preset === 'lifetime') return { from: null, to };
 
     const from = new Date(now);
     const days = preset === '7d' ? 7 : preset === '30d' ? 30 : preset === '90d' ? 90 : 365;
     from.setDate(now.getDate() - days);
-    return { from: from.toISOString().split('T')[0], to };
+    return { from: from.toISOString(), to };
   }
 
   private getPrevDateRange(preset: DatePreset): { from: string | null; to: string | null } {
     if (preset === 'lifetime') return { from: null, to: null };
     const now = new Date();
     const days = preset === '7d' ? 7 : preset === '30d' ? 30 : preset === '90d' ? 90 : 365;
-    const to = new Date(now);
-    to.setDate(now.getDate() - days);
-    const from = new Date(to);
-    from.setDate(to.getDate() - days);
-    return { from: from.toISOString().split('T')[0], to: to.toISOString().split('T')[0] };
+    const toDate = new Date(now);
+    toDate.setDate(now.getDate() - days);
+    const fromDate = new Date(toDate);
+    fromDate.setDate(toDate.getDate() - days);
+    return { from: fromDate.toISOString(), to: toDate.toISOString() };
   }
 
   setPreset(preset: DatePreset) {
