@@ -10,6 +10,7 @@ interface KpiCard {
   value: string;
   icon: string;
   color: string;
+  glowColor: string;
 }
 
 interface QuickAction {
@@ -45,10 +46,10 @@ export class AdminDashboardComponent implements OnInit {
       next: (data) => {
         this.rawData.set(data);
         this.kpiCards.set([
-          { labelKey: 'ANALYTICS.KPI_USERS',        value: String(data.totalUsers  ?? 0),                icon: 'group',        color: 'bg-primary/10 text-primary' },
-          { labelKey: 'ANALYTICS.KPI_STORES',       value: String(data.totalStores ?? 0),                icon: 'storefront',   color: 'bg-secondary/10 text-secondary' },
-          { labelKey: 'ANALYTICS.KPI_TOTAL_ORDERS', value: String(data.totalOrders ?? 0),                icon: 'receipt_long', color: 'bg-tertiary/10 text-tertiary' },
-          { labelKey: 'ANALYTICS.KPI_TOTAL_REVENUE',value: this.currency.format(data.totalRevenue ?? 0), icon: 'payments',     color: 'bg-success/10 text-success' },
+          { labelKey: 'ANALYTICS.KPI_USERS',        value: String(data.totalUsers  ?? 0),                icon: 'group',        color: 'bg-primary/10 text-primary',   glowColor: 'bg-primary/10' },
+          { labelKey: 'ANALYTICS.KPI_STORES',       value: String(data.totalStores ?? 0),                icon: 'storefront',   color: 'bg-secondary/10 text-secondary', glowColor: 'bg-secondary/10' },
+          { labelKey: 'ANALYTICS.KPI_TOTAL_ORDERS', value: String(data.totalOrders ?? 0),                icon: 'receipt_long', color: 'bg-tertiary/10 text-tertiary',  glowColor: 'bg-tertiary/10' },
+          { labelKey: 'ANALYTICS.KPI_TOTAL_REVENUE',value: this.currency.format(data.totalRevenue ?? 0), icon: 'payments',     color: 'bg-primary/10 text-primary',   glowColor: 'bg-primary/10' },
         ]);
         this.loading.set(false);
       },

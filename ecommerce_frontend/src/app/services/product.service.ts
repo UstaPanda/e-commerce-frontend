@@ -244,12 +244,14 @@ export class ProductService {
     return this.http.get<PageResponse<Product>>(`${environment.apiUrl}/products/store/${storeId}?page=${page}&size=${size}`);
   }
 
-  filter(params: { keyword?: string; categoryId?: number; minPrice?: number; maxPrice?: number }, page = 0, size = 20): Observable<PageResponse<Product>> {
+  filter(params: { keyword?: string; categoryId?: number; minPrice?: number; maxPrice?: number; minRating?: number; sortOrder?: string }, page = 0, size = 20): Observable<PageResponse<Product>> {
     const query = new URLSearchParams({ page: String(page), size: String(size) });
     if (params.keyword) query.set('keyword', params.keyword);
     if (params.categoryId) query.set('categoryId', String(params.categoryId));
     if (params.minPrice != null) query.set('minPrice', String(params.minPrice));
     if (params.maxPrice != null) query.set('maxPrice', String(params.maxPrice));
+    if (params.minRating != null) query.set('minRating', String(params.minRating));
+    if (params.sortOrder) query.set('sortOrder', params.sortOrder);
     return this.http.get<PageResponse<Product>>(`${environment.apiUrl}/products/filter?${query}`);
   }
 

@@ -73,7 +73,7 @@
           </div>
           <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ st.reviewCount }} {{ 'STORE_DETAIL.REVIEWS' | translate }}</p>
         </div>
-        <div class="text-center border-x border-outline-variant">
+        <div class="text-center bg-surface-container-low rounded-2xl py-2">
           <p class="text-primary font-extrabold text-base" style="font-family:'Plus Jakarta Sans',sans-serif">
             {{ st.productCount }}
           </p>
@@ -109,54 +109,43 @@
         <p class="text-outline text-sm">{{ 'STORE_DETAIL.NO_PRODUCTS' | translate }}</p>
       </div>
     } @else {
-      <div class="px-4 grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+      <div class="px-4 grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         @for (product of products(); track product.id) {
-          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
-            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)"
+          <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform editorial-shadow"
             (click)="goToProduct(product.id)">
 
             <!-- Product image -->
-            <div class="h-32 bg-surface-container-low overflow-hidden">
+            <div class="aspect-[4/5] bg-surface-container-low overflow-hidden relative">
               <img [src]="getProductImage(product)" [alt]="product.name"
-                   class="w-full h-full object-cover"
+                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                    (error)="onImgError($event, product)">
+              <!-- Stock badge -->
+              <span class="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                [class]="product.stockQuantity > 10
+                  ? 'bg-secondary-container text-on-secondary-container'
+                  : product.stockQuantity > 0
+                  ? 'bg-surface-container text-on-surface'
+                  : 'bg-error-container text-on-error-container'">
+                {{ product.stockQuantity }} {{ 'STORE_DETAIL.STOCK' | translate }}
+              </span>
             </div>
 
-            <div class="p-3">
-              <p class="text-on-surface font-bold text-sm truncate">{{ product.name }}</p>
-              <p class="text-outline text-xs mt-0.5 truncate">{{ product.category?.name ?? ('STORE_DETAIL.UNCATEGORIZED' | translate) }}</p>
-
+            <div class="p-3 space-y-1">
               <!-- Stars -->
               @if (product.reviewCount > 0) {
-                <div class="flex items-center gap-1 mt-1.5">
-                  <div class="flex gap-0.5">
-                    @for (star of starsFor(product.avgRating); track $index) {
-                      <span [class]="'text-[10px] ' + (star === 'full' ? 'material-symbols-filled text-yellow-500' : 'material-symbols-outlined text-outline-variant')">star</span>
-                    }
-                  </div>
+                <div class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-yellow-500 text-[11px]" style="font-variation-settings:'FILL' 1">star</span>
                   <span class="text-yellow-500 text-[10px] font-bold">{{ product.avgRating.toFixed(1) }}</span>
                   <span class="text-outline text-[10px]">({{ product.reviewCount }})</span>
                 </div>
-              } @else {
-                <p class="text-outline text-[10px] mt-1.5">{{ 'STORE_DETAIL.NO_REVIEWS_PRODUCT' | translate }}</p>
               }
-
-              <div class="flex items-center justify-between mt-2">
-                <span class="text-primary font-extrabold text-sm"
-                  style="font-family:'Plus Jakarta Sans',sans-serif">
-                  {{ currency.format(product.unitPrice) }}
-                </span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  [class]="product.stockQuantity > 10
-                    ? 'bg-secondary-container text-on-secondary-container'
-                    : product.stockQuantity > 0
-                    ? 'bg-tertiary-container text-on-tertiary-container'
-                    : 'bg-error-container text-on-error-container'">
-                  {{ product.stockQuantity }} {{ 'STORE_DETAIL.STOCK' | translate }}
-                </span>
-              </div>
+              <h4 class="text-on-surface font-bold text-sm truncate leading-tight" style="font-family:'Plus Jakarta Sans',sans-serif">{{ product.name }}</h4>
+              <p class="text-outline text-xs truncate">{{ product.category?.name ?? ('STORE_DETAIL.UNCATEGORIZED' | translate) }}</p>
+              <p class="text-primary font-extrabold text-base pt-1" style="font-family:'Plus Jakarta Sans',sans-serif">
+                {{ currency.format(product.unitPrice) }}
+              </p>
             </div>
-          </div>
+          </article>
         }
       </div>
 

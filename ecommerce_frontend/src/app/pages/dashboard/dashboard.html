@@ -3,9 +3,9 @@
   <!-- ═══════════════════════════════════════════════════
        HERO — Gradient backdrop + central search bar
   ════════════════════════════════════════════════════════ -->
-  <section class="relative px-6 md:px-8 pt-10 pb-16 md:pt-6 md:pb-16 overflow-hidden">
+  <section class="relative px-6 md:px-8 pt-10 pb-16 md:pt-6 md:pb-16">
     <!-- Ambient gradient -->
-    <div class="absolute inset-0 z-0 pointer-events-none">
+    <div class="absolute inset-0 overflow-hidden z-0 pointer-events-none">
       <div class="absolute inset-0 editorial-gradient opacity-[0.07] scale-110 blur-3xl"></div>
     </div>
 
@@ -88,10 +88,10 @@
         </button>
       }
     </div>
-    <app-scroll-row rowClass="gap-4 px-6 md:px-8 pb-2" [hideArrows]="true">
+    <app-scroll-row rowClass="gap-4 px-6 md:px-8 pb-2 justify-evenly" [hideArrows]="true">
       <!-- All -->
       <button (click)="backToBrowse()"
-        class="flex-none flex flex-col items-center gap-2 min-w-[68px] active:scale-95 transition-transform">
+        class="flex-none flex flex-col items-center gap-2 min-w-[80px] active:scale-95 transition-transform">
         <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200"
           [class.editorial-gradient]="view() === 'browse' && !selectedCategoryId"
           [class.bg-surface-container-lowest]="!(view() === 'browse' && !selectedCategoryId)"
@@ -104,7 +104,7 @@
       </button>
       @for (cat of rootCategories(); track cat.id) {
         <button (click)="selectCategory(cat)"
-          class="flex-none flex flex-col items-center gap-2 min-w-[68px] active:scale-95 transition-transform">
+          class="flex-none flex flex-col items-center gap-2 min-w-[80px] active:scale-95 transition-transform">
           <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200"
             [class.editorial-gradient]="selectedCategoryId === cat.id"
             [class.bg-surface-container-lowest]="selectedCategoryId !== cat.id"
@@ -453,6 +453,42 @@
               }
             </div>
           </div>
+
+          <!-- Sıralama -->
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Sıralama</p>
+            <div class="relative">
+              <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+                class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option value="">Varsayılan</option>
+                <option value="newest">En Yeni</option>
+                <option value="oldest">En Eski</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Min. Yıldız -->
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Min. Yıldız</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <button (click)="minRating = null; currentPage.set(0); loadProducts(0, true)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                [class.bg-primary]="minRating === null" [class.text-on-primary]="minRating === null"
+                [class.bg-surface-container-low]="minRating !== null" [class.text-on-surface-variant]="minRating !== null">
+                Tümü
+              </button>
+              @for (star of [1, 2, 3, 4]; track star) {
+                <button (click)="minRating = star; currentPage.set(0); loadProducts(0, true)"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                  [class.bg-primary]="minRating === star" [class.text-on-primary]="minRating === star"
+                  [class.bg-surface-container-low]="minRating !== star" [class.text-on-surface-variant]="minRating !== star">
+                  {{ star }}★+
+                </button>
+              }
+            </div>
+          </div>
+
         </div>
       </aside>
 
@@ -480,6 +516,28 @@
         <!-- Mobile filter chips -->
         <div class="md:hidden mb-6">
           <app-scroll-row rowClass="gap-3 pb-1">
+            <!-- Sıralama -->
+            <div class="relative flex-none">
+              <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+                class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option value="">Sıralama</option>
+                <option value="newest">En Yeni</option>
+                <option value="oldest">En Eski</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+            <!-- Min. Yıldız -->
+            <div class="relative flex-none">
+              <select [ngModel]="minRating" (ngModelChange)="minRating = $event != null ? +$event : null; currentPage.set(0); loadProducts(0, true)"
+                class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option [ngValue]="null">Yıldız</option>
+                <option [ngValue]="1">1★+</option>
+                <option [ngValue]="2">2★+</option>
+                <option [ngValue]="3">3★+</option>
+                <option [ngValue]="4">4★+</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
             <div class="relative flex-none">
               <select [ngModel]="selectedCategoryId"
                 (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"

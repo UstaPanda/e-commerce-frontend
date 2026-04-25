@@ -61,6 +61,8 @@ export class ProductsComponent implements OnInit {
   minPrice: number | null = null;
   maxPrice: number | null = null;
   priceError = false;
+  sortOrder = '';
+  minRating: number | null = null;
 
   private searchSubject = new Subject<string>();
   private suggestSubject = new Subject<string>();
@@ -127,6 +129,8 @@ export class ProductsComponent implements OnInit {
     this.minPrice = null;
     this.maxPrice = null;
     this.priceError = false;
+    this.sortOrder = '';
+    this.minRating = null;
   }
 
   loadProducts(page = 0, soft = false) {
@@ -144,6 +148,8 @@ export class ProductsComponent implements OnInit {
           categoryId: this.selectedCategoryId ?? undefined,
           minPrice: this.minPrice ?? undefined,
           maxPrice: this.maxPrice ?? undefined,
+          minRating: this.minRating ?? undefined,
+          sortOrder: this.sortOrder || undefined,
         }, page, this.pageSize)
       : this.productService.getAll(page, this.pageSize);
 
@@ -236,6 +242,8 @@ export class ProductsComponent implements OnInit {
     this.minPrice = null;
     this.maxPrice = null;
     this.priceError = false;
+    this.sortOrder = '';
+    this.minRating = null;
     this.currentPage.set(0);
     this.loadProducts();
   }
@@ -284,7 +292,8 @@ export class ProductsComponent implements OnInit {
   }
 
   get hasActiveFilter(): boolean {
-    return !!(this.searchQuery.trim() || this.minPrice != null || this.maxPrice != null);
+    return !!(this.searchQuery.trim() || this.minPrice != null || this.maxPrice != null ||
+              this.sortOrder || this.minRating != null);
   }
 
   // Kategori için icon harfi

@@ -173,18 +173,25 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           @for (p of products(); track p.id) {
-            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
-              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden editorial-shadow">
 
-              <!-- Image placeholder -->
-              <div class="relative aspect-square bg-surface-container-low flex items-center justify-center cursor-pointer"
+              <!-- Product image -->
+              <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden cursor-pointer group"
                 (click)="goToProduct(p.id)">
-                <span class="material-symbols-outlined text-outline text-4xl">image</span>
-                <span class="absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                @if (p.imageUrl) {
+                  <img [src]="p.imageUrl" [alt]="p.name"
+                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                       (error)="$any($event.target).style.display='none'">
+                } @else {
+                  <div class="w-full h-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-outline text-4xl">image</span>
+                  </div>
+                }
+                <span class="absolute top-3 left-3 text-[9px] font-bold px-2.5 py-1 rounded-full"
                   [class]="p.stockQuantity > 10
                     ? 'bg-secondary-container text-on-secondary-container'
                     : p.stockQuantity > 0
-                    ? 'bg-tertiary-container text-on-tertiary-container'
+                    ? 'bg-surface-container text-on-surface'
                     : 'bg-error-container text-on-error-container'">
                   {{ p.stockQuantity }} {{ 'MY_STORE.STOCK' | translate }}
                 </span>
@@ -199,14 +206,13 @@
 
                 <div class="flex gap-2 mt-3">
                   <button (click)="openEditModal(p, $event)"
-                    class="flex-1 flex items-center justify-center gap-1 text-xs font-bold bg-surface-container-high text-on-surface py-2 rounded-full active:scale-95 transition-transform">
+                    class="flex-1 flex items-center justify-center gap-1 text-xs font-bold bg-surface-container-high text-on-surface-variant py-2 rounded-full active:scale-95 transition-transform hover:bg-surface-container">
                     <span class="material-symbols-outlined text-sm">edit</span>
                     {{ 'MY_STORE.EDIT' | translate }}
                   </button>
                   <button (click)="deleteProduct(p, $event)"
-                    class="flex-1 flex items-center justify-center gap-1 text-xs font-bold bg-error-container text-on-error-container py-2 rounded-full active:scale-95 transition-transform">
+                    class="w-9 h-9 flex items-center justify-center rounded-full bg-error-container text-on-error-container active:scale-95 transition-transform hover:opacity-80 shrink-0">
                     <span class="material-symbols-outlined text-sm">delete</span>
-                    {{ 'MY_STORE.DELETE' | translate }}
                   </button>
                 </div>
               </div>

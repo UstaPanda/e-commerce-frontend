@@ -6,33 +6,33 @@
 
 @theme {
   /* Brand Colors */
-  --color-primary:                  #283593;
-  --color-primary-container:        #c5cae9;
+  --color-primary:                  #2b3896;
+  --color-primary-container:        #4551af;
   --color-on-primary:               #ffffff;
-  --color-on-primary-container:     #1a237e;
-  --color-primary-fixed:            #c5cae9;
-  --color-primary-fixed-dim:        #9fa8da;
-  --color-on-primary-fixed:         #1a237e;
-  --color-on-primary-fixed-variant: #283593;
-  --color-inverse-primary:          #9fa8da;
+  --color-on-primary-container:     #cbcfff;
+  --color-primary-fixed:            #dfe0ff;
+  --color-primary-fixed-dim:        #bcc2ff;
+  --color-on-primary-fixed:         #000c62;
+  --color-on-primary-fixed-variant: #303c9a;
+  --color-inverse-primary:          #bcc2ff;
 
-  --color-secondary:                #43a047;
-  --color-secondary-container:      #c8e6c9;
+  --color-secondary:                #006e1c;
+  --color-secondary-container:      #98f994;
   --color-on-secondary:             #ffffff;
-  --color-on-secondary-container:   #1b5e20;
-  --color-secondary-fixed:          #c8e6c9;
-  --color-secondary-fixed-dim:      #a5d6a7;
-  --color-on-secondary-fixed:       #1b5e20;
-  --color-on-secondary-fixed-variant: #2e7d32;
+  --color-on-secondary-container:   #0c7521;
+  --color-secondary-fixed:          #98f994;
+  --color-secondary-fixed-dim:      #7ddc7a;
+  --color-on-secondary-fixed:       #002204;
+  --color-on-secondary-fixed-variant: #005313;
 
-  --color-tertiary:                 #ff8f00;
-  --color-tertiary-container:       #ffe0b2;
+  --color-tertiary:                 #673600;
+  --color-tertiary-container:       #894a00;
   --color-on-tertiary:              #ffffff;
-  --color-on-tertiary-container:    #e65100;
-  --color-tertiary-fixed:           #ffe0b2;
-  --color-tertiary-fixed-dim:       #ffcc80;
-  --color-on-tertiary-fixed:        #e65100;
-  --color-on-tertiary-fixed-variant:#ff8f00;
+  --color-on-tertiary-container:    #ffc799;
+  --color-tertiary-fixed:           #ffdcc2;
+  --color-tertiary-fixed-dim:       #ffb77a;
+  --color-on-tertiary-fixed:        #2e1500;
+  --color-on-tertiary-fixed-variant:#6d3a00;
 
   /* Surfaces */
   --color-background:               #fbf8ff;
@@ -141,7 +141,11 @@ h1, h2, h3, h4 {
    ==================================================== */
 
 .editorial-gradient {
-  background: linear-gradient(135deg, #283593 0%, #3949ab 100%);
+  background: linear-gradient(135deg, #2b3896 0%, #4551af 100%);
+}
+
+.editorial-shadow {
+  box-shadow: 0 20px 40px -10px rgba(43, 56, 150, 0.08);
 }
 
 /* ====================================================
@@ -162,4 +166,37 @@ h1, h2, h3, h4 {
   background: rgba(251, 248, 255, 0.80);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+}
+
+/* ====================================================
+   AMBIENT CARD (Bento Grid Helper)
+   ==================================================== */
+
+.ambient-card {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 2rem;
+  box-shadow: 0 8px 24px rgba(26, 27, 34, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.ambient-card:hover {
+  box-shadow: 0 16px 40px rgba(43, 56, 150, 0.08);
+}
+
+/* ====================================================
+   ASYMMETRIC GRID (Editorial Layout)
+   ==================================================== */
+
+.asymmetric-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .asymmetric-grid {
+    grid-template-columns: 1fr;
+  }
 }

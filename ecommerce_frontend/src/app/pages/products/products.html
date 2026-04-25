@@ -74,10 +74,10 @@
         <button (click)="selectCategory(null)"
           class="text-primary text-sm font-bold hover:opacity-70 transition-opacity">{{ 'PRODUCTS.ALL' | translate }}</button>
       </div>
-      <app-scroll-row rowClass="gap-3 px-6 md:px-0 md:flex-wrap md:overflow-x-visible" arrowClass="md:hidden">
+      <app-scroll-row rowClass="gap-3 px-6 md:px-0 md:flex-wrap md:overflow-x-visible justify-evenly" arrowClass="md:hidden">
         @for (cat of rootCategories; track cat.id) {
           <button (click)="selectCategory(cat)"
-            class="flex-none flex flex-col items-center gap-2 min-w-[72px]">
+            class="flex-none flex flex-col items-center gap-2 min-w-[80px]">
             <div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center transition-colors hover:bg-surface-container"
               style="box-shadow: 0 4px 16px rgba(26,27,34,0.06)">
               <span class="font-bold text-primary text-xl">{{ categoryInitial(cat.name) }}</span>
@@ -132,28 +132,28 @@
             </div>
           }
           @for (p of popularProducts().slice(1); track p.id) {
-            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
-              (click)="goToProduct(p.id)"
-              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
-              <div class="relative aspect-square bg-surface-container-low overflow-hidden">
-                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover" (error)="onImgError($event, p)">
+            <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group editorial-shadow"
+              (click)="goToProduct(p.id)">
+              <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" (error)="onImgError($event, p)">
               </div>
-              <div class="p-4">
+              <div class="p-4 space-y-1">
                 @if (p.reviewCount > 0) {
-                  <div class="flex items-center gap-1 mb-1">
+                  <div class="flex items-center gap-1">
                     <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
                     <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
                   </div>
                 }
-                <h4 class="text-sm font-bold text-on-surface truncate"
+                <h4 class="text-sm font-bold text-on-surface truncate leading-tight"
                   style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
-                <p class="text-primary font-bold text-lg mt-1">{{ currency.format(p.unitPrice) }}</p>
+                <p class="text-primary font-extrabold text-lg" style="font-family:'Plus Jakarta Sans',sans-serif">{{ currency.format(p.unitPrice) }}</p>
                 <button (click)="$event.stopPropagation(); addToCart(p, $event)"
-                  class="mt-3 w-full bg-on-surface/8 text-on-surface flex items-center justify-center py-2 rounded-full hover:bg-on-surface/15 active:scale-95 transition-all">
-                  <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                  class="mt-2 w-full bg-secondary text-on-secondary flex items-center justify-center gap-2 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all text-xs font-bold">
+                  <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                  {{ 'PRODUCTS.ADD_TO_CART' | translate }}
                 </button>
               </div>
-            </div>
+            </article>
           }
         </div>
       </section>
@@ -304,6 +304,41 @@
           </div>
         </div>
 
+        <!-- Sıralama -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Sıralama</p>
+          <div class="relative">
+            <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+              class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+              <option value="">Varsayılan</option>
+              <option value="newest">En Yeni</option>
+              <option value="oldest">En Eski</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Min. Yıldız -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Min. Yıldız</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <button (click)="minRating = null; currentPage.set(0); loadProducts(0, true)"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+              [class.bg-primary]="minRating === null" [class.text-on-primary]="minRating === null"
+              [class.bg-surface-container-low]="minRating !== null" [class.text-on-surface-variant]="minRating !== null">
+              Tümü
+            </button>
+            @for (star of [1, 2, 3, 4]; track star) {
+              <button (click)="minRating = star; currentPage.set(0); loadProducts(0, true)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                [class.bg-primary]="minRating === star" [class.text-on-primary]="minRating === star"
+                [class.bg-surface-container-low]="minRating !== star" [class.text-on-surface-variant]="minRating !== star">
+                {{ star }}★+
+              </button>
+            }
+          </div>
+        </div>
+
       </div>
     </aside>
 
@@ -331,6 +366,28 @@
       <!-- Mobile: Yatay filtre chips -->
       <div class="md:hidden mb-6">
       <app-scroll-row rowClass="gap-3 pb-1">
+        <!-- Sıralama -->
+        <div class="relative flex-none">
+          <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+            class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+            <option value="">Sıralama</option>
+            <option value="newest">En Yeni</option>
+            <option value="oldest">En Eski</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+        </div>
+        <!-- Min. Yıldız -->
+        <div class="relative flex-none">
+          <select [ngModel]="minRating" (ngModelChange)="minRating = $event != null ? +$event : null; currentPage.set(0); loadProducts(0, true)"
+            class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+            <option [ngValue]="null">Yıldız</option>
+            <option [ngValue]="1">1★+</option>
+            <option [ngValue]="2">2★+</option>
+            <option [ngValue]="3">3★+</option>
+            <option [ngValue]="4">4★+</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+        </div>
         <div class="relative flex-none">
           <select [ngModel]="selectedCategoryId"
             (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"
@@ -398,30 +455,27 @@
           }
         </div>
       } @else {
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" [class.opacity-60]="searching()">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10 mb-8" [class.opacity-60]="searching()">
           @for (p of products(); track p.id) {
-            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group"
-              (click)="goToProduct(p.id)"
-              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
-              <div class="relative aspect-square bg-surface-container-low overflow-hidden">
-                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" (error)="onImgError($event, p)">
-                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div class="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
-                    <span class="material-symbols-outlined text-primary text-base">favorite_border</span>
-                  </div>
-                </div>
+            <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group editorial-shadow"
+              (click)="goToProduct(p.id)">
+              <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" (error)="onImgError($event, p)">
+                <button class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-on-primary transition-all opacity-0 group-hover:opacity-100">
+                  <span class="material-symbols-outlined text-lg">favorite_border</span>
+                </button>
               </div>
-              <div class="p-4">
+              <div class="p-4 space-y-1">
                 @if (p.reviewCount > 0) {
-                  <div class="flex items-center gap-1 mb-1">
+                  <div class="flex items-center gap-1">
                     <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
                     <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
                   </div>
                 }
-                <h4 class="text-sm font-bold text-on-surface truncate"
+                <h4 class="text-sm font-bold text-on-surface truncate leading-tight"
                   style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
-                <p class="text-outline text-xs truncate mt-0.5">{{ p.category ? getCategoryDisplayName(p.category) : ('PRODUCTS.GENERAL' | translate) }}</p>
-                <p class="text-primary font-bold text-base mt-2">{{ currency.format(p.unitPrice) }}</p>
+                <p class="text-outline text-xs truncate">{{ p.category ? getCategoryDisplayName(p.category) : ('PRODUCTS.GENERAL' | translate) }}</p>
+                <p class="text-primary font-extrabold text-lg pt-1" style="font-family:'Plus Jakarta Sans',sans-serif">{{ currency.format(p.unitPrice) }}</p>
                 @if (canManage) {
                   <div class="flex gap-2 mt-3">
                     <button class="flex-1 text-xs bg-surface-container-high text-on-surface py-1.5 rounded-full">{{ 'PRODUCTS.EDIT' | translate }}</button>
@@ -430,7 +484,7 @@
                   </div>
                 }
               </div>
-            </div>
+            </article>
           }
         </div>
 

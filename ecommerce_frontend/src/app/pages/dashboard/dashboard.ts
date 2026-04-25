@@ -55,6 +55,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   minPrice: number | null = null;
   maxPrice: number | null = null;
   priceError = false;
+  sortOrder = '';
+  minRating: number | null = null;
 
   // Products
   products = signal<Product[]>([]);
@@ -144,6 +146,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.minPrice = null;
     this.maxPrice = null;
     this.priceError = false;
+    this.sortOrder = '';
+    this.minRating = null;
   }
 
   loadProducts(page = 0, soft = false) {
@@ -155,6 +159,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       categoryId: this.selectedCategoryId ?? undefined,
       minPrice: this.minPrice ?? undefined,
       maxPrice: this.maxPrice ?? undefined,
+      minRating: this.minRating ?? undefined,
+      sortOrder: this.sortOrder || undefined,
     }, page, this.pageSize).subscribe({
       next: (res) => {
         this.products.set(res.content);
@@ -241,6 +247,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.minPrice = null;
     this.maxPrice = null;
     this.priceError = false;
+    this.sortOrder = '';
+    this.minRating = null;
     this.currentPage.set(0);
     this.loadProducts();
   }
@@ -260,7 +268,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get hasActiveFilter(): boolean {
-    return !!(this.searchQuery.trim() || this.minPrice != null || this.maxPrice != null || this.selectedCategoryId != null);
+    return !!(this.searchQuery.trim() || this.minPrice != null || this.maxPrice != null ||
+              this.selectedCategoryId != null || this.sortOrder || this.minRating != null);
   }
 
   addToCart(product: Product, event: Event) {
