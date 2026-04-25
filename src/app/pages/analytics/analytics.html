@@ -133,9 +133,9 @@
           </p>
           <p class="text-outline text-xs mb-4">
             @if (prevData() && (rawData()?.['totalOrders'] || rawData()?.['totalRevenue'])) {
-              % change compared to the previous {{ datePreset() === '7d' ? '7 days' : datePreset() === '30d' ? '30 days' : datePreset() === '90d' ? '90 days' : 'year' }}
+              % change compared to the previous {{ datePreset() === '7d' ? '7 days' : datePreset() === '30d' ? '30 days' : datePreset() === '90d' ? '90 days' : datePreset() === '1y' ? 'year' : 'previous period' }}
             } @else {
-              Selected period: {{ datePreset() === '7d' ? 'Last 7 days' : datePreset() === '30d' ? 'Last 30 days' : datePreset() === '90d' ? 'Last 90 days' : 'Last year' }}
+              Selected period: {{ datePreset() === '7d' ? 'Last 7 days' : datePreset() === '30d' ? 'Last 30 days' : datePreset() === '90d' ? 'Last 90 days' : datePreset() === '1y' ? 'Last year' : 'All-time (Lifetime)' }}
             }
           </p>
           <div class="relative h-52">
