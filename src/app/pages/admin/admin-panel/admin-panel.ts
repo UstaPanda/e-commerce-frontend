@@ -86,10 +86,17 @@ export class AdminPanelComponent implements OnInit {
   productsSearch = '';
 
   // ── AI Support ─────────────────────────────────────────────────────────
-  aiMessages = signal<{ role: 'user' | 'assistant'; text: string }[]>([]);
+  aiMessages = signal<{
+    role: 'user' | 'assistant';
+    text: string;
+    sqlQuery?: string;
+    visualizationData?: any;
+    timestamp: Date;
+  }[]>([]);
   aiInput = '';
   aiLoading = signal(false);
   aiError = signal('');
+  private renderedCharts = new Set<number>();
 
   ngOnInit() {
     this.loadAnalytics();
@@ -319,13 +326,57 @@ export class AdminPanelComponent implements OnInit {
   sendAiMessage() {
     const text = this.aiInput.trim();
     if (!text || this.aiLoading()) return;
-    this.aiMessages.update(m => [...m, { role: 'user', text }]);
+    
+    this.aiMessages.update(m => [...m, { 
+      role: 'user', 
+      text,
+      timestamp: new Date()
+    }]);
+    
     this.aiInput = '';
     this.aiLoading.set(true);
     this.aiError.set('');
-    this.http.post<{ reply: string }>(`${environment.apiUrl}/ai/chat`, { message: text }).subscribe({
-      next: r => { this.aiMessages.update(m => [...m, { role: 'assistant', text: r.reply }]); this.aiLoading.set(false); },
-      error: () => { this.aiError.set('Yanıt alınamadı.'); this.aiLoading.set(false); },
+    
+    this.http.post<any>(`${environment.aiUrl}/api/chat/ask`, { question: text }).subscribe({
+      next: r => { 
+        this.aiMessages.update(m => [...m, { 
+          role: 'assistant', 
+          text: r.final_answer || 'Yanıt alınamadı.',
+          sqlQuery: r.sql_query,
+          visualizationData: r.visualization_data,
+          timestamp: new Date()
+        }]); 
+        this.aiLoading.set(false);
+        
+        // Render charts after a short delay to let the DOM update
+        setTimeout(() => this.renderPendingCharts(), 100);
+      },
+      error: () => { 
+        this.aiError.set('AI servisine ulaşılamadı. Lütfen API anahtarınızı ve servis durumunu kontrol edin.'); 
+        this.aiLoading.set(false); 
+      },
+    });
+  }
+
+  private renderPendingCharts() {
+    this.aiMessages().forEach((msg, i) => {
+      if (msg.visualizationData && !this.renderedCharts.has(i)) {
+        const el = document.getElementById(`admin-ai-chart-${i}`);
+        if (el) {
+          this.renderedCharts.add(i);
+          import('plotly.js-dist-min').then((PlotlyModule: any) => {
+            const Plotly = PlotlyModule.default || PlotlyModule;
+            const fig = msg.visualizationData;
+            Plotly.newPlot(el, fig.data ?? [], {
+              ...fig.layout,
+              paper_bgcolor: 'transparent',
+              plot_bgcolor: 'transparent',
+              font: { family: 'Plus Jakarta Sans, sans-serif', size: 11 },
+              margin: { t: 30, r: 10, b: 30, l: 30 },
+            }, { responsive: true, displayModeBar: false });
+          });
+        }
+      }
     });
   }
 

@@ -167,13 +167,31 @@
       }
       @for (msg of aiMessages(); track $index) {
         <div class="flex" [class.justify-end]="msg.role === 'user'">
-          <div class="max-w-[80%] rounded-3xl px-5 py-3.5 text-sm leading-relaxed"
-            [class.editorial-gradient]="msg.role === 'user'"
-            [class.text-white]="msg.role === 'user'"
-            [class.bg-surface-container-lowest]="msg.role === 'assistant'"
-            [class.text-on-surface]="msg.role === 'assistant'"
-            style="box-shadow: 0 2px 12px rgba(26,27,34,0.08)">
-            {{ msg.text }}
+          <div class="max-w-[85%] space-y-2">
+            <div class="rounded-3xl px-5 py-3.5 text-sm leading-relaxed"
+              [class.editorial-gradient]="msg.role === 'user'"
+              [class.text-white]="msg.role === 'user'"
+              [class.bg-surface-container-lowest]="msg.role === 'assistant'"
+              [class.text-on-surface]="msg.role === 'assistant'"
+              style="box-shadow: 0 2px 12px rgba(26,27,34,0.08)">
+              {{ msg.text }}
+            </div>
+
+            <!-- Chart -->
+            @if (msg.visualizationData) {
+              <div class="bg-surface-container-lowest rounded-[2rem] p-3 overflow-hidden"
+                style="box-shadow: 0 4px 12px rgba(26,27,34,0.05)">
+                <div [id]="'admin-ai-chart-' + $index" style="min-height: 250px; width: 100%"></div>
+              </div>
+            }
+
+            <!-- SQL -->
+            @if (msg.sqlQuery) {
+              <details class="opacity-60 hover:opacity-100 transition-opacity">
+                <summary class="text-[10px] cursor-pointer outline-none">SQL Sorgusunu Görüntüle</summary>
+                <pre class="mt-1 text-[10px] bg-surface-container-high p-3 rounded-2xl overflow-x-auto font-mono text-outline">{{ msg.sqlQuery }}</pre>
+              </details>
+            }
           </div>
         </div>
       }
