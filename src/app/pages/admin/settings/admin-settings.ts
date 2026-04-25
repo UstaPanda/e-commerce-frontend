@@ -37,8 +37,8 @@ export class AdminSettingsComponent implements OnInit {
     requireEmailVerification: true,
     maxOrdersPerUser: 50,
     platformCurrency: 'USD',
-    supportEmail: 'support@zorlutrading.com',
-    platformName: 'Zorlu Trading',
+    supportEmail: 'support@zorlukurt.com',
+    platformName: 'ZorluKurt Trading',
   });
 
   readonly currencies = [
@@ -85,8 +85,8 @@ export class AdminSettingsComponent implements OnInit {
       requireEmailVerification: true,
       maxOrdersPerUser: 50,
       platformCurrency: 'USD',
-      supportEmail: 'support@zorlutrading.com',
-      platformName: 'Zorlu Trading',
+      supportEmail: 'support@zorlukurt.com',
+      platformName: 'ZorluKurt Trading',
     });
   }
 }
