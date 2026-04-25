@@ -382,7 +382,7 @@
   "AI_ASSISTANT": {
     "SUBTITLE": "Einkaufsassistent",
     "INPUT_PLACEHOLDER": "Etwas fragen...",
-    "WELCOME": "Hallo! Ich bin Indigo AI, Ihr Einkaufsassistent. Ich helfe Ihnen bei Produktempfehlungen, Bestellverfolgung und mehr. Was möchten Sie wissen?",
+    "WELCOME": "Hallo! Ich bin ZorluKurt AI, Ihr Einkaufsassistent. Ich helfe Ihnen bei Produktempfehlungen, Bestellverfolgung und mehr. Was möchten Sie wissen?",
     "ERROR": "Es tut mir leid, ich kann gerade nicht antworten. Bitte versuchen Sie es später erneut.",
     "CLEARED": "Chat gelöscht. Wie kann ich Ihnen helfen?",
     "VIEW_SQL": "Generierten SQL anzeigen",

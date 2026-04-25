@@ -382,7 +382,7 @@
   "AI_ASSISTANT": {
     "SUBTITLE": "Alışveriş Asistanı",
     "INPUT_PLACEHOLDER": "Bir şey sorun...",
-    "WELCOME": "Merhaba! Ben Indigo AI, alışveriş asistanınızım. Size ürün önerileri, sipariş takibi ve daha fazlası konusunda yardımcı olabilirim. Ne öğrenmek istersiniz?",
+    "WELCOME": "Merhaba! Ben ZorluKurt AI, alışveriş asistanınızım. Size ürün önerileri, sipariş takibi ve daha fazlası konusunda yardımcı olabilirim. Ne öğrenmek istersiniz?",
     "ERROR": "Üzgünüm, şu an yanıt veremiyorum. Lütfen daha sonra tekrar deneyin.",
     "CLEARED": "Sohbet temizlendi. Size nasıl yardımcı olabilirim?",
     "VIEW_SQL": "SQL sorgusunu görüntüle",
