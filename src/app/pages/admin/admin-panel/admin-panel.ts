@@ -337,7 +337,15 @@ export class AdminPanelComponent implements OnInit {
     this.aiLoading.set(true);
     this.aiError.set('');
     
-    this.http.post<any>(`${environment.aiUrl}/api/chat/ask`, { question: text }).subscribe({
+    const currentMessages = this.aiMessages();
+    const history = currentMessages
+      .slice(-10)
+      .map(m => ({ role: m.role, content: m.text }));
+
+    this.http.post<any>(`${environment.aiUrl}/api/chat/ask`, { 
+      question: text,
+      history: history
+    }).subscribe({
       next: r => { 
         this.aiMessages.update(m => [...m, { 
           role: 'assistant', 

@@ -124,8 +124,17 @@ export class AiAssistantComponent implements AfterViewChecked, OnDestroy {
     this.sending.set(true);
     this.shouldScroll = true;
 
+    const currentMessages = this.messages();
+    const history = currentMessages
+      .filter(m => m.role !== 'assistant' || m.content !== this.translate.instant('AI_ASSISTANT.WELCOME'))
+      .slice(-10)
+      .map(m => ({ role: m.role, content: m.content }));
+
     this.http
-      .post<AiResponse>(`${environment.aiUrl}/api/chat/ask`, { question: content })
+      .post<AiResponse>(`${environment.aiUrl}/api/chat/ask`, { 
+        question: content,
+        history: history
+      })
       .subscribe({
         next: (res) => {
           const answer =
