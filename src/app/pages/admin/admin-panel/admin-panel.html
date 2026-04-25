@@ -645,11 +645,11 @@
             style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
             <div class="flex items-center gap-4">
               <div class="w-11 h-11 rounded-full editorial-gradient flex items-center justify-center shrink-0 text-white font-black text-base">
-                {{ user.name.charAt(0).toUpperCase() }}
+                {{ (user.name || user.email || '?').charAt(0).toUpperCase() }}
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <p class="text-sm font-bold text-on-surface">{{ user.name }}</p>
+                  <p class="text-sm font-bold text-on-surface">{{ user.name || 'İsimsiz Kullanıcı' }}</p>
                   <span class="text-[10px] font-black px-2.5 py-0.5 rounded-full" [class]="userRoleBadge(user.role)">{{ user.role }}</span>
                   <span class="text-[10px] font-black px-2.5 py-0.5 rounded-full" [class]="userStatusBadge(user.status)">
                     {{ user.status === 'SUSPENDED' ? 'Donduruldu' : 'Aktif' }}

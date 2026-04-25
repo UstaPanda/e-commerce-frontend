@@ -62,8 +62,8 @@ export class CurrencyService {
     const currency = SUPPORTED_CURRENCIES.find(c => c.code === code);
     const symbol = currency?.symbol ?? code;
 
-    // JPY gibi küçük para birimleri için ondalık gösterme
-    const decimals = converted >= 100 ? 0 : 2;
+    // Her zaman 2 ondalık hane göster (fiyat tutarlılığı için)
+    const decimals = 2;
 
     return `${symbol}${converted.toLocaleString('tr-TR', {
       minimumFractionDigits: decimals,

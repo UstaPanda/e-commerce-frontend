@@ -67,12 +67,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "redirectTo": "/app/dashboard",
@@ -81,12 +81,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/dashboard"
@@ -94,12 +94,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/analytics"
@@ -107,12 +107,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/orders"
@@ -120,12 +120,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "redirectTo": "/app/dashboard",
@@ -134,12 +134,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/products/*"
@@ -147,12 +147,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/ai-assistant"
@@ -160,12 +160,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/cart"
@@ -173,12 +173,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/profile"
@@ -186,12 +186,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/stores/*"
@@ -199,12 +199,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/my-store"
@@ -212,12 +212,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/shipments"
@@ -225,12 +225,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin"
@@ -238,12 +238,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/dashboard"
@@ -251,12 +251,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/users"
@@ -264,12 +264,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/stores"
@@ -277,12 +277,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/categories"
@@ -290,12 +290,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/audit-logs"
@@ -303,12 +303,12 @@ export default {
   {
     "renderMode": 1,
     "preload": [
-      "chunk-UIZ5ZKZS.js",
+      "chunk-YREGGGHP.js",
       "chunk-MAV6ZILP.js",
       "chunk-7I5D7KNP.js",
       "chunk-BGUXNVQL.js",
       "chunk-OV4HNQQ2.js",
-      "chunk-GNDDBUND.js",
+      "chunk-GNB72DDO.js",
       "chunk-L5PURTTO.js"
     ],
     "route": "/app/admin/settings"
@@ -321,8 +321,8 @@ export default {
 ],
   entryPointToBrowserMapping: undefined,
   assets: {
-    'index.csr.html': {size: 28661, hash: 'cbe1135a79ff2b12be0c61692e826ab8ac6afe844914f9e42db9a2b1d60d4032', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
-    'index.server.html': {size: 17626, hash: '938ce8889caa69da2a0996ac473c07280fc684cb58d78dd6a5badba2e8f8516a', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
+    'index.csr.html': {size: 28661, hash: '5d108d18029dfe839ad736abc71b9bfc3b6fd1f972aae9fd7a53183d46755e0c', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
+    'index.server.html': {size: 17626, hash: '8aede289250c6623360fd26d115d4e676cc93bb5ebbafe7a05c2215fc62f3d27', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
     'styles-B3UTYC66.css': {size: 83859, hash: 'wWgmos/5HT0', text: () => import('./assets-chunks/styles-B3UTYC66_css.mjs').then(m => m.default)}
   },
 };
