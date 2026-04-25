@@ -425,7 +425,15 @@
     "DATA_TOTAL_PRODUCTS": "Total Products",
     "DATA_AVG_REVIEW_RATING": "Avg. Rating",
     "DATA_TOTAL_USERS": "Number of Users",
-    "DATA_TOTAL_STORES": "Number of Stores"
+    "DATA_TOTAL_STORES": "Number of Stores",
+    "TOP_PRODUCTS": "Top Selling Products",
+    "ORDER_STATUS_DIST": "Order Status Distribution",
+    "CUSTOMER_SEGMENTATION": "Customer Segmentation",
+    "PRODUCT": "Product",
+    "SOLD": "Sold",
+    "STATUS": "Status",
+    "COUNT": "Count",
+    "SEGMENT": "Segment"
   },
   "ADMIN": {
     "LABEL": "Admin Panel",

@@ -193,9 +193,89 @@
     }
   }
 
-  <!-- Detailed Breakdown (all roles except individual who gets charts) -->
+  <!-- Detailed Breakdown -->
   @if (!loading() && rawData() && role !== 'INDIVIDUAL') {
-    <div class="mx-6 mt-6">
+    
+    <div class="mx-6 mt-6 space-y-6">
+      
+      <!-- Top Selling Products -->
+      @if (topProducts.length > 0) {
+        <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+          style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+          <div class="px-5 py-4 border-b border-outline-variant/20">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">
+              {{ 'ANALYTICS.TOP_PRODUCTS' | translate }}
+            </h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="bg-surface-container-low text-outline uppercase font-black tracking-tighter">
+                  <th class="px-5 py-3">{{ 'ANALYTICS.PRODUCT' | translate }}</th>
+                  <th class="px-5 py-3 text-right">{{ 'ANALYTICS.SOLD' | translate }}</th>
+                  <th class="px-5 py-3 text-right">{{ 'ANALYTICS.REVENUE' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of topProducts; track p.productId) {
+                  <tr class="border-b border-outline-variant/10 last:border-0">
+                    <td class="px-5 py-3 font-bold text-on-surface">{{ p.productName }}</td>
+                    <td class="px-5 py-3 text-right text-outline">{{ p.totalQuantitySold }}</td>
+                    <td class="px-5 py-3 text-right font-black text-primary">{{ currency.format(p.totalRevenue) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Order Distribution -->
+        @if (orderStatusDistribution.length > 0) {
+          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+            style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+            <div class="px-5 py-4 border-b border-outline-variant/20">
+              <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">
+                {{ 'ANALYTICS.ORDER_STATUS_DIST' | translate }}
+              </h3>
+            </div>
+            <div class="space-y-1 p-2">
+              @for (s of orderStatusDistribution; track s.status) {
+                <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
+                  <span class="text-outline text-xs">{{ s.status }}</span>
+                  <span class="text-on-surface text-xs font-black">{{ s.count }} {{ 'ANALYTICS.COUNT' | translate }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Customer Segmentation -->
+        @if (customerSegmentation.length > 0) {
+          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+            style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+            <div class="px-5 py-4 border-b border-outline-variant/20">
+              <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">
+                {{ 'ANALYTICS.CUSTOMER_SEGMENTATION' | translate }}
+              </h3>
+            </div>
+            <div class="space-y-1 p-2">
+              @for (seg of customerSegmentation; track seg.membershipType) {
+                <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-secondary"></div>
+                    <span class="text-on-surface text-xs font-bold">{{ seg.membershipType }}</span>
+                  </div>
+                  <span class="text-outline text-xs">{{ seg.count }} {{ 'ANALYTICS.CUSTOMERS' | translate }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Basic Stats Table -->
       <div class="bg-surface-container-lowest rounded-3xl overflow-hidden md:grid md:grid-cols-2"
         style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
         <div class="px-5 py-4 border-b border-outline-variant/20 md:col-span-2">
@@ -210,6 +290,7 @@
           </div>
         }
       </div>
+
     </div>
   }
 

@@ -290,10 +290,16 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
       totalUsers:      'ANALYTICS.DATA_TOTAL_USERS',
       totalStores:     'ANALYTICS.DATA_TOTAL_STORES',
     };
-    return Object.entries(data).map(([key, value]) => ({
-      key: labelMap[key] ?? key,
-      value,
-    }));
+
+    // Filter out complex lists/objects and only show primitives in the table
+    const blacklist = ['topProducts', 'orderStatusDistribution', 'customerSegmentation', 'revenueByDay', 'storeComparison'];
+
+    return Object.entries(data)
+      .filter(([key, value]) => !blacklist.includes(key) && typeof value !== 'object')
+      .map(([key, value]) => ({
+        key: labelMap[key] ?? key,
+        value,
+      }));
   }
 
   formatValue(value: unknown): string {
@@ -302,6 +308,18 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
       return String(value);
     }
     return String(value ?? '—');
+  }
+
+  get topProducts(): any[] {
+    return (this.rawData() as any)?.['topProducts'] || [];
+  }
+
+  get orderStatusDistribution(): any[] {
+    return (this.rawData() as any)?.['orderStatusDistribution'] || [];
+  }
+
+  get customerSegmentation(): any[] {
+    return (this.rawData() as any)?.['customerSegmentation'] || [];
   }
 
   private async initChartsAsync(

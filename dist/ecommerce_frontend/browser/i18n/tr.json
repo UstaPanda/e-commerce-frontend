@@ -425,7 +425,15 @@
     "DATA_TOTAL_PRODUCTS": "Toplam Ürün",
     "DATA_AVG_REVIEW_RATING": "Ort. Puan",
     "DATA_TOTAL_USERS": "Kullanıcı Sayısı",
-    "DATA_TOTAL_STORES": "Mağaza Sayısı"
+    "DATA_TOTAL_STORES": "Mağaza Sayısı",
+    "TOP_PRODUCTS": "En Çok Satan Ürünler",
+    "ORDER_STATUS_DIST": "Sipariş Durum Dağılımı",
+    "CUSTOMER_SEGMENTATION": "Müşteri Segmentasyonu",
+    "PRODUCT": "Ürün",
+    "SOLD": "Satış",
+    "STATUS": "Durum",
+    "COUNT": "Adet",
+    "SEGMENT": "Segment"
   },
   "ADMIN": {
     "LABEL": "Admin Paneli",
