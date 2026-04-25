@@ -433,7 +433,20 @@
     "SOLD": "Satış",
     "STATUS": "Durum",
     "COUNT": "Adet",
-    "SEGMENT": "Segment"
+    "SEGMENT": "Segment",
+    "STATUS_DELIVERED": "Teslim Edildi",
+    "STATUS_CANCELLED": "İptal Edildi",
+    "STATUS_RETURNED": "İade Edildi",
+    "STATUS_PENDING": "Bekliyor",
+    "STATUS_CONFIRMED": "Onaylandı",
+    "STATUS_PROCESSING": "Hazırlanıyor",
+    "STATUS_SHIPPED": "Kargoda",
+    "SEGMENT_GOLD": "Altın Üye",
+    "SEGMENT_SILVER": "Gümüş Üye",
+    "SEGMENT_BRONZE": "Bronz Üye",
+    "SEGMENT_PLATINUM": "Platin Üye",
+    "SEGMENT_DIAMOND": "Elmas Üye",
+    "SEGMENT_REGULAR": "Standart Üye"
   },
   "ADMIN": {
     "LABEL": "Admin Paneli",

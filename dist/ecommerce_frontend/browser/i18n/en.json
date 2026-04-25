@@ -433,7 +433,20 @@
     "SOLD": "Sold",
     "STATUS": "Status",
     "COUNT": "Count",
-    "SEGMENT": "Segment"
+    "SEGMENT": "Segment",
+    "STATUS_DELIVERED": "Delivered",
+    "STATUS_CANCELLED": "Cancelled",
+    "STATUS_RETURNED": "Returned",
+    "STATUS_PENDING": "Pending",
+    "STATUS_CONFIRMED": "Confirmed",
+    "STATUS_PROCESSING": "Processing",
+    "STATUS_SHIPPED": "Shipped",
+    "SEGMENT_GOLD": "Gold Member",
+    "SEGMENT_SILVER": "Silver Member",
+    "SEGMENT_BRONZE": "Bronze Member",
+    "SEGMENT_PLATINUM": "Platinum Member",
+    "SEGMENT_DIAMOND": "Diamond Member",
+    "SEGMENT_REGULAR": "Regular Member"
   },
   "ADMIN": {
     "LABEL": "Admin Panel",

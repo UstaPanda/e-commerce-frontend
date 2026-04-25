@@ -321,8 +321,8 @@ export default {
 ],
   entryPointToBrowserMapping: undefined,
   assets: {
-    'index.csr.html': {size: 27794, hash: '90eb2f50c4afd1f7d7cf484b970f0406403d9acaca6f1002e18ccae0a321fe6e', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
-    'index.server.html': {size: 17630, hash: '1ca5545e068d43b96a2d366c58291b6b794f924f51071c1750c90aeac4b836f1', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
+    'index.csr.html': {size: 27794, hash: '88c1e3e79178022571d36120f975c82dea670bb37809fa40292d9632aa5d84e2', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
+    'index.server.html': {size: 17630, hash: '73c7ce18e40aa443f21cbdd6f3638c7eb2cea9fd24e6a43f0b092bd5211870e7', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
     'styles-G2RDZOOR.css': {size: 78693, hash: 'LYM1kZEm24c', text: () => import('./assets-chunks/styles-G2RDZOOR_css.mjs').then(m => m.default)}
   },
 };

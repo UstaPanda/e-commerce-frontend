@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ScrollRowComponent } from '../../components/scroll-row/scroll-row';
 import { AnalyticsService } from '../../services/analytics.service';
-import { ProductService, Product, ProductRequest, buildProductImageUrl } from '../../services/product.service';
+import { ProductService, Product, ProductRequest, buildProductImageUrl, getProductImage } from '../../services/product.service';
 import { StoreService, StoreRequest } from '../../services/store.service';
 import { CurrencyService } from '../../services/currency.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -24,6 +24,7 @@ export class MyStoreComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   currency = inject(CurrencyService);
+  readonly getProductImage = getProductImage;
 
   stores = signal<any[]>([]);
   selectedStore = signal<any>(null);
