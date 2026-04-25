@@ -99,7 +99,8 @@ export class AiAssistantComponent implements AfterViewChecked, OnDestroy {
         const el = document.getElementById(`ai-chart-${i}`);
         if (el) {
           this.renderedCharts.add(i);
-          import('plotly.js-dist-min').then((Plotly: any) => {
+          import('plotly.js-dist-min').then((PlotlyModule: any) => {
+            const Plotly = PlotlyModule.default || PlotlyModule;
             const fig = msg.visualizationData;
             Plotly.newPlot(el, fig.data ?? [], {
               ...fig.layout,
