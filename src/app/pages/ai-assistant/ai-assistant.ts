@@ -125,11 +125,11 @@ export class AiAssistantComponent implements AfterViewChecked, OnDestroy {
     this.shouldScroll = true;
 
     this.http
-      .post<AiResponse>(`${environment.aiUrl}/api/chat/ask`, { question: content })
+      .post<any>(`${environment.apiUrl}/chat/ask`, { question: content })
       .subscribe({
         next: (res) => {
           const answer =
-            res.final_answer ??
+            res.answer ??
             (res.error ? this.translate.instant('AI_ASSISTANT.ERROR') : '');
 
           this.messages.update(msgs => [
@@ -138,9 +138,9 @@ export class AiAssistantComponent implements AfterViewChecked, OnDestroy {
               role: 'assistant',
               content: answer,
               timestamp: new Date(),
-              sqlQuery: res.sql_query ?? undefined,
-              visualizationData: res.visualization_data ?? undefined,
-              isOutOfScope: !res.is_in_scope,
+              sqlQuery: res.sqlQuery ?? undefined,
+              visualizationData: res.visualizationData ?? undefined,
+              isOutOfScope: res.isOutOfScope,
             },
           ]);
           this.sending.set(false);

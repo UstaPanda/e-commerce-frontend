@@ -337,13 +337,13 @@ export class AdminPanelComponent implements OnInit {
     this.aiLoading.set(true);
     this.aiError.set('');
     
-    this.http.post<any>(`${environment.aiUrl}/api/chat/ask`, { question: text }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/chat/ask`, { question: text }).subscribe({
       next: r => { 
         this.aiMessages.update(m => [...m, { 
           role: 'assistant', 
-          text: r.final_answer || 'Yanıt alınamadı.',
-          sqlQuery: r.sql_query,
-          visualizationData: r.visualization_data,
+          text: r.answer || 'Yanıt alınamadı.',
+          sqlQuery: r.sqlQuery,
+          visualizationData: r.visualizationData,
           timestamp: new Date()
         }]); 
         this.aiLoading.set(false);
