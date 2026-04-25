@@ -6,7 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CurrencyService } from '../../services/currency.service';
 import { HttpClient } from '@angular/common/http';
-import { switchMap, forkJoin } from 'rxjs';
+import { switchMap, forkJoin, Observable } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../enviroments/enviroments';
 
@@ -17,7 +17,7 @@ interface KpiCard {
   trendKey?: string;
 }
 
-type DatePreset = '7d' | '30d' | '90d' | '1y';
+type DatePreset = '7d' | '30d' | '90d' | '1y' | 'lifetime';
 
 @Component({
   selector: 'app-analytics',
@@ -51,10 +51,11 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
   private charts: any[] = [];
 
   readonly presets: { key: DatePreset; label: string }[] = [
-    { key: '7d',  label: '7 Days' },
-    { key: '30d', label: '30 Days' },
-    { key: '90d', label: '90 Days' },
-    { key: '1y',  label: '1 Year' },
+    { key: '7d',       label: '7 Days' },
+    { key: '30d',      label: '30 Days' },
+    { key: '90d',      label: '90 Days' },
+    { key: '1y',       label: '1 Year' },
+    { key: 'lifetime', label: 'Lifetime' },
   ];
 
   ngOnInit() {
@@ -78,16 +79,19 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
     this.charts = [];
   }
 
-  private getDateRange(preset: DatePreset): { from: string; to: string } {
+  private getDateRange(preset: DatePreset): { from: string | null; to: string } {
     const now = new Date();
     const to = now.toISOString().split('T')[0];
+    if (preset === 'lifetime') return { from: null, to };
+
     const from = new Date(now);
     const days = preset === '7d' ? 7 : preset === '30d' ? 30 : preset === '90d' ? 90 : 365;
     from.setDate(now.getDate() - days);
     return { from: from.toISOString().split('T')[0], to };
   }
 
-  private getPrevDateRange(preset: DatePreset): { from: string; to: string } {
+  private getPrevDateRange(preset: DatePreset): { from: string | null; to: string | null } {
+    if (preset === 'lifetime') return { from: null, to: null };
     const now = new Date();
     const days = preset === '7d' ? 7 : preset === '30d' ? 30 : preset === '90d' ? 90 : 365;
     const to = new Date(now);
@@ -114,11 +118,18 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
     this.destroyCharts();
     const { from, to } = this.getDateRange(this.datePreset());
     const prev = this.getPrevDateRange(this.datePreset());
-    forkJoin({
-      current: this.analyticsService.getCorporateAnalytics(id, from, to),
-      previous: this.analyticsService.getCorporateAnalytics(id, prev.from, prev.to),
-    }).subscribe({
-      next: ({ current, previous }) => {
+
+    const requests: Record<string, Observable<any>> = {
+      current: this.analyticsService.getCorporateAnalytics(id, from ?? undefined, to)
+    };
+    if (prev.from && prev.to) {
+      requests['previous'] = this.analyticsService.getCorporateAnalytics(id, prev.from, prev.to);
+    }
+
+    forkJoin(requests).subscribe({
+      next: (res: any) => {
+        const current = res.current;
+        const previous = res.previous || null;
         this.rawData.set(current);
         this.prevData.set(previous);
         this.buildCorporateKpis(current);
@@ -188,13 +199,19 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
         this.stores.set(stores);
         const id = stores[0]?.id;
         if (id) this.activeStoreId.set(id);
-        return forkJoin({
-          current: this.analyticsService.getCorporateAnalytics(id, from, to),
-          previous: this.analyticsService.getCorporateAnalytics(id, prev.from, prev.to),
-        });
+        
+        const requests: Record<string, Observable<any>> = {
+          current: this.analyticsService.getCorporateAnalytics(id, from ?? undefined, to)
+        };
+        if (prev.from && prev.to) {
+          requests['previous'] = this.analyticsService.getCorporateAnalytics(id, prev.from, prev.to);
+        }
+        return forkJoin(requests);
       })
     ).subscribe({
-      next: ({ current, previous }) => {
+      next: (res: any) => {
+        const current = res.current;
+        const previous = res.previous || null;
         this.rawData.set(current);
         this.prevData.set(previous);
         this.buildCorporateKpis(current);
@@ -425,7 +442,7 @@ export class AnalyticsPageComponent implements OnInit, OnDestroy {
       } else {
         // No prev data — show absolute values
         const presetLabel = this.datePreset() === '7d' ? '7d' : this.datePreset() === '30d' ? '30d'
-          : this.datePreset() === '90d' ? '90d' : '1y';
+          : this.datePreset() === '90d' ? '90d' : this.datePreset() === '1y' ? '1y' : 'Lifetime';
         this.charts.push(new Chart(compCanvas, {
           type: 'bar',
           data: {
