@@ -243,8 +243,8 @@
             <div class="space-y-1 p-2">
               @for (s of orderStatusDistribution; track s.status) {
                 <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
-                  <span class="text-outline text-xs">{{ s.status }}</span>
-                  <span class="text-on-surface text-xs font-black">{{ s.count }} {{ 'ANALYTICS.COUNT' | translate }}</span>
+                  <span class="text-outline text-xs">{{ 'ANALYTICS.STATUS_' + s.status | translate }}</span>
+                  <span class="text-on-surface text-xs font-black">{{ s.count }} {{ 'ANALYTICS.UNIT_COUNT' | translate }}</span>
                 </div>
               }
             </div>
@@ -265,9 +265,9 @@
                 <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
                   <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-secondary"></div>
-                    <span class="text-on-surface text-xs font-bold">{{ seg.membershipType }}</span>
+                    <span class="text-on-surface text-xs font-bold">{{ 'ANALYTICS.SEGMENT_' + seg.membershipType | translate }}</span>
                   </div>
-                  <span class="text-outline text-xs">{{ seg.count }} {{ 'ANALYTICS.CUSTOMERS' | translate }}</span>
+                  <span class="text-outline text-xs">{{ seg.count }} {{ 'ANALYTICS.CUSTOMER_COUNT' | translate }}</span>
                 </div>
               }
             </div>

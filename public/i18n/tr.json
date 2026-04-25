@@ -446,7 +446,10 @@
     "SEGMENT_BRONZE": "Bronz Üye",
     "SEGMENT_PLATINUM": "Platin Üye",
     "SEGMENT_DIAMOND": "Elmas Üye",
-    "SEGMENT_REGULAR": "Standart Üye"
+    "SEGMENT_REGULAR": "Standart Üye",
+    "SEGMENT_UNKNOWN": "Tanımsız",
+    "UNIT_COUNT": "Adet",
+    "CUSTOMER_COUNT": "Müşteri"
   },
   "ADMIN": {
     "LABEL": "Admin Paneli",

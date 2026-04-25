@@ -446,7 +446,10 @@
     "SEGMENT_BRONZE": "Bronze Member",
     "SEGMENT_PLATINUM": "Platinum Member",
     "SEGMENT_DIAMOND": "Diamond Member",
-    "SEGMENT_REGULAR": "Regular Member"
+    "SEGMENT_REGULAR": "Regular Member",
+    "SEGMENT_UNKNOWN": "Unknown",
+    "UNIT_COUNT": "Units",
+    "CUSTOMER_COUNT": "Customers"
   },
   "ADMIN": {
     "LABEL": "Admin Panel",
