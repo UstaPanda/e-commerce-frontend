@@ -1,0 +1,169 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-12 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="relative z-10 flex items-start justify-between">
+      <div>
+        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">{{ 'ADMIN.LABEL' | translate }}</p>
+        <h1 class="text-white font-extrabold text-2xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+          {{ 'ADMIN.CATEGORIES.TITLE' | translate }}
+        </h1>
+        <p class="text-white/60 text-sm mt-1">{{ categories().length }} {{ 'ADMIN.CATEGORIES.COUNT_LABEL' | translate }}</p>
+      </div>
+      <button (click)="openCreate()"
+        class="bg-white/20 hover:bg-white/30 text-white font-bold px-4 py-2 rounded-2xl flex items-center gap-2 text-sm active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-lg">add</span>
+        {{ 'ADMIN.CATEGORIES.ADD' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="mx-6 mt-4 space-y-3">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="bg-surface-container-lowest rounded-3xl p-4 animate-pulse flex items-center gap-4">
+          <div class="w-10 h-10 rounded-2xl bg-surface-container-high shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3 bg-surface-container-high rounded w-1/3"></div>
+            <div class="h-2 bg-surface-container-high rounded w-1/4"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Category list -->
+  @if (!loading()) {
+    @if (categories().length === 0) {
+      <div class="text-center py-16 px-6">
+        <div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-outline text-5xl">category</span>
+        </div>
+        <h3 class="text-on-surface font-bold text-lg mb-4" style="font-family:'Plus Jakarta Sans',sans-serif">
+          {{ 'ADMIN.CATEGORIES.EMPTY' | translate }}
+        </h3>
+        <button (click)="openCreate()"
+          class="editorial-gradient text-white font-bold px-8 py-3 rounded-2xl mx-auto flex items-center gap-2 active:scale-95 transition-transform"
+          style="box-shadow: 0 8px 32px rgba(43,56,150,0.25)">
+          <span class="material-symbols-outlined text-xl">add</span>
+          {{ 'ADMIN.CATEGORIES.ADD' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="mx-6 mt-4 space-y-3">
+        @for (cat of categories(); track cat.id) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-4"
+            style="box-shadow: 0 2px 12px rgba(26,27,34,0.05)">
+            <div class="w-10 h-10 rounded-2xl bg-tertiary/10 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-tertiary text-xl">category</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-on-surface text-sm font-bold">{{ cat.name }}</p>
+              @if (cat.parentName) {
+                <p class="text-outline text-xs mt-0.5">
+                  <span class="material-symbols-outlined text-[12px] align-middle">subdirectory_arrow_right</span>
+                  {{ cat.parentName }}
+                </p>
+              }
+              @if (cat.productCount > 0) {
+                <p class="text-outline text-xs mt-0.5">{{ cat.productCount }} {{ 'ADMIN.CATEGORIES.PRODUCTS' | translate }}</p>
+              }
+            </div>
+            @if (actionLoading() === cat.id) {
+              <div class="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin shrink-0"></div>
+            } @else {
+              <div class="flex items-center gap-1 shrink-0">
+                <button (click)="openEdit(cat)"
+                  class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors active:scale-90">
+                  <span class="material-symbols-outlined text-base">edit</span>
+                </button>
+                <button (click)="openDelete(cat)"
+                  class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-error/10 hover:text-error transition-colors active:scale-90">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>
+
+<!-- Create / Edit Modal -->
+@if (modal()) {
+  <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" (click)="closeModal()"></div>
+    <div class="relative bg-surface-container-lowest rounded-3xl p-6 w-full max-w-sm z-10"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)">
+      <h3 class="text-on-surface font-extrabold text-lg mb-5" style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ (modal()!.mode === 'create' ? 'ADMIN.CATEGORIES.CREATE_TITLE' : 'ADMIN.CATEGORIES.EDIT_TITLE') | translate }}
+      </h3>
+
+      <!-- Name -->
+      <div class="mb-4">
+        <label class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-2 block">
+          {{ 'ADMIN.CATEGORIES.NAME_LABEL' | translate }}
+        </label>
+        <input type="text" [(ngModel)]="modal()!.name"
+          [placeholder]="'ADMIN.CATEGORIES.NAME_PLACEHOLDER' | translate"
+          class="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30" />
+      </div>
+
+      <!-- Parent Category -->
+      <div class="mb-6">
+        <label class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-2 block">
+          {{ 'ADMIN.CATEGORIES.PARENT_LABEL' | translate }}
+        </label>
+        <select [(ngModel)]="modal()!.parentId"
+          class="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
+          <option [ngValue]="null">{{ 'ADMIN.CATEGORIES.NO_PARENT' | translate }}</option>
+          @for (parent of parentCategories(); track parent.id) {
+            <option [ngValue]="parent.id">{{ parent.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="closeModal()"
+          class="flex-1 py-3 rounded-2xl bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button (click)="saveModal()" [disabled]="saving() || !modal()!.name.trim()"
+          class="flex-1 py-3 rounded-2xl editorial-gradient text-white font-bold text-sm active:scale-95 transition-transform disabled:opacity-50">
+          {{ saving() ? ('COMMON.LOADING' | translate) : ('COMMON.SAVE' | translate) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirm -->
+@if (deleteConfirm()) {
+  <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" (click)="closeDelete()"></div>
+    <div class="relative bg-surface-container-lowest rounded-3xl p-6 w-full max-w-sm z-10"
+      style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)">
+      <div class="w-14 h-14 rounded-2xl bg-error/10 mx-auto mb-4 flex items-center justify-center">
+        <span class="material-symbols-outlined text-error text-2xl">delete</span>
+      </div>
+      <h3 class="text-on-surface font-extrabold text-lg text-center mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ 'ADMIN.CATEGORIES.CONFIRM_DELETE' | translate }}
+      </h3>
+      <p class="text-outline text-sm text-center mb-6">{{ deleteConfirm()!.name }}</p>
+      <div class="flex gap-3">
+        <button (click)="closeDelete()"
+          class="flex-1 py-3 rounded-2xl bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button (click)="confirmDelete()"
+          class="flex-1 py-3 rounded-2xl bg-error text-white font-bold text-sm active:scale-95 transition-transform">
+          {{ 'COMMON.DELETE' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

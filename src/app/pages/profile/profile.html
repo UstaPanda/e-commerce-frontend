@@ -1,0 +1,866 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Editorial gradient header — mobile only -->
+  <div class="md:hidden editorial-gradient px-6 pt-6 pb-16 relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+    <div class="relative z-10 flex items-center gap-4">
+      <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white font-extrabold text-3xl border-2 border-white/30"
+        style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ user()?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-white font-extrabold text-xl truncate"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ user()?.name }}</h1>
+        <p class="text-white/70 text-xs mt-0.5 truncate">{{ user()?.email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats strip — removed -->
+
+  <!-- ═══════════════════════════════════════════════════
+       LAYOUT WRAPPER — desktop: 12-col grid, mobile: single column
+  ════════════════════════════════════════════════════════ -->
+  <div class="md:grid md:grid-cols-12 md:gap-12 md:max-w-7xl md:mx-auto md:px-8 md:py-12">
+
+    <!-- Desktop Sidebar (hidden on mobile) -->
+    <aside class="hidden md:block md:col-span-4 space-y-8">
+      <!-- Profile card -->
+      <div class="bg-surface-container-low p-8 rounded-xl">
+        <div class="flex flex-col items-center text-center">
+          <div class="relative mb-6">
+            <div class="w-28 h-28 rounded-full editorial-gradient flex items-center justify-center text-white font-extrabold text-4xl border-4 border-surface-container-lowest"
+              style="font-family:'Plus Jakarta Sans',sans-serif">
+              {{ user()?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+            </div>
+          </div>
+          <h1 class="text-2xl font-headline font-bold text-on-surface tracking-tight">{{ user()?.name }}</h1>
+          <p class="text-sm text-outline font-label mt-1">{{ user()?.email }}</p>
+        </div>
+
+        <!-- Quick links (all tabs) -->
+        <div class="mt-8 space-y-1">
+          @for (tab of tabs; track tab.id) {
+            <a (click)="setTab(tab.id)"
+              class="flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer"
+              [class.bg-surface-container-lowest]="activeTab() === tab.id"
+              [class.text-primary]="activeTab() === tab.id"
+              [class.hover:bg-white]="activeTab() === tab.id"
+              [class.hover:bg-surface-container-high]="activeTab() !== tab.id">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-base"
+                  [class.text-primary]="activeTab() === tab.id"
+                  [class.text-outline]="activeTab() !== tab.id">{{ tab.icon }}</span>
+                <span class="font-medium text-sm"
+                  [class.text-on-surface]="activeTab() === tab.id"
+                  [class.text-outline]="activeTab() !== tab.id">{{ tab.labelKey | translate }}</span>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </a>
+          }
+          <a (click)="auth.logout()"
+            class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors rounded-lg cursor-pointer mt-2">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-error">logout</span>
+              <span class="font-medium text-sm text-error">{{ 'PROFILE.LOGOUT' | translate }}</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content column — mobile: full width, desktop: col-span-8 -->
+    <div class="md:col-span-8">
+
+  <!-- Tab switcher — mobile only -->
+  <div class="md:hidden mx-6 mb-6">
+    <div class="bg-surface-container-low p-1.5 rounded-full flex gap-1 overflow-x-auto hide-scrollbar">
+      @for (tab of tabs; track tab.id) {
+        <button (click)="setTab(tab.id)"
+          class="flex-none flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap"
+          [class.bg-surface-container-lowest]="activeTab() === tab.id"
+          [class.text-on-surface]="activeTab() === tab.id"
+          [class.text-outline]="activeTab() !== tab.id"
+          [style.box-shadow]="activeTab() === tab.id ? '0 2px 8px rgba(26,27,34,0.08)' : 'none'">
+          <span class="material-symbols-outlined text-sm">{{ tab.icon }}</span>
+          {{ tab.labelKey | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ═══════════════ PROFILE TAB ═══════════════ -->
+  @if (activeTab() === 'info') {
+    <div class="px-6 md:px-0 space-y-4">
+      @if (!editingInfo()) {
+        <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <div class="px-5 py-4 flex items-center justify-between border-b border-outline-variant/30">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">{{ 'PROFILE.MY_INFO' | translate }}</h3>
+            <button (click)="startEditInfo()"
+              class="flex items-center gap-1.5 text-primary text-xs font-bold active:opacity-70 transition-opacity">
+              <span class="material-symbols-outlined text-base">edit</span>
+              {{ 'PROFILE.EDIT' | translate }}
+            </button>
+          </div>
+          <div class="divide-y divide-outline-variant/20">
+            <div class="flex items-center gap-4 px-5 py-4">
+              <span class="material-symbols-outlined text-outline text-xl">person</span>
+              <div class="flex-1">
+                <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-0.5">{{ isCorporate ? ('PROFILE.ACCOUNT_NAME' | translate) : ('PROFILE.FULL_NAME' | translate) }}</p>
+                <p class="text-on-surface text-sm font-medium">{{ user()?.name ?? '—' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 px-5 py-4">
+              <span class="material-symbols-outlined text-outline text-xl">mail</span>
+              <div class="flex-1">
+                <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-0.5">{{ 'PROFILE.EMAIL' | translate }}</p>
+                <p class="text-on-surface text-sm font-medium">{{ user()?.email ?? '—' }}</p>
+              </div>
+            </div>
+            @if (!isCorporate && !loadingProfile() && profile()) {
+              <div class="flex items-center gap-4 px-5 py-4">
+                <span class="material-symbols-outlined text-outline text-xl">wc</span>
+                <div class="flex-1">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-0.5">{{ 'PROFILE.GENDER' | translate }}</p>
+                  <p class="text-on-surface text-sm font-medium">{{ profile()!.gender ?? '—' }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 px-5 py-4">
+                <span class="material-symbols-outlined text-outline text-xl">cake</span>
+                <div class="flex-1">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-0.5">{{ 'PROFILE.AGE' | translate }}</p>
+                  <p class="text-on-surface text-sm font-medium">{{ profile()!.age ?? '—' }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 px-5 py-4">
+                <span class="material-symbols-outlined text-outline text-xl">location_city</span>
+                <div class="flex-1">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-0.5">{{ 'PROFILE.CITY' | translate }}</p>
+                  <p class="text-on-surface text-sm font-medium">{{ profile()!.city ?? '—' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <button (click)="auth.logout()"
+          class="w-full flex items-center justify-center gap-2 py-4 rounded-full bg-error-container text-on-error-container font-bold text-sm active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-xl">logout</span>
+          {{ 'PROFILE.LOGOUT' | translate }}
+        </button>
+      } @else {
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-5">{{ 'PROFILE.EDIT_INFO' | translate }}</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ isCorporate ? ('PROFILE.ACCOUNT_NAME_FIELD' | translate) : ('PROFILE.FULL_NAME' | translate) }}</label>
+              <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                <span class="material-symbols-outlined text-outline text-lg">person</span>
+                <input [(ngModel)]="editName" type="text"
+                  class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                  [placeholder]="isCorporate ? ('PROFILE.ACCOUNT_NAME_FIELD' | translate) : ('PROFILE.FULL_NAME' | translate)">
+              </div>
+            </div>
+            @if (!isCorporate) {
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.GENDER' | translate }}</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (g of genderOptions; track g) {
+                    <button (click)="editGender = g"
+                      class="px-4 py-2 rounded-full text-xs font-bold transition-all"
+                      [class.bg-primary]="editGender === g" [class.text-on-primary]="editGender === g"
+                      [class.bg-surface-container-low]="editGender !== g" [class.text-outline]="editGender !== g">
+                      {{ g }}
+                    </button>
+                  }
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.AGE' | translate }}</label>
+                <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                  <span class="material-symbols-outlined text-outline text-lg">cake</span>
+                  <input [(ngModel)]="editAge" type="number" min="1" max="120"
+                    class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                    [placeholder]="'PROFILE.AGE' | translate">
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.CITY' | translate }}</label>
+                <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                  <span class="material-symbols-outlined text-outline text-lg">location_city</span>
+                  <input [(ngModel)]="editCity" type="text"
+                    class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                    [placeholder]="'PROFILE.CITY' | translate">
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.SATISFACTION' | translate }}</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (s of satisfactionOptions; track s) {
+                    <button (click)="editSatisfaction = s"
+                      class="px-4 py-2 rounded-full text-xs font-bold transition-all"
+                      [class.bg-primary]="editSatisfaction === s" [class.text-on-primary]="editSatisfaction === s"
+                      [class.bg-surface-container-low]="editSatisfaction !== s" [class.text-outline]="editSatisfaction !== s">
+                      {{ s }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button (click)="cancelEditInfo()"
+              class="flex-1 py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+              {{ 'PROFILE.CANCEL_EDIT' | translate }}
+            </button>
+            <button (click)="saveInfo()" [disabled]="savingInfo()"
+              class="flex-1 editorial-gradient text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-50"
+              style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+              {{ savingInfo() ? ('PROFILE.SAVING' | translate) : ('PROFILE.SAVE' | translate) }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ═══════════════ ADDRESSES TAB ═══════════════ -->
+  @if (activeTab() === 'addresses') {
+    <div class="px-6 md:px-0 space-y-4">
+      @if (!showAddressForm()) {
+        <button (click)="openAddForm()"
+          class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+          style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+          <span class="material-symbols-outlined text-xl">add_location</span>
+          {{ 'PROFILE.NEW_ADDRESS' | translate }}
+        </button>
+        @if (loadingAddresses()) {
+          <div class="space-y-4">
+            @for (i of [1,2]; track i) {
+              <div class="bg-surface-container-lowest rounded-3xl p-5 animate-pulse h-28"></div>
+            }
+          </div>
+        } @else if (addresses().length === 0) {
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined text-outline text-5xl mb-3 block">location_off</span>
+            <p class="text-outline text-sm font-medium">{{ 'PROFILE.NO_ADDRESSES' | translate }}</p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (addr of addresses(); track addr.id) {
+              <div class="bg-surface-container-lowest rounded-3xl p-5 relative"
+                [class.ring-2]="addr.isDefault" [class.ring-primary]="addr.isDefault"
+                style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+                @if (addr.isDefault) {
+                  <span class="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest bg-primary text-on-primary px-2.5 py-1 rounded-full">
+                    {{ 'COMMON.DEFAULT' | translate }}
+                  </span>
+                }
+                <div class="flex items-start gap-3 mb-3">
+                  <span class="material-symbols-outlined text-primary text-xl mt-0.5">location_on</span>
+                  <div class="flex-1 pr-16">
+                    <p class="text-on-surface font-bold text-sm">{{ addr.title }}</p>
+                    <p class="text-outline text-xs mt-1 leading-relaxed">{{ addr.fullAddress }}</p>
+                    <p class="text-outline text-xs">{{ addr.district ? addr.district + ', ' : '' }}{{ addr.city }}{{ addr.postalCode ? ' ' + addr.postalCode : '' }}</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 pt-3 border-t border-outline-variant/20">
+                  @if (!addr.isDefault) {
+                    <button (click)="setDefaultAddress(addr.id)"
+                      class="flex-1 text-xs font-bold text-outline py-2.5 rounded-full bg-surface-container-low active:scale-95 transition-transform">
+                      {{ 'PROFILE.SET_DEFAULT' | translate }}
+                    </button>
+                  }
+                  <button (click)="openEditForm(addr)"
+                    class="flex-1 text-xs font-bold text-on-surface py-2.5 rounded-full bg-surface-container-low active:scale-95 transition-transform flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-sm">edit</span> {{ 'COMMON.EDIT' | translate }}
+                  </button>
+                  <button (click)="deleteAddress(addr.id)" [disabled]="deletingAddressId() === addr.id"
+                    class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50">
+                    <span class="material-symbols-outlined text-error text-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      } @else {
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-5">
+            {{ editingAddressId() ? ('PROFILE.EDIT_ADDRESS' | translate) : ('PROFILE.ADDRESS_NEW' | translate) }}
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_TITLE_FIELD' | translate }} *</label>
+              <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                <span class="material-symbols-outlined text-outline text-lg">label</span>
+                <input [(ngModel)]="formTitle" type="text"
+                  class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                  placeholder="Ev, İş, vb.">
+              </div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_FULL_FIELD' | translate }} *</label>
+              <textarea [(ngModel)]="formFullAddress" rows="3"
+                class="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none resize-none"
+                placeholder="Mahalle, sokak, bina no..."></textarea>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_CITY_FIELD' | translate }} *</label>
+              <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                <span class="material-symbols-outlined text-outline text-lg">location_city</span>
+                <input [(ngModel)]="formCity" type="text"
+                  class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                  [placeholder]="'PROFILE.ADDRESS_CITY_FIELD' | translate">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_DISTRICT' | translate }}</label>
+                <input [(ngModel)]="formDistrict" type="text"
+                  class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none"
+                  [placeholder]="'PROFILE.ADDRESS_DISTRICT' | translate">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.ADDRESS_POSTAL' | translate }}</label>
+                <input [(ngModel)]="formPostalCode" type="text"
+                  class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none"
+                  placeholder="34000">
+              </div>
+            </div>
+            <button (click)="formIsDefault = !formIsDefault"
+              class="flex items-center gap-3 w-full py-3 px-4 rounded-2xl bg-surface-container-low active:scale-95 transition-transform">
+              <div class="w-11 h-6 rounded-full transition-colors flex items-center px-0.5"
+                [class.bg-primary]="formIsDefault" [class.bg-outline-variant]="!formIsDefault">
+                <div class="w-5 h-5 bg-white rounded-full shadow transition-transform"
+                  [class.translate-x-5]="formIsDefault"></div>
+              </div>
+              <span class="text-sm font-bold text-on-surface">{{ 'PROFILE.SAVE_AS_DEFAULT' | translate }}</span>
+            </button>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button (click)="cancelAddressForm()"
+              class="flex-1 py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+              {{ 'PROFILE.CANCEL_EDIT' | translate }}
+            </button>
+            <button (click)="saveAddress()" [disabled]="savingAddress() || !formValid"
+              class="flex-1 editorial-gradient text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-50"
+              style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+              {{ savingAddress() ? ('PROFILE.SAVING' | translate) : ('PROFILE.SAVE' | translate) }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ═══════════════ WISHLIST TAB ═══════════════ -->
+  @if (activeTab() === 'wishlist') {
+    <div class="px-6 md:px-0 space-y-4">
+      @if (loadingWishlist()) {
+        <div class="space-y-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="bg-surface-container-lowest rounded-3xl h-20 animate-pulse"></div>
+          }
+        </div>
+      } @else if (wishlist().length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-outline text-6xl mb-4 block">favorite_border</span>
+          <p class="text-outline font-medium text-sm">{{ 'PROFILE.WISHLIST_EMPTY' | translate }}</p>
+          <p class="text-outline-variant text-xs mt-1">{{ 'PROFILE.WISHLIST_EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <p class="text-outline text-xs font-bold uppercase tracking-wider px-1">{{ wishlist().length }} {{ 'PROFILE.FAVORITES_COUNT' | translate }}</p>
+        @for (item of wishlist(); track item.id) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-3"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-outline text-2xl">inventory_2</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-on-surface font-bold text-sm truncate">{{ item.productName }}</p>
+              @if (item.storeName) {
+                <p class="text-outline text-xs truncate">{{ item.storeName }}</p>
+              }
+              <p class="text-primary font-bold text-sm mt-1">{{ currency.format(item.unitPrice) }}</p>
+            </div>
+            <button (click)="removeFromWishlist(item.productId)"
+              [disabled]="removingWishlistId() === item.productId"
+              class="w-9 h-9 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50">
+              <span class="material-symbols-outlined text-error text-base">favorite</span>
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ═══════════════ COLLECTIONS TAB ═══════════════ -->
+  @if (activeTab() === 'collections') {
+    <div class="px-6 md:px-0 space-y-4">
+
+      @if (!selectedCollection()) {
+        @if (!showCollectionForm()) {
+          <button (click)="openNewCollection()"
+            class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+            <span class="material-symbols-outlined text-xl">add</span>
+            {{ 'PROFILE.NEW_COLLECTION' | translate }}
+          </button>
+        }
+
+        @if (loadingCollections()) {
+          <div class="space-y-3">
+            @for (i of [1,2]; track i) {
+              <div class="bg-surface-container-lowest rounded-3xl h-20 animate-pulse"></div>
+            }
+          </div>
+        } @else if (!showCollectionForm() && collections().length === 0) {
+          <div class="text-center py-16">
+            <span class="material-symbols-outlined text-outline text-6xl mb-4 block">collections_bookmark</span>
+            <p class="text-outline font-medium text-sm">{{ 'PROFILE.COLLECTIONS_EMPTY' | translate }}</p>
+            <p class="text-outline-variant text-xs mt-1">{{ 'PROFILE.COLLECTIONS_EMPTY_HINT' | translate }}</p>
+          </div>
+        }
+
+        <!-- Collection form -->
+        @if (showCollectionForm()) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-5">
+              {{ editingCollectionId() ? ('PROFILE.EDIT_COLLECTION' | translate) : ('PROFILE.NEW_COLLECTION' | translate) }}
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.COLLECTION_NAME_FIELD' | translate }} *</label>
+                <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                  <span class="material-symbols-outlined text-outline text-lg">collections_bookmark</span>
+                  <input [(ngModel)]="collectionFormName" type="text"
+                    class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                    [placeholder]="'PROFILE.COLLECTION_NAME_FIELD' | translate">
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.COLLECTION_DESC_FIELD' | translate }}</label>
+                <textarea [(ngModel)]="collectionFormDesc" rows="2"
+                  class="w-full bg-surface-container-low rounded-2xl px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none resize-none"
+                  placeholder="..."></textarea>
+              </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button (click)="cancelCollectionForm()"
+                class="flex-1 py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+                {{ 'PROFILE.CANCEL_EDIT' | translate }}
+              </button>
+              <button (click)="saveCollection()" [disabled]="savingCollection() || !collectionFormName.trim()"
+                class="flex-1 editorial-gradient text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-50"
+                style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+                {{ savingCollection() ? ('PROFILE.SAVING' | translate) : ('PROFILE.SAVE' | translate) }}
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Koleksiyon kartları -->
+        @if (!showCollectionForm()) {
+          @for (col of collections(); track col.id) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-2xl editorial-gradient flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-white text-xl">collections_bookmark</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-on-surface font-bold text-sm truncate">{{ col.name }}</p>
+                  @if (col.description) {
+                    <p class="text-outline text-xs truncate">{{ col.description }}</p>
+                  }
+                  <p class="text-outline text-xs mt-0.5">{{ col.itemCount }} {{ 'PROFILE.COLLECTION_ITEMS' | translate }}</p>
+                </div>
+              </div>
+              <div class="flex gap-2 pt-3 border-t border-outline-variant/20">
+                <button (click)="openCollection(col)"
+                  class="flex-1 text-xs font-bold text-on-surface py-2.5 rounded-full bg-surface-container-low active:scale-95 transition-transform flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-sm">open_in_new</span> {{ 'PROFILE.VIEW' | translate }}
+                </button>
+                <button (click)="openEditCollection(col)"
+                  class="flex-1 text-xs font-bold text-on-surface py-2.5 rounded-full bg-surface-container-low active:scale-95 transition-transform flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-sm">edit</span> {{ 'COMMON.EDIT' | translate }}
+                </button>
+                <button (click)="deleteCollection(col.id)" [disabled]="deletingCollectionId() === col.id"
+                  class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50">
+                  <span class="material-symbols-outlined text-error text-sm">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+      } @else {
+        <!-- Koleksiyon detay -->
+        <div class="flex items-center gap-3 mb-2">
+          <button (click)="backToCollections()"
+            class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center active:scale-90 transition-transform">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div class="flex-1 min-w-0">
+            <h2 class="text-base font-bold text-on-surface truncate">{{ selectedCollection()!.name }}</h2>
+            <p class="text-outline text-xs">{{ selectedCollection()!.itemCount }} {{ 'PROFILE.COLLECTION_ITEMS' | translate }}</p>
+          </div>
+        </div>
+
+        @if (selectedCollection()!.items.length === 0) {
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined text-outline text-5xl mb-3 block">inventory_2</span>
+            <p class="text-outline text-sm">{{ 'PROFILE.COLLECTION_EMPTY' | translate }}</p>
+          </div>
+        } @else {
+          @for (item of selectedCollection()!.items; track item.id) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-3"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-outline text-2xl">inventory_2</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-on-surface font-bold text-sm truncate">{{ item.productName }}</p>
+                @if (item.storeName) { <p class="text-outline text-xs">{{ item.storeName }}</p> }
+                <p class="text-primary font-bold text-sm mt-1">{{ currency.format(item.unitPrice) }}</p>
+              </div>
+              <button (click)="removeFromCollection(selectedCollection()!.id, item.productId)"
+                class="w-9 h-9 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-error text-base">remove_circle</span>
+              </button>
+            </div>
+          }
+        }
+      }
+
+    </div>
+  }
+
+  <!-- ═══════════════ PAYMENT METHODS TAB ═══════════════ -->
+  @if (activeTab() === 'payments') {
+    <div class="px-6 md:px-0 space-y-4">
+      @if (!showPaymentForm()) {
+        <button (click)="openAddPayment()"
+          class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+          style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+          <span class="material-symbols-outlined text-xl">add_card</span>
+          {{ 'PROFILE.ADD_PAYMENT_METHOD' | translate }}
+        </button>
+      }
+
+      @if (loadingPayments()) {
+        <div class="space-y-3">
+          @for (i of [1,2]; track i) {
+            <div class="bg-surface-container-lowest rounded-3xl h-20 animate-pulse"></div>
+          }
+        </div>
+      } @else if (!showPaymentForm() && paymentMethods().length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-outline text-6xl mb-4 block">credit_card_off</span>
+          <p class="text-outline font-medium text-sm">{{ 'PROFILE.NO_PAYMENTS' | translate }}</p>
+          <p class="text-outline-variant text-xs mt-1">{{ 'PROFILE.NO_SAVED_PAYMENTS_HINT' | translate }}</p>
+        </div>
+      }
+
+      <!-- Payment form -->
+      @if (showPaymentForm()) {
+        <div class="bg-surface-container-lowest rounded-3xl p-5"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+          <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-5">{{ 'PROFILE.ADD_PAYMENT_METHOD' | translate }}</h3>
+          <div class="space-y-4">
+
+            <!-- Type selection -->
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.PAYMENT_TYPE' | translate }}</label>
+              <div class="flex gap-2">
+                @for (opt of paymentTypeOptions; track opt.value) {
+                  <button (click)="pmFormType = opt.value"
+                    class="flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl text-xs font-bold transition-all"
+                    [class.bg-primary]="pmFormType === opt.value" [class.text-on-primary]="pmFormType === opt.value"
+                    [class.bg-surface-container-low]="pmFormType !== opt.value" [class.text-outline]="pmFormType !== opt.value">
+                    <span class="material-symbols-outlined text-lg">{{ opt.icon }}</span>
+                    {{ (opt.labelKey | translate).split(' ')[0] }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Label -->
+            <div>
+              <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.PAYMENT_LABEL_FIELD' | translate }} *</label>
+              <div class="flex items-center gap-3 bg-surface-container-low rounded-full px-4 py-3">
+                <span class="material-symbols-outlined text-outline text-lg">label</span>
+                <input [(ngModel)]="pmFormLabel" type="text"
+                  class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none"
+                  placeholder='Ör. "İş Kartım"'>
+              </div>
+            </div>
+
+            <!-- STRIPE fields -->
+            @if (pmFormType === 'STRIPE') {
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.LAST4' | translate }}</label>
+                  <input [(ngModel)]="pmFormCardLast4" type="text" maxlength="4" placeholder="4242"
+                    class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none text-center tracking-widest font-bold">
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.CARD_BRAND' | translate }}</label>
+                  <input [(ngModel)]="pmFormCardBrand" type="text" placeholder="Visa"
+                    class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.STRIPE_PM_ID' | translate }}</label>
+                <input [(ngModel)]="pmFormStripeId" type="text" placeholder="pm_..."
+                  class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none font-mono text-xs">
+              </div>
+            }
+
+            <!-- CRYPTO fields -->
+            @if (pmFormType === 'CRYPTO') {
+              <div>
+                <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.WALLET_ADDRESS_FIELD' | translate }}</label>
+                <input [(ngModel)]="pmFormWalletAddress" type="text" placeholder="0x..."
+                  class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none font-mono text-xs">
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">Chain ID</label>
+                  <input [(ngModel)]="pmFormChainId" type="number" placeholder="1"
+                    class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none">
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-2">{{ 'PROFILE.NETWORK_NAME_FIELD' | translate }}</label>
+                  <input [(ngModel)]="pmFormChainName" type="text" placeholder="Ethereum"
+                    class="w-full bg-surface-container-low rounded-full px-4 py-3 text-sm text-on-surface placeholder-outline focus:outline-none">
+                </div>
+              </div>
+            }
+
+            <!-- Default toggle -->
+            <button (click)="pmFormIsDefault = !pmFormIsDefault"
+              class="flex items-center gap-3 w-full py-3 px-4 rounded-2xl bg-surface-container-low active:scale-95 transition-transform">
+              <div class="w-11 h-6 rounded-full transition-colors flex items-center px-0.5"
+                [class.bg-primary]="pmFormIsDefault" [class.bg-outline-variant]="!pmFormIsDefault">
+                <div class="w-5 h-5 bg-white rounded-full shadow transition-transform"
+                  [class.translate-x-5]="pmFormIsDefault"></div>
+              </div>
+              <span class="text-sm font-bold text-on-surface">{{ 'PROFILE.SET_DEFAULT_PAYMENT' | translate }}</span>
+            </button>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button (click)="cancelPaymentForm()"
+              class="flex-1 py-3.5 rounded-full bg-surface-container-low text-on-surface font-bold text-sm active:scale-95 transition-transform">
+              {{ 'PROFILE.CANCEL_EDIT' | translate }}
+            </button>
+            <button (click)="savePaymentMethod()" [disabled]="savingPayment() || !pmFormLabel.trim()"
+              class="flex-1 editorial-gradient text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-50"
+              style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+              {{ savingPayment() ? ('PROFILE.SAVING' | translate) : ('PROFILE.SAVE' | translate) }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Saved payment methods list -->
+      @if (!showPaymentForm()) {
+        @for (pm of paymentMethods(); track pm.id) {
+          <div class="bg-surface-container-lowest rounded-3xl p-4"
+            [class.ring-2]="pm.isDefault" [class.ring-primary]="pm.isDefault"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            @if (pm.isDefault) {
+              <span class="text-[10px] font-bold uppercase tracking-widest bg-primary text-on-primary px-2.5 py-1 rounded-full inline-block mb-2">
+                {{ 'COMMON.DEFAULT' | translate }}
+              </span>
+            }
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-2xl editorial-gradient flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-xl">{{ paymentIcon(pm.type) }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-on-surface font-bold text-sm truncate">{{ pm.label }}</p>
+                <p class="text-outline text-xs truncate mt-0.5">{{ paymentSummary(pm) }}</p>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-outline-variant">{{ pm.type }}</span>
+              </div>
+            </div>
+            <div class="flex gap-2 pt-3 border-t border-outline-variant/20">
+              @if (!pm.isDefault) {
+                <button (click)="setDefaultPayment(pm.id)"
+                  class="flex-1 text-xs font-bold text-outline py-2.5 rounded-full bg-surface-container-low active:scale-95 transition-transform">
+                  {{ 'PROFILE.SET_DEFAULT' | translate }}
+                </button>
+              }
+              <button (click)="deletePaymentMethod(pm.id)" [disabled]="deletingPaymentId() === pm.id"
+                class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50 ml-auto">
+                <span class="material-symbols-outlined text-error text-sm">delete</span>
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ═══════════════ RECEIVING ACCOUNTS TAB (CORPORATE) ═══════════════ -->
+  @if (activeTab() === 'accounts') {
+    <div class="px-6 md:px-0 space-y-6">
+
+      @for (opt of accountTypeOptions; track opt.value) {
+        <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+
+          <div class="px-5 py-4 border-b border-outline-variant/10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 editorial-gradient rounded-2xl flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-lg">{{ opt.icon }}</span>
+              </div>
+              <div>
+                <p class="text-on-surface font-bold text-sm">{{ opt.labelKey | translate }}</p>
+                <p class="text-outline text-xs mt-0.5">{{ opt.descKey | translate }}</p>
+              </div>
+            </div>
+            <button (click)="openAccountForm(opt.value)"
+              class="text-primary font-bold text-xs flex items-center gap-1 active:opacity-70 transition-opacity shrink-0 ml-3">
+              <span class="material-symbols-outlined text-base">add</span>
+              {{ 'PROFILE.ADD_ACCOUNT' | translate }}
+            </button>
+          </div>
+
+          @if (loadingAccounts()) {
+            <div class="p-4 animate-pulse">
+              <div class="h-10 bg-surface-container-high rounded-2xl w-full"></div>
+            </div>
+          } @else if (accountsForType(opt.value).length === 0) {
+            <div class="px-5 py-4 text-outline text-sm text-center">
+              {{ 'PROFILE.NO_ACCOUNTS' | translate }}
+            </div>
+          } @else {
+            <div class="divide-y divide-outline-variant/10">
+              @for (acc of accountsForType(opt.value); track acc.id) {
+                <div class="px-5 py-4 flex items-center gap-3">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-on-surface font-bold text-sm truncate">{{ acc.label }}</p>
+                    <p class="text-outline text-xs font-mono mt-0.5 truncate">{{ accountSummary(acc) }}</p>
+                  </div>
+                  <button (click)="deleteReceivingAccount(acc.id)"
+                    [disabled]="deletingAccountId() === acc.id"
+                    class="w-9 h-9 rounded-full bg-error-container flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50 shrink-0">
+                    <span class="material-symbols-outlined text-error text-sm">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Account form modal -->
+      @if (showAccountForm()) {
+        <div class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6"
+          (click)="closeAccountForm()">
+          <div class="w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl overflow-hidden"
+            style="box-shadow: 0 24px 64px rgba(26,27,34,0.20)"
+            (click)="$event.stopPropagation()">
+
+            <div class="px-6 py-5 border-b border-outline-variant/10 flex items-center justify-between">
+              <h2 class="text-base font-extrabold text-on-surface" style="font-family:'Plus Jakarta Sans',sans-serif">
+                @if (activeAccountType() === 'STRIPE') { {{ 'PROFILE.ADD_STRIPE' | translate }} }
+                @if (activeAccountType() === 'PAYPAL') { {{ 'PROFILE.ADD_PAYPAL' | translate }} }
+                @if (activeAccountType() === 'CRYPTO') { {{ 'PROFILE.ADD_CRYPTO' | translate }} }
+              </h2>
+              <button (click)="closeAccountForm()" class="text-outline hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div class="px-6 py-5 space-y-4">
+
+              @if (activeAccountType() === 'STRIPE') {
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.PAYMENT_LABEL_FIELD' | translate }} *</label>
+                  <input type="text" [(ngModel)]="stripeAccountLabel" placeholder="Ör. Ana Stripe Hesabım"
+                    class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" />
+                </div>
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Stripe Account ID *</label>
+                  <input type="text" [(ngModel)]="stripeAccountId" placeholder="acct_xxxxxxxxxxxx"
+                    class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline font-mono" />
+                  <p class="text-outline text-xs mt-1.5 px-1">{{ 'PROFILE.STRIPE_ACCOUNT_ID_HINT' | translate }}</p>
+                </div>
+              }
+
+              @if (activeAccountType() === 'PAYPAL') {
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.PAYMENT_LABEL_FIELD' | translate }} *</label>
+                  <input type="text" [(ngModel)]="paypalAccountLabel" placeholder="Ör. İş PayPal Hesabım"
+                    class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" />
+                </div>
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.PAYPAL_EMAIL_FIELD' | translate }} *</label>
+                  <div class="flex items-center gap-3 bg-surface-container-low rounded-2xl px-4 py-3 focus-within:ring-1 focus-within:ring-primary">
+                    <span class="material-symbols-outlined text-outline text-lg">mail</span>
+                    <input type="email" [(ngModel)]="paypalReceiveEmail" placeholder="hesap@paypal.com"
+                      class="flex-1 bg-transparent text-sm text-on-surface placeholder-outline focus:outline-none" />
+                  </div>
+                  <p class="text-outline text-xs mt-1.5 px-1">{{ 'PROFILE.PAYPAL_ACCOUNT_EMAIL_HINT' | translate }}</p>
+                </div>
+              }
+
+              @if (activeAccountType() === 'CRYPTO') {
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.PAYMENT_LABEL_FIELD' | translate }} *</label>
+                  <input type="text" [(ngModel)]="cryptoWalletLabel" placeholder="Ör. Ana EVM Cüzdanım"
+                    class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" />
+                </div>
+                <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.WALLET_ADDRESS_FIELD' | translate }} *</label>
+                  <input type="text" [(ngModel)]="cryptoWalletAddress" placeholder="0x..."
+                    class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline font-mono text-xs" />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">{{ 'PROFILE.NETWORK_NAME_FIELD' | translate }}</label>
+                    <input type="text" [(ngModel)]="cryptoChainName" placeholder="Ethereum"
+                      class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" />
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold uppercase tracking-widest text-outline mb-1.5 block">Chain ID</label>
+                    <input type="number" [(ngModel)]="cryptoChainId" placeholder="1"
+                      class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" />
+                  </div>
+                </div>
+              }
+
+            </div>
+
+            <div class="px-6 py-5 border-t border-outline-variant/10 flex gap-3">
+              <button (click)="closeAccountForm()"
+                class="flex-1 bg-surface-container-high text-on-surface text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform">
+                {{ 'COMMON.CANCEL' | translate }}
+              </button>
+              <button (click)="saveReceivingAccount()" [disabled]="savingAccount()"
+                class="flex-1 editorial-gradient text-white text-sm font-bold py-3 rounded-2xl active:scale-95 transition-transform disabled:opacity-40 flex items-center justify-center gap-2">
+                @if (savingAccount()) {
+                  <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                }
+                {{ 'COMMON.SAVE' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+    </div><!-- end col-span-8 -->
+  </div><!-- end grid / layout wrapper -->
+
+</div>

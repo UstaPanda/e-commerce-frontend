@@ -1,0 +1,75 @@
+<div class="relative">
+
+  <!-- HEADER MODE: wider pill with globe + code + name -->
+  @if (inHeader) {
+    <button (click)="toggle()"
+      class="flex items-center gap-2 px-4 py-2 rounded-2xl bg-surface-container-low text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors min-w-[148px]">
+      <span class="material-symbols-outlined text-base" style="font-size:18px;line-height:1">language</span>
+      <span class="flex items-center gap-1.5 flex-1">
+        <span style="line-height:1">{{ currentLanguage().flag }}</span>
+        <span class="font-bold text-on-surface" style="line-height:1">{{ currentLanguage().code }}</span>
+        <span class="text-on-surface-variant" style="line-height:1">{{ currentLanguage().label }}</span>
+      </span>
+      <span class="material-symbols-outlined" style="font-size:16px;line-height:1">expand_more</span>
+    </button>
+
+    @if (showMenu()) {
+      <div class="fixed inset-0 z-40" (click)="showMenu.set(false)"></div>
+      <div class="absolute left-0 top-full mt-2 w-48 bg-surface-container-lowest rounded-3xl shadow-xl z-50 overflow-hidden border border-outline-variant/20">
+        <div class="px-4 py-3 border-b border-surface-container-high">
+          <p class="text-xs font-bold uppercase tracking-widest text-outline">{{ 'LANG.SWITCHER' | translate }}</p>
+        </div>
+        @for (language of languages; track language.code) {
+          <button (click)="select(language.code)"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container-low transition-colors"
+            [class.text-primary]="lang.currentLang() === language.code"
+            [class.font-bold]="lang.currentLang() === language.code"
+            [class.text-on-surface-variant]="lang.currentLang() !== language.code">
+            <span class="text-base" style="line-height:1">{{ language.flag }}</span>
+            <span class="font-bold w-7" style="line-height:1">{{ language.code }}</span>
+            <span class="flex-1 text-left" style="line-height:1">{{ language.label }}</span>
+            @if (lang.currentLang() === language.code) {
+              <span class="material-symbols-outlined text-primary text-base">check</span>
+            }
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <!-- SIDEBAR MODE: full-width button, opens upward -->
+  @if (!inHeader) {
+    <button (click)="toggle()"
+      class="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-surface-container-low text-on-surface-variant text-sm font-bold hover:bg-surface-container transition-colors w-full">
+      <span class="material-symbols-outlined text-lg leading-none">language</span>
+      <span class="flex-1 text-left flex items-center gap-1.5 leading-none">
+        <span>{{ currentLanguage().flag }}</span>
+        <span>{{ currentLanguage().label }}</span>
+      </span>
+      <span class="material-symbols-outlined text-sm leading-none">expand_more</span>
+    </button>
+
+    @if (showMenu()) {
+      <div class="fixed inset-0 z-40" (click)="showMenu.set(false)"></div>
+      <div class="absolute bottom-full left-0 right-0 mb-2 bg-surface-container-lowest rounded-3xl shadow-xl z-50 overflow-hidden border border-outline-variant/20">
+        <div class="px-4 py-3 border-b border-surface-container-high">
+          <p class="text-xs font-bold uppercase tracking-widest text-outline">{{ 'LANG.SWITCHER' | translate }}</p>
+        </div>
+        @for (language of languages; track language.code) {
+          <button (click)="select(language.code)"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container-low transition-colors"
+            [class.text-primary]="lang.currentLang() === language.code"
+            [class.font-bold]="lang.currentLang() === language.code"
+            [class.text-on-surface-variant]="lang.currentLang() !== language.code">
+            <span class="text-lg leading-none">{{ language.flag }}</span>
+            <span class="flex-1 text-left leading-none">{{ language.label }}</span>
+            @if (lang.currentLang() === language.code) {
+              <span class="material-symbols-outlined text-primary text-base">check</span>
+            }
+          </button>
+        }
+      </div>
+    }
+  }
+
+</div>

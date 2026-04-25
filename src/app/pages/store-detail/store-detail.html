@@ -1,0 +1,178 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Loading skeleton -->
+  @if (loading()) {
+    <div class="editorial-gradient h-40 animate-pulse"></div>
+    <div class="px-4 mt-4 space-y-4">
+      <div class="bg-surface-container-lowest rounded-3xl h-24 animate-pulse"></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl h-52 animate-pulse"></div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!loading() && store(); as s) {
+
+    <!-- Editorial gradient header -->
+    <div class="editorial-gradient px-5 pt-6 pb-16 relative overflow-hidden">
+      <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+      <div class="relative z-10">
+        <!-- Breadcrumb -->
+        <button (click)="back()"
+          class="flex items-center gap-1.5 text-white/70 text-sm mb-5 active:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          {{ 'STORE_DETAIL.BACK' | translate }}
+        </button>
+
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-white font-extrabold text-2xl border-2 border-white/30 shrink-0"
+            style="font-family:'Plus Jakarta Sans',sans-serif">
+            {{ s.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-white font-extrabold text-xl"
+                style="font-family:'Plus Jakarta Sans',sans-serif">{{ s.name }}</h1>
+              <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                [class]="s.status === 'ACTIVE'
+                  ? 'bg-secondary/20 text-white'
+                  : s.status === 'PENDING'
+                  ? 'bg-tertiary/20 text-white'
+                  : 'bg-white/10 text-white/60'">
+                @if (s.status === 'ACTIVE') {
+                  {{ 'STORE_DETAIL.STATUS_ACTIVE' | translate }}
+                } @else if (s.status === 'PENDING') {
+                  {{ 'STORE_DETAIL.STATUS_PENDING' | translate }}
+                } @else {
+                  {{ 'STORE_DETAIL.STATUS_INACTIVE' | translate }}
+                }
+              </span>
+            </div>
+            @if (s.description) {
+              <p class="text-white/70 text-xs mt-1 truncate">{{ s.description }}</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats strip overlapping header -->
+    @if (stats(); as st) {
+      <div class="mx-4 -mt-8 relative z-10 bg-surface-container-lowest rounded-3xl p-4 grid grid-cols-3 gap-4 mb-5"
+        style="box-shadow: 0 8px 24px rgba(26,27,34,0.10)">
+        <div class="text-center">
+          <p class="text-primary font-extrabold text-base" style="font-family:'Plus Jakarta Sans',sans-serif">
+            {{ st.avgRating > 0 ? st.avgRating.toFixed(1) : '—' }}
+          </p>
+          <div class="flex justify-center gap-0.5 mt-0.5">
+            @for (star of starsFor(st.avgRating); track $index) {
+              <span [class]="'text-xs ' + (star === 'full' ? 'material-symbols-filled text-yellow-500' : 'material-symbols-outlined text-outline-variant')">star</span>
+            }
+          </div>
+          <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ st.reviewCount }} {{ 'STORE_DETAIL.REVIEWS' | translate }}</p>
+        </div>
+        <div class="text-center bg-surface-container-low rounded-2xl py-2">
+          <p class="text-primary font-extrabold text-base" style="font-family:'Plus Jakarta Sans',sans-serif">
+            {{ st.productCount }}
+          </p>
+          <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">{{ 'STORE_DETAIL.PRODUCTS_COUNT' | translate }}</p>
+        </div>
+        <div class="text-center">
+          <span class="material-symbols-outlined text-secondary text-xl">verified</span>
+          <p class="text-outline text-[10px] font-bold uppercase tracking-wider mt-0.5">
+            @if (s.status === 'ACTIVE') {
+              {{ 'STORE_DETAIL.STATUS_ACTIVE' | translate }}
+            } @else if (s.status === 'PENDING') {
+              {{ 'STORE_DETAIL.STATUS_PENDING' | translate }}
+            } @else {
+              {{ 'STORE_DETAIL.STATUS_INACTIVE' | translate }}
+            }
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- Products header -->
+    <div class="px-4 flex items-center justify-between mb-3">
+      <h2 class="text-on-surface font-extrabold text-base"
+        style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'STORE_DETAIL.PRODUCTS' | translate }}</h2>
+      <span class="text-outline text-xs">{{ totalProducts() }} {{ 'STORE_DETAIL.PRODUCTS_FOUND' | translate }}</span>
+    </div>
+
+    <!-- Empty state -->
+    @if (products().length === 0) {
+      <div class="mx-4 bg-surface-container-lowest rounded-3xl p-12 text-center"
+        style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+        <span class="material-symbols-outlined text-outline text-5xl mb-3 block">inventory_2</span>
+        <p class="text-outline text-sm">{{ 'STORE_DETAIL.NO_PRODUCTS' | translate }}</p>
+      </div>
+    } @else {
+      <div class="px-4 grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        @for (product of products(); track product.id) {
+          <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform editorial-shadow"
+            (click)="goToProduct(product.id)">
+
+            <!-- Product image -->
+            <div class="aspect-[4/5] bg-surface-container-low overflow-hidden relative">
+              <img [src]="getProductImage(product)" [alt]="product.name"
+                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                   (error)="onImgError($event, product)">
+              <!-- Stock badge -->
+              <span class="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                [class]="product.stockQuantity > 10
+                  ? 'bg-secondary-container text-on-secondary-container'
+                  : product.stockQuantity > 0
+                  ? 'bg-surface-container text-on-surface'
+                  : 'bg-error-container text-on-error-container'">
+                {{ product.stockQuantity }} {{ 'STORE_DETAIL.STOCK' | translate }}
+              </span>
+            </div>
+
+            <div class="p-3 space-y-1">
+              <!-- Stars -->
+              @if (product.reviewCount > 0) {
+                <div class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-yellow-500 text-[11px]" style="font-variation-settings:'FILL' 1">star</span>
+                  <span class="text-yellow-500 text-[10px] font-bold">{{ product.avgRating.toFixed(1) }}</span>
+                  <span class="text-outline text-[10px]">({{ product.reviewCount }})</span>
+                </div>
+              }
+              <h4 class="text-on-surface font-bold text-sm truncate leading-tight" style="font-family:'Plus Jakarta Sans',sans-serif">{{ product.name }}</h4>
+              <p class="text-outline text-xs truncate">{{ product.category?.name ?? ('STORE_DETAIL.UNCATEGORIZED' | translate) }}</p>
+              <p class="text-primary font-extrabold text-base pt-1" style="font-family:'Plus Jakarta Sans',sans-serif">
+                {{ currency.format(product.unitPrice) }}
+              </p>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-1.5 px-4">
+          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-outline disabled:opacity-30 active:scale-90 transition-transform">
+            <span class="material-symbols-outlined text-lg">chevron_left</span>
+          </button>
+          @for (page of pages; track page) {
+            <button (click)="goToPage(page)"
+              class="w-9 h-9 rounded-full text-sm font-bold transition-all active:scale-90"
+              [class.editorial-gradient]="page === currentPage()"
+              [class.text-white]="page === currentPage()"
+              [class.bg-surface-container-low]="page !== currentPage()"
+              [class.text-outline]="page !== currentPage()">
+              {{ page + 1 }}
+            </button>
+          }
+          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1"
+            class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-outline disabled:opacity-30 active:scale-90 transition-transform">
+            <span class="material-symbols-outlined text-lg">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  }
+
+</div>

@@ -1,0 +1,519 @@
+<!-- ===== SEARCH BAR ===== -->
+<div class="px-6 md:px-0 pt-4 pb-2 relative" (keydown.escape)="showSuggestions.set(false)">
+  <div class="relative flex items-center bg-surface-container-highest rounded-full px-5 py-3 transition-all"
+    [class.bg-surface-container-lowest]="searchFocused"
+    [class.ring-1]="searchFocused"
+    [class.ring-primary]="searchFocused"
+    style="ring-opacity: 0.2">
+    <span class="material-symbols-outlined text-outline mr-3 text-xl">search</span>
+    <input type="text" [placeholder]="'PRODUCTS.SEARCH_PLACEHOLDER' | translate"
+      [value]="searchQuery"
+      (input)="onSearch($any($event.target).value)"
+      (focus)="onSearchFocus()"
+      (blur)="onSearchBlur()"
+      class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium text-on-surface p-0 placeholder-outline focus:outline-none" />
+    @if (searchQuery) {
+      <button (mousedown)="clearSearch()"
+        class="text-outline hover:text-on-surface transition-colors ml-2">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    }
+  </div>
+
+  <!-- Suggestions dropdown -->
+  @if (showSuggestions()) {
+    <div class="absolute top-full left-6 md:left-0 right-6 md:right-0 mt-1 bg-surface-container-lowest rounded-3xl shadow-xl z-[9999] overflow-hidden border border-outline-variant/20">
+      <div class="px-4 py-3 border-b border-surface-container-high">
+        <span class="text-outline text-xs font-bold uppercase tracking-wider">{{ 'PRODUCTS.SUGGESTIONS' | translate }}</span>
+      </div>
+      @if (suggestLoading()) {
+        <div class="px-4 py-4 flex items-center gap-3">
+          <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-outline text-sm">{{ 'PRODUCTS.SEARCHING' | translate }}</span>
+        </div>
+      } @else if (suggestions().length === 0) {
+        <div class="px-4 py-4 text-outline text-sm">{{ 'PRODUCTS.NO_RESULTS' | translate }}</div>
+      } @else {
+        @for (s of suggestions(); track s) {
+          <button (mousedown)="selectSuggestion(s)"
+            class="w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low flex items-center gap-3 transition-colors border-b border-surface-container-high/50 last:border-0">
+            <span class="material-symbols-outlined text-outline text-lg">search</span>
+            <span class="flex-1" [innerHTML]="highlightMatch(s, searchQuery)"></span>
+            <span class="material-symbols-outlined text-outline-variant text-base rotate-[-45deg]">arrow_forward</span>
+          </button>
+        }
+      }
+    </div>
+  }
+</div>
+
+<!-- ===== BROWSE VIEW ===== -->
+@if (view() === 'browse') {
+
+  @if (browseLoading()) {
+    <div class="px-6 md:px-0 py-8 space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div [class.col-span-2]="i === 1" [class.md:col-span-3]="i === 1" class="bg-surface-container-lowest rounded-3xl overflow-hidden animate-pulse">
+            <div [class.aspect-video]="i === 1" [class.aspect-square]="i !== 1" class="bg-surface-container-high"></div>
+            <div class="p-4 space-y-2">
+              <div class="h-3 bg-surface-container-high rounded w-3/4"></div>
+              <div class="h-5 bg-surface-container-high rounded w-1/3"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+
+    <!-- Kategoriler -->
+    <section class="py-6 bg-surface-container-low">
+      <div class="px-6 md:px-0 mb-4 flex justify-between items-end">
+        <h3 class="text-lg font-bold text-on-surface tracking-tight"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.CATEGORIES' | translate }}</h3>
+        <button (click)="selectCategory(null)"
+          class="text-primary text-sm font-bold hover:opacity-70 transition-opacity">{{ 'PRODUCTS.ALL' | translate }}</button>
+      </div>
+      <app-scroll-row rowClass="gap-3 px-6 md:px-0 md:flex-wrap md:overflow-x-visible justify-evenly" arrowClass="md:hidden">
+        @for (cat of rootCategories; track cat.id) {
+          <button (click)="selectCategory(cat)"
+            class="flex-none flex flex-col items-center gap-2 min-w-[80px]">
+            <div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center transition-colors hover:bg-surface-container"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.06)">
+              <span class="font-bold text-primary text-xl">{{ categoryInitial(cat.name) }}</span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface text-center leading-tight">{{ cat.name }}</span>
+          </button>
+        }
+      </app-scroll-row>
+    </section>
+
+    <!-- Desktop: 2-sütun layout -->
+    <div class="md:grid md:grid-cols-3 md:gap-8 md:items-start">
+
+      <!-- Popüler Ürünler -->
+      <section class="px-6 md:px-0 py-8 md:col-span-2">
+        <div class="flex justify-between items-end mb-5">
+          <h3 class="text-xl font-bold text-on-surface tracking-tight"
+            style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.POPULAR' | translate }}</h3>
+          <button (click)="selectCategory(null)"
+            class="text-primary text-sm font-bold hover:opacity-70 transition-opacity">{{ 'PRODUCTS.SEE_ALL' | translate }}</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          @if (popularProducts()[0]; as p) {
+            <div class="col-span-2 bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
+              (click)="goToProduct(p.id)"
+              style="box-shadow: 0 4px 24px rgba(26,27,34,0.06)">
+              <div class="relative aspect-video bg-surface-container-low flex items-center justify-center overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover" (error)="onImgError($event, p)">
+                <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-xl">favorite_border</span>
+                </button>
+              </div>
+              <div class="p-5 flex justify-between items-end">
+                <div>
+                  @if (p.reviewCount > 0) {
+                    <div class="flex items-center gap-1 mb-1">
+                      <span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings:'FILL' 1">star</span>
+                      <span class="text-xs font-bold text-on-surface">{{ p.avgRating.toFixed(1) }}</span>
+                      <span class="text-xs text-outline">({{ p.reviewCount }})</span>
+                    </div>
+                  }
+                  <h4 class="text-lg font-bold text-on-surface tracking-tight"
+                    style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                  <p class="text-outline text-sm">{{ p.store.name }}</p>
+                  <p class="text-primary font-bold mt-2 text-xl tracking-tight">{{ currency.format(p.unitPrice) }}</p>
+                </div>
+                <button (click)="addToCart(p, $event)"
+                  class="w-10 h-10 rounded-full bg-on-surface/8 text-on-surface flex items-center justify-center hover:bg-on-surface/15 active:scale-90 transition-all">
+                  <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                </button>
+              </div>
+            </div>
+          }
+          @for (p of popularProducts().slice(1); track p.id) {
+            <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group editorial-shadow"
+              (click)="goToProduct(p.id)">
+              <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" (error)="onImgError($event, p)">
+              </div>
+              <div class="p-4 space-y-1">
+                @if (p.reviewCount > 0) {
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
+                    <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                  </div>
+                }
+                <h4 class="text-sm font-bold text-on-surface truncate leading-tight"
+                  style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                <p class="text-primary font-extrabold text-lg" style="font-family:'Plus Jakarta Sans',sans-serif">{{ currency.format(p.unitPrice) }}</p>
+                <button (click)="$event.stopPropagation(); addToCart(p, $event)"
+                  class="mt-2 w-full bg-secondary text-on-secondary flex items-center justify-center gap-2 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all text-xs font-bold">
+                  <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                  {{ 'PRODUCTS.ADD_TO_CART' | translate }}
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <!-- Mağazalar -->
+      @if (stores().length > 0) {
+        <section class="px-6 md:px-0 py-8 md:col-span-1">
+          <div class="flex justify-between items-end mb-5">
+            <h3 class="text-xl font-bold text-on-surface tracking-tight"
+              style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.STORES' | translate }}</h3>
+            <button class="text-primary text-sm font-bold hover:opacity-70 transition-opacity">{{ 'PRODUCTS.SEE_ALL' | translate }}</button>
+          </div>
+          <div class="flex flex-col gap-3">
+            @for (store of stores(); track store.id) {
+              <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:bg-surface-container transition-colors"
+                (click)="goToStore(store.id)"
+                style="box-shadow: 0 2px 12px rgba(26,27,34,0.04)">
+                <div class="w-12 h-12 rounded-2xl bg-surface-container-low flex items-center justify-center flex-shrink-0">
+                  <span class="text-primary font-bold text-xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+                    {{ store.name.charAt(0) }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-bold text-on-surface truncate text-sm"
+                    style="font-family:'Plus Jakarta Sans',sans-serif">{{ store.name }}</h4>
+                  @if (store.description) {
+                    <p class="text-outline text-xs truncate mt-0.5">{{ store.description }}</p>
+                  }
+                </div>
+                <span class="material-symbols-outlined text-outline-variant text-lg">chevron_right</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+    </div>
+
+  }
+}
+
+<!-- ===== CATEGORY VIEW ===== -->
+@if (view() === 'category') {
+
+  <div class="md:flex md:gap-8 md:items-start pt-4">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:block md:w-52 md:flex-none">
+      <div class="sticky top-6 space-y-6">
+
+        <button (click)="backToBrowse()"
+          class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined text-lg">arrow_back</span>
+          {{ 'PRODUCTS.ALL_PRODUCTS' | translate }}
+        </button>
+
+        <div>
+          <h2 class="text-base font-extrabold text-on-surface tracking-tight"
+            style="font-family:'Plus Jakarta Sans',sans-serif">
+            {{ selectedCategory() ? selectedCategory()!.name : ('PRODUCTS.ALL_PRODUCTS' | translate) }}
+          </h2>
+          <p class="text-outline text-xs mt-1">
+            {{ totalElements() }} {{ 'PRODUCTS.ALL_PRODUCTS' | translate | lowercase }}
+            @if (searching()) { <span class="text-primary">· {{ 'PRODUCTS.UPDATING' | translate }}</span> }
+          </p>
+        </div>
+
+        <!-- Kategori Listesi (Accordion) -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-2">{{ 'PRODUCTS.CATEGORY' | translate }}</p>
+          <div class="space-y-0.5">
+            <button (click)="selectCategory(null)"
+              class="w-full text-left text-sm px-3 py-2 rounded-xl transition-colors font-medium"
+              [class.bg-primary]="!selectedCategoryId"
+              [class.text-on-primary]="!selectedCategoryId"
+              [class.text-on-surface-variant]="!!selectedCategoryId"
+              [class.hover:bg-surface-container-low]="!!selectedCategoryId">
+              {{ 'PRODUCTS.ALL_CATEGORIES' | translate }}
+            </button>
+            @for (cat of rootCategories; track cat.id) {
+              <!-- Ana Kategori Butonu -->
+              <div>
+                <div class="flex items-center">
+                  <button (click)="selectCategory(cat)"
+                    class="flex-1 text-left text-sm px-3 py-2 rounded-l-xl transition-colors font-medium"
+                    [class.bg-primary]="selectedCategoryId === cat.id"
+                    [class.text-on-primary]="selectedCategoryId === cat.id"
+                    [class.text-on-surface-variant]="selectedCategoryId !== cat.id"
+                    [class.hover:bg-surface-container-low]="selectedCategoryId !== cat.id">
+                    {{ cat.name }}
+                  </button>
+                  @if (childrenFor(cat.id).length > 0) {
+                    <button (click)="toggleCategoryExpand(cat.id)"
+                      class="px-2 py-2 rounded-r-xl transition-colors text-outline hover:text-on-surface"
+                      [class.bg-primary]="selectedCategoryId === cat.id"
+                      [class.text-on-primary]="selectedCategoryId === cat.id"
+                      [class.hover:bg-surface-container-low]="selectedCategoryId !== cat.id">
+                      <span class="material-symbols-outlined text-base transition-transform inline-block"
+                        [class.rotate-180]="expandedCategoryId() === cat.id">expand_more</span>
+                    </button>
+                  }
+                </div>
+                <!-- Alt Kategoriler -->
+                @if (expandedCategoryId() === cat.id) {
+                  <div class="ml-4 mt-0.5 space-y-0.5 border-l-2 border-primary/20 pl-2">
+                    @for (child of childrenFor(cat.id); track child.id) {
+                      <button (click)="selectCategory(child)"
+                        class="w-full text-left text-xs px-3 py-1.5 rounded-xl transition-colors font-medium"
+                        [class.bg-primary]="selectedCategoryId === child.id"
+                        [class.text-on-primary]="selectedCategoryId === child.id"
+                        [class.text-on-surface-variant]="selectedCategoryId !== child.id"
+                        [class.hover:bg-surface-container-low]="selectedCategoryId !== child.id">
+                        {{ child.name }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Fiyat Filtresi -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">{{ 'PRODUCTS.PRICE_RANGE' | translate }}</p>
+          <div class="space-y-2">
+            <input type="number" [ngModel]="minPrice" (ngModelChange)="onMinChange($event)"
+              [placeholder]="'PRODUCTS.MIN_PRICE' | translate"
+              class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-2.5 focus:outline-none placeholder-outline"
+              [class.ring-1]="priceError" [class.ring-error]="priceError" />
+            <input type="number" [ngModel]="maxPrice" (ngModelChange)="onMaxChange($event)"
+              [placeholder]="'PRODUCTS.MAX_PRICE' | translate"
+              class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-2.5 focus:outline-none placeholder-outline"
+              [class.ring-1]="priceError" [class.ring-error]="priceError" />
+            @if (priceError) {
+              <p class="text-error text-[11px] font-medium px-1">{{ 'PRODUCTS.PRICE_ERROR' | translate }}</p>
+            }
+            <button (click)="applyFilters()" [disabled]="priceError"
+              class="w-full editorial-gradient text-white text-sm font-bold rounded-2xl px-4 py-2.5 active:scale-95 transition-transform disabled:opacity-40">
+              {{ 'PRODUCTS.APPLY' | translate }}
+            </button>
+            @if (hasActiveFilter) {
+              <button (click)="clearFilters()"
+                class="w-full bg-surface-container-high text-on-surface text-sm font-bold rounded-2xl px-4 py-2.5 active:scale-95 transition-transform">
+                {{ 'PRODUCTS.CLEAR' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Sıralama -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Sıralama</p>
+          <div class="relative">
+            <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+              class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+              <option value="">Varsayılan</option>
+              <option value="newest">En Yeni</option>
+              <option value="oldest">En Eski</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Min. Yıldız -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Min. Yıldız</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <button (click)="minRating = null; currentPage.set(0); loadProducts(0, true)"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+              [class.bg-primary]="minRating === null" [class.text-on-primary]="minRating === null"
+              [class.bg-surface-container-low]="minRating !== null" [class.text-on-surface-variant]="minRating !== null">
+              Tümü
+            </button>
+            @for (star of [1, 2, 3, 4]; track star) {
+              <button (click)="minRating = star; currentPage.set(0); loadProducts(0, true)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                [class.bg-primary]="minRating === star" [class.text-on-primary]="minRating === star"
+                [class.bg-surface-container-low]="minRating !== star" [class.text-on-surface-variant]="minRating !== star">
+                {{ star }}★+
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ANA İÇERİK -->
+    <div class="flex-1 min-w-0 px-6 md:px-0 pb-8">
+
+      <!-- Mobile: Header / Geri -->
+      <div class="md:hidden flex items-center gap-3 mb-6">
+        <button (click)="backToBrowse()"
+          class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="flex-1">
+          <h2 class="text-lg font-bold text-on-surface tracking-tight"
+            style="font-family:'Plus Jakarta Sans',sans-serif">
+            {{ selectedCategory() ? selectedCategory()!.name : ('PRODUCTS.ALL_PRODUCTS' | translate) }}
+          </h2>
+          <p class="text-outline text-xs font-medium">
+            {{ totalElements() }} {{ 'PRODUCTS.ALL_PRODUCTS' | translate | lowercase }}
+            @if (searching()) { <span class="text-primary"> · {{ 'PRODUCTS.UPDATING' | translate }}...</span> }
+          </p>
+        </div>
+      </div>
+
+      <!-- Mobile: Yatay filtre chips -->
+      <div class="md:hidden mb-6">
+      <app-scroll-row rowClass="gap-3 pb-1">
+        <!-- Sıralama -->
+        <div class="relative flex-none">
+          <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+            class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+            <option value="">Sıralama</option>
+            <option value="newest">En Yeni</option>
+            <option value="oldest">En Eski</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+        </div>
+        <!-- Min. Yıldız -->
+        <div class="relative flex-none">
+          <select [ngModel]="minRating" (ngModelChange)="minRating = $event != null ? +$event : null; currentPage.set(0); loadProducts(0, true)"
+            class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+            <option [ngValue]="null">Yıldız</option>
+            <option [ngValue]="1">1★+</option>
+            <option [ngValue]="2">2★+</option>
+            <option [ngValue]="3">3★+</option>
+            <option [ngValue]="4">4★+</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+        </div>
+        <div class="relative flex-none">
+          <select [ngModel]="selectedCategoryId"
+            (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"
+            class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none focus:bg-surface-container cursor-pointer">
+            <option [ngValue]="null">{{ 'PRODUCTS.ALL_CATEGORIES' | translate }}</option>
+            @for (cat of rootCategories; track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.name }}</option>
+              @for (child of childrenFor(cat.id); track child.id) {
+                <option [ngValue]="child.id">— {{ child.name }}</option>
+              }
+            }
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+        </div>
+
+        <input type="number" [ngModel]="minPrice" (ngModelChange)="onMinChange($event)"
+          [placeholder]="'PRODUCTS.MIN_PRICE' | translate"
+          class="flex-none w-28 bg-surface-container-low text-on-surface text-sm rounded-full px-4 py-2.5 focus:outline-none placeholder-outline"
+          [class.ring-1]="priceError" [class.ring-error]="priceError" />
+
+        <input type="number" [ngModel]="maxPrice" (ngModelChange)="onMaxChange($event)"
+          [placeholder]="'PRODUCTS.MAX_PRICE' | translate"
+          class="flex-none w-28 bg-surface-container-low text-on-surface text-sm rounded-full px-4 py-2.5 focus:outline-none placeholder-outline"
+          [class.ring-1]="priceError" [class.ring-error]="priceError" />
+
+        <button (click)="applyFilters()" [disabled]="priceError"
+          class="flex-none editorial-gradient text-white text-sm font-bold rounded-full px-5 py-2.5 active:scale-95 transition-transform disabled:opacity-40">
+          {{ 'PRODUCTS.FILTER' | translate }}
+        </button>
+
+        @if (hasActiveFilter) {
+          <button (click)="clearFilters()"
+            class="flex-none bg-surface-container-high text-on-surface text-sm font-bold rounded-full px-5 py-2.5 active:scale-95 transition-transform">
+            {{ 'PRODUCTS.CLEAR' | translate }}
+          </button>
+        }
+      </app-scroll-row>
+      </div>
+
+      @if (priceError) {
+        <p class="md:hidden text-error text-xs font-medium mb-3 px-1">{{ 'PRODUCTS.PRICE_ERROR_MOBILE' | translate }}</p>
+      }
+
+      <!-- Ürün Grid -->
+      @if (initialLoading()) {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden animate-pulse">
+              <div class="aspect-square bg-surface-container-high"></div>
+              <div class="p-4 space-y-2">
+                <div class="h-3 bg-surface-container-high rounded w-3/4"></div>
+                <div class="h-5 bg-surface-container-high rounded w-1/3"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (products().length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-outline text-6xl mb-4 block">inventory_2</span>
+          <p class="text-outline font-medium">{{ 'PRODUCTS.NOT_FOUND' | translate }}</p>
+          @if (hasActiveFilter) {
+            <button (click)="clearFilters()" class="mt-4 text-primary font-bold text-sm hover:opacity-70 transition-opacity">
+              {{ 'PRODUCTS.CLEAR_FILTERS' | translate }}
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10 mb-8" [class.opacity-60]="searching()">
+          @for (p of products(); track p.id) {
+            <article class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group editorial-shadow"
+              (click)="goToProduct(p.id)">
+              <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" (error)="onImgError($event, p)">
+                <button class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-on-primary transition-all opacity-0 group-hover:opacity-100">
+                  <span class="material-symbols-outlined text-lg">favorite_border</span>
+                </button>
+              </div>
+              <div class="p-4 space-y-1">
+                @if (p.reviewCount > 0) {
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
+                    <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                  </div>
+                }
+                <h4 class="text-sm font-bold text-on-surface truncate leading-tight"
+                  style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                <p class="text-outline text-xs truncate">{{ p.category ? getCategoryDisplayName(p.category) : ('PRODUCTS.GENERAL' | translate) }}</p>
+                <p class="text-primary font-extrabold text-lg pt-1" style="font-family:'Plus Jakarta Sans',sans-serif">{{ currency.format(p.unitPrice) }}</p>
+                @if (canManage) {
+                  <div class="flex gap-2 mt-3">
+                    <button class="flex-1 text-xs bg-surface-container-high text-on-surface py-1.5 rounded-full">{{ 'PRODUCTS.EDIT' | translate }}</button>
+                    <button (click)="$event.stopPropagation(); deleteProduct(p.id)"
+                      class="flex-1 text-xs bg-error-container text-on-error-container py-1.5 rounded-full">{{ 'PRODUCTS.DELETE' | translate }}</button>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="flex items-center justify-center gap-2">
+            <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0"
+              class="w-10 h-10 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-lg">chevron_left</span>
+            </button>
+            @for (page of pages; track page) {
+              <button (click)="goToPage(page)"
+                class="w-10 h-10 rounded-full text-sm font-bold transition-colors"
+                [class.editorial-gradient]="page === currentPage()"
+                [class.text-white]="page === currentPage()"
+                [class.bg-surface-container-low]="page !== currentPage()"
+                [class.text-on-surface-variant]="page !== currentPage()">
+                {{ page + 1 }}
+              </button>
+            }
+            <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1"
+              class="w-10 h-10 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-lg">chevron_right</span>
+            </button>
+          </div>
+        }
+      }
+
+    </div>
+
+  </div>
+}

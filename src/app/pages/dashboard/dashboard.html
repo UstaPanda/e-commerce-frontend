@@ -1,0 +1,661 @@
+<div class="bg-surface min-h-screen pb-4">
+
+  <!-- ═══════════════════════════════════════════════════
+       HERO — Gradient backdrop + central search bar
+  ════════════════════════════════════════════════════════ -->
+  <section class="relative px-6 md:px-8 pt-10 pb-16 md:pt-6 md:pb-16">
+    <!-- Ambient gradient -->
+    <div class="absolute inset-0 overflow-hidden z-0 pointer-events-none">
+      <div class="absolute inset-0 editorial-gradient opacity-[0.07] scale-110 blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-3xl mx-auto text-center">
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-3 leading-tight"
+        style="font-family:'Plus Jakarta Sans',sans-serif">
+        {{ 'DASHBOARD.HERO_TITLE' | translate }}<br/>
+        <span class="text-primary">{{ 'DASHBOARD.HERO_SUBTITLE' | translate }}</span>
+      </h1>
+      <p class="text-on-surface-variant text-sm md:text-base mb-8 md:mb-10 max-w-md mx-auto">
+        {{ 'DASHBOARD.HERO_DESC' | translate }}
+      </p>
+
+      <!-- Search Bar -->
+      <div class="relative max-w-2xl mx-auto" (keydown.escape)="showSuggestions.set(false)">
+        <div class="flex items-center bg-surface-container-lowest rounded-full transition-all"
+          [class.ring-2]="searchFocused"
+          [class.ring-primary]="searchFocused"
+          style="box-shadow: 0 8px 32px rgba(43,56,150,0.10)">
+          <span class="material-symbols-outlined text-primary text-xl ml-5 shrink-0">search</span>
+          <input type="text" [placeholder]="'DASHBOARD.SEARCH_PLACEHOLDER' | translate"
+            [value]="searchQuery"
+            (input)="onSearch($any($event.target).value)"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base font-medium text-on-surface px-3 py-4 md:py-5 placeholder-outline focus:outline-none" />
+          @if (searchQuery) {
+            <button (mousedown)="clearSearch()" class="text-outline hover:text-on-surface transition-colors mr-2">
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+          }
+          <button (click)="applyFilters()"
+            class="editorial-gradient text-white font-bold text-sm px-5 md:px-8 py-2.5 md:py-3.5 rounded-full mr-2 active:scale-95 transition-transform shrink-0">
+            <span class="hidden md:inline">{{ 'DASHBOARD.SEARCH_BTN' | translate }}</span>
+            <span class="md:hidden material-symbols-outlined text-lg leading-none align-middle">arrow_forward</span>
+          </button>
+        </div>
+
+        <!-- Autocomplete suggestions -->
+        @if (showSuggestions()) {
+          <div class="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest rounded-3xl shadow-xl z-[9999] overflow-hidden text-left">
+            <div class="px-4 py-3 border-b border-surface-container-high">
+              <span class="text-outline text-xs font-bold uppercase tracking-wider">{{ 'PRODUCTS.SUGGESTIONS' | translate }}</span>
+            </div>
+            @if (suggestLoading()) {
+              <div class="px-4 py-4 flex items-center gap-3">
+                <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-outline text-sm">{{ 'PRODUCTS.SEARCHING' | translate }}</span>
+              </div>
+            } @else if (suggestions().length === 0) {
+              <div class="px-4 py-4 text-outline text-sm">{{ 'PRODUCTS.NO_RESULTS' | translate }}</div>
+            } @else {
+              @for (s of suggestions(); track s) {
+                <button (mousedown)="selectSuggestion(s)"
+                  class="w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low flex items-center gap-3 transition-colors border-b border-surface-container-high/50 last:border-0">
+                  <span class="material-symbols-outlined text-outline text-lg">search</span>
+                  <span class="flex-1" [innerHTML]="highlightMatch(s, searchQuery)"></span>
+                  <span class="material-symbols-outlined text-outline-variant text-base -rotate-45">arrow_forward</span>
+                </button>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       CATEGORIES ROW
+  ════════════════════════════════════════════════════════ -->
+  <section class="py-8 bg-surface-container-low/60">
+    <div class="px-6 md:px-8 max-w-7xl mx-auto mb-5 flex items-center justify-between">
+      <h3 class="text-lg font-bold text-on-surface tracking-tight"
+        style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.CATEGORIES' | translate }}</h3>
+      @if (view() === 'search' && hasActiveFilter) {
+        <button (click)="backToBrowse()"
+          class="text-primary text-sm font-bold hover:opacity-70 transition-opacity flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">close</span>
+          {{ 'PRODUCTS.CLEAR' | translate }}
+        </button>
+      }
+    </div>
+    <app-scroll-row rowClass="gap-4 px-6 md:px-8 pb-2 justify-evenly" [hideArrows]="true">
+      <!-- All -->
+      <button (click)="backToBrowse()"
+        class="flex-none flex flex-col items-center gap-2 min-w-[80px] active:scale-95 transition-transform">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200"
+          [class.editorial-gradient]="view() === 'browse' && !selectedCategoryId"
+          [class.bg-surface-container-lowest]="!(view() === 'browse' && !selectedCategoryId)"
+          style="box-shadow: 0 4px 16px rgba(26,27,34,0.07)">
+          <span class="material-symbols-outlined text-2xl"
+            [class.text-white]="view() === 'browse' && !selectedCategoryId"
+            [class.text-primary]="!(view() === 'browse' && !selectedCategoryId)">grid_view</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface">{{ 'DASHBOARD.ALL' | translate }}</span>
+      </button>
+      @for (cat of rootCategories(); track cat.id) {
+        <button (click)="selectCategory(cat)"
+          class="flex-none flex flex-col items-center gap-2 min-w-[80px] active:scale-95 transition-transform">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200"
+            [class.editorial-gradient]="selectedCategoryId === cat.id"
+            [class.bg-surface-container-lowest]="selectedCategoryId !== cat.id"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.07)">
+            <span class="font-bold text-lg"
+              [class.text-white]="selectedCategoryId === cat.id"
+              [class.text-primary]="selectedCategoryId !== cat.id"
+              style="font-family:'Plus Jakarta Sans',sans-serif">{{ categoryInitial(cat.name) }}</span>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface text-center leading-tight max-w-[68px] truncate">{{ cat.name }}</span>
+        </button>
+      }
+    </app-scroll-row>
+  </section>
+
+  <!-- KPI Cards (for logged-in users with analytics) -->
+  @if (kpiCards.length > 0) {
+    <section class="px-6 md:px-8 py-8 max-w-7xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (card of kpiCards; track card.label) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="w-8 h-8 rounded-xl bg-surface-container-low flex items-center justify-center mb-3">
+              <span class="material-symbols-outlined text-primary text-lg">{{ card.icon }}</span>
+            </div>
+            <p class="text-outline text-xs font-medium uppercase tracking-wider mb-1">{{ card.label }}</p>
+            <p class="text-on-surface text-xl font-bold tracking-tight"
+              style="font-family:'Plus Jakarta Sans',sans-serif">{{ card.value }}</p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ═══════════════════════════════════════════════════
+       BROWSE VIEW — Popular products + Stores
+  ════════════════════════════════════════════════════════ -->
+  @if (view() === 'browse') {
+    <section class="px-6 md:px-8 py-8 max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-on-surface tracking-tight"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.POPULAR' | translate }}</h3>
+      </div>
+
+      @if (browseLoading()) {
+        <!-- Skeleton -->
+        <div class="hidden md:grid grid-cols-12 gap-6">
+          <div class="col-span-8 bg-surface-container-low rounded-xl animate-pulse h-[400px]"></div>
+          <div class="col-span-4 space-y-6">
+            <div class="bg-surface-container-lowest rounded-xl animate-pulse h-[188px]"></div>
+            <div class="bg-surface-container-lowest rounded-xl animate-pulse h-[188px]"></div>
+          </div>
+          @for (i of [1,2,3,4]; track i) {
+            <div class="col-span-3 bg-surface-container-lowest rounded-xl animate-pulse h-[260px]"></div>
+          }
+        </div>
+        <div class="md:hidden grid grid-cols-2 gap-4">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div [class.col-span-2]="i === 1" class="bg-surface-container-lowest rounded-3xl overflow-hidden animate-pulse">
+              <div [class.aspect-video]="i === 1" [class.aspect-square]="i !== 1" class="bg-surface-container-high"></div>
+              <div class="p-4 space-y-2">
+                <div class="h-3 bg-surface-container-high rounded w-3/4"></div>
+                <div class="h-5 bg-surface-container-high rounded w-1/3"></div>
+              </div>
+            </div>
+          }
+        </div>
+
+      } @else if (popularProducts().length === 0) {
+        <div class="text-center py-20">
+          <span class="material-symbols-outlined text-outline text-6xl mb-4 block">inventory_2</span>
+          <p class="text-outline font-medium">{{ 'DASHBOARD.NO_PRODUCTS' | translate }}</p>
+        </div>
+
+      } @else {
+        <!-- Desktop bento grid -->
+        <div class="hidden md:grid grid-cols-12 gap-6 mb-8">
+          @if (popularProducts()[0]; as p) {
+            <div class="col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-low cursor-pointer"
+              (click)="goToProduct(p.id)"
+              style="box-shadow: 0 4px 24px rgba(26,27,34,0.06)">
+              <div class="absolute inset-0 bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p, 900, 600)" [alt]="p.name" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" (error)="onImgError($event, p)">
+              </div>
+              <div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent text-white">
+                <div class="flex justify-between items-end">
+                  <div>
+                    @if (p.category) {
+                      <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white/90 px-2.5 py-0.5 rounded-full mb-2 cursor-pointer hover:bg-white/30 transition-colors"
+                        (click)="$event.stopPropagation(); selectCategory(p.category!)">{{ p.category.name }}</span>
+                    }
+                    @if (p.reviewCount > 0) {
+                      <div class="flex items-center gap-1 mb-2">
+                        <span class="material-symbols-outlined text-yellow-400 text-sm" style="font-variation-settings:'FILL' 1">star</span>
+                        <span class="text-white/90 text-xs font-bold">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                      </div>
+                    }
+                    <h4 class="text-3xl font-headline font-bold mb-1">{{ p.name }}</h4>
+                    <p class="text-white/80 text-sm">{{ p.store.name }}</p>
+                  </div>
+                  <div class="text-2xl font-headline font-bold shrink-0">{{ currency.format(p.unitPrice) }}</div>
+                </div>
+              </div>
+            </div>
+          }
+          <div class="col-span-4 flex flex-col gap-6">
+            @for (p of popularProducts().slice(1, 3); track p.id) {
+              <div class="flex-1 bg-surface-container-lowest rounded-xl overflow-hidden flex flex-col cursor-pointer group hover:shadow-md transition-shadow"
+                (click)="goToProduct(p.id)"
+                style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+                <div class="h-40 bg-surface-container-low overflow-hidden">
+                  <img [src]="getProductImage(p, 460, 160)" [alt]="p.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" (error)="onImgError($event, p)">
+                </div>
+                <div class="p-5 flex flex-col flex-grow">
+                  @if (p.category) {
+                    <span class="inline-block self-start text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full mb-1.5 cursor-pointer hover:bg-primary/20 transition-colors"
+                      (click)="$event.stopPropagation(); selectCategory(p.category!)">{{ p.category.name }}</span>
+                  }
+                  @if (p.reviewCount > 0) {
+                    <div class="flex items-center gap-1 mb-1">
+                      <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1">star</span>
+                      <span class="text-xs font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                    </div>
+                  }
+                  <h4 class="font-headline font-bold mb-1 truncate">{{ p.name }}</h4>
+                  <p class="text-on-surface-variant text-xs mb-3 flex-grow">{{ p.store.name }}</p>
+                  <div class="flex justify-between items-center mt-auto">
+                    <span class="text-xl font-bold font-headline text-on-surface">{{ currency.format(p.unitPrice) }}</span>
+                    <button (click)="addToCart(p, $event)"
+                      class="w-9 h-9 rounded-full bg-on-surface/8 text-on-surface flex items-center justify-center hover:bg-on-surface/15 active:scale-90 transition-all">
+                      <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+          @for (p of popularProducts().slice(3); track p.id) {
+            <div class="col-span-3 bg-surface-container-lowest rounded-xl overflow-hidden cursor-pointer group hover:shadow-md transition-shadow"
+              (click)="goToProduct(p.id)"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="h-52 bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p, 344, 208)" [alt]="p.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" (error)="onImgError($event, p)">
+              </div>
+              <div class="p-5">
+                @if (p.category) {
+                  <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full mb-1.5 cursor-pointer hover:bg-primary/20 transition-colors"
+                    (click)="$event.stopPropagation(); selectCategory(p.category!)">{{ p.category.name }}</span>
+                }
+                @if (p.reviewCount > 0) {
+                  <div class="flex items-center gap-1 mb-1">
+                    <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1">star</span>
+                    <span class="text-xs font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                  </div>
+                }
+                <h4 class="font-headline font-bold mb-1 truncate text-sm">{{ p.name }}</h4>
+                <div class="flex justify-between items-center mt-2">
+                  <span class="text-lg font-bold font-headline">{{ currency.format(p.unitPrice) }}</span>
+                  <button (click)="addToCart(p, $event)"
+                    class="w-8 h-8 rounded-full bg-on-surface/8 text-on-surface flex items-center justify-center hover:bg-on-surface/15 active:scale-90 transition-all">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Mobile grid -->
+        <div class="md:hidden grid grid-cols-2 gap-4">
+          @if (popularProducts()[0]; as p) {
+            <div class="col-span-2 bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
+              (click)="goToProduct(p.id)"
+              style="box-shadow: 0 4px 24px rgba(26,27,34,0.06)">
+              <div class="relative bg-surface-container-low overflow-hidden" style="height:260px">
+                <img [src]="getProductImage(p, 700, 260)" [alt]="p.name" class="w-full h-full object-cover object-center" (error)="onImgError($event, p)">
+              </div>
+              <div class="p-5 flex justify-between items-end">
+                <div>
+                  @if (p.category) {
+                    <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full mb-1.5 cursor-pointer hover:bg-primary/20 transition-colors"
+                      (click)="$event.stopPropagation(); selectCategory(p.category!)">{{ p.category.name }}</span>
+                  }
+                  @if (p.reviewCount > 0) {
+                    <div class="flex items-center gap-1 mb-1">
+                      <span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings:'FILL' 1">star</span>
+                      <span class="text-xs font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                    </div>
+                  }
+                  <h4 class="text-lg font-bold text-on-surface tracking-tight"
+                    style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                  <p class="text-outline text-sm">{{ p.store.name }}</p>
+                  <p class="text-primary font-bold mt-2 text-xl">{{ currency.format(p.unitPrice) }}</p>
+                </div>
+                <button (click)="addToCart(p, $event)"
+                  class="w-10 h-10 rounded-full bg-on-surface/8 text-on-surface flex items-center justify-center hover:bg-on-surface/15 active:scale-90 transition-all">
+                  <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                </button>
+              </div>
+            </div>
+          }
+          @for (p of popularProducts().slice(1); track p.id) {
+            <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer"
+              (click)="goToProduct(p.id)"
+              style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+              <div class="aspect-square bg-surface-container-low overflow-hidden">
+                <img [src]="getProductImage(p, 300, 300)" [alt]="p.name" class="w-full h-full object-cover" (error)="onImgError($event, p)">
+              </div>
+              <div class="p-4">
+                @if (p.category) {
+                  <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full mb-1 cursor-pointer hover:bg-primary/20 transition-colors"
+                    (click)="$event.stopPropagation(); selectCategory(p.category!)">{{ p.category.name }}</span>
+                }
+                @if (p.reviewCount > 0) {
+                  <div class="flex items-center gap-1 mb-1">
+                    <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
+                    <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                  </div>
+                }
+                <h4 class="text-sm font-bold text-on-surface truncate"
+                  style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                <p class="text-primary font-bold text-lg mt-1">{{ currency.format(p.unitPrice) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Stores section -->
+    @if (stores().length > 0) {
+      <section class="px-6 md:px-8 pb-8 max-w-7xl mx-auto">
+        <h3 class="text-xl font-bold text-on-surface tracking-tight mb-5"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'PRODUCTS.STORES' | translate }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          @for (store of stores().slice(0, 6); track store.id) {
+            <div class="bg-surface-container-lowest rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:bg-surface-container transition-colors"
+              (click)="goToStore(store.id)"
+              style="box-shadow: 0 2px 12px rgba(26,27,34,0.04)">
+              <div class="w-12 h-12 rounded-2xl editorial-gradient flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-bold text-xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+                  {{ store.name.charAt(0) }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-on-surface truncate text-sm">{{ store.name }}</h4>
+                @if (store.description) {
+                  <p class="text-outline text-xs truncate mt-0.5">{{ store.description }}</p>
+                }
+              </div>
+              <span class="material-symbols-outlined text-outline-variant text-lg">chevron_right</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Desktop footer -->
+    <footer class="hidden md:block bg-surface-container-low border-t border-outline-variant/10 mt-8 py-12">
+      <div class="max-w-7xl mx-auto px-8 flex flex-col items-center gap-6">
+        <h3 class="font-headline text-2xl font-extrabold text-primary uppercase tracking-[0.3em]">Zorlu Trading</h3>
+        <div class="flex gap-8">
+          <a class="font-body text-xs text-outline hover:text-primary transition-colors cursor-pointer">{{ 'DASHBOARD.PRIVACY' | translate }}</a>
+          <a class="font-body text-xs text-outline hover:text-primary transition-colors cursor-pointer">{{ 'DASHBOARD.TERMS' | translate }}</a>
+          <a class="font-body text-xs text-outline hover:text-primary transition-colors cursor-pointer">{{ 'DASHBOARD.SHIPPING' | translate }}</a>
+        </div>
+        <p class="font-body text-xs text-outline">© 2024 Zorlu Trading. All Rights Reserved.</p>
+      </div>
+    </footer>
+  }
+
+  <!-- ═══════════════════════════════════════════════════
+       SEARCH / CATEGORY VIEW — Filtered product grid
+  ════════════════════════════════════════════════════════ -->
+  @if (view() === 'search') {
+    <div class="max-w-7xl mx-auto md:flex md:gap-8 md:items-start px-6 md:px-8 pt-6 pb-8">
+
+      <!-- Desktop sidebar -->
+      <aside class="hidden md:block md:w-52 md:flex-none">
+        <div class="sticky top-6 space-y-6">
+          <button (click)="backToBrowse()"
+            class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            {{ 'PRODUCTS.ALL_PRODUCTS' | translate }}
+          </button>
+          <div>
+            <h2 class="text-base font-extrabold text-on-surface tracking-tight"
+              style="font-family:'Plus Jakarta Sans',sans-serif">
+              {{ selectedCategory() ? selectedCategory()!.name : (searchQuery ? searchQuery : ('PRODUCTS.ALL_PRODUCTS' | translate)) }}
+            </h2>
+            <p class="text-outline text-xs mt-1">
+              {{ totalElements() }} {{ 'PRODUCTS.ALL_PRODUCTS' | translate | lowercase }}
+              @if (searching()) { <span class="text-primary">· {{ 'PRODUCTS.UPDATING' | translate }}</span> }
+            </p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-2">{{ 'PRODUCTS.CATEGORY' | translate }}</p>
+            <div class="space-y-0.5">
+              <button (click)="selectCategory(null)"
+                class="w-full text-left text-sm px-3 py-2 rounded-xl transition-colors font-medium"
+                [class.bg-primary]="!selectedCategoryId"
+                [class.text-on-primary]="!selectedCategoryId"
+                [class.text-on-surface-variant]="!!selectedCategoryId">
+                {{ 'PRODUCTS.ALL_CATEGORIES' | translate }}
+              </button>
+              @for (group of categoriesGrouped; track group.root.id) {
+                <button (click)="selectCategory(group.root)"
+                  class="w-full text-left text-sm px-3 py-2 rounded-xl transition-colors font-medium"
+                  [class.bg-primary]="selectedCategoryId === group.root.id"
+                  [class.text-on-primary]="selectedCategoryId === group.root.id"
+                  [class.text-on-surface-variant]="selectedCategoryId !== group.root.id">
+                  {{ group.root.name }}
+                </button>
+                @for (child of group.children; track child.id) {
+                  <button (click)="selectCategory(child)"
+                    class="w-full text-left text-xs pl-6 pr-3 py-1.5 rounded-xl transition-colors font-medium"
+                    [class.bg-primary]="selectedCategoryId === child.id"
+                    [class.text-on-primary]="selectedCategoryId === child.id"
+                    [class.text-on-surface-variant]="selectedCategoryId !== child.id">
+                    {{ child.name }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">{{ 'PRODUCTS.PRICE_RANGE' | translate }}</p>
+            <div class="space-y-2">
+              <input type="number" [ngModel]="minPrice" (ngModelChange)="onMinChange($event)"
+                [placeholder]="'PRODUCTS.MIN_PRICE' | translate"
+                class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-2.5 focus:outline-none placeholder-outline"
+                [class.ring-1]="priceError" [class.ring-error]="priceError" />
+              <input type="number" [ngModel]="maxPrice" (ngModelChange)="onMaxChange($event)"
+                [placeholder]="'PRODUCTS.MAX_PRICE' | translate"
+                class="w-full bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 py-2.5 focus:outline-none placeholder-outline"
+                [class.ring-1]="priceError" [class.ring-error]="priceError" />
+              <button (click)="applyFilters()" [disabled]="priceError"
+                class="w-full editorial-gradient text-white text-sm font-bold rounded-2xl px-4 py-2.5 active:scale-95 transition-transform disabled:opacity-40">
+                {{ 'PRODUCTS.APPLY' | translate }}
+              </button>
+              @if (hasActiveFilter) {
+                <button (click)="clearFilters()"
+                  class="w-full bg-surface-container-high text-on-surface text-sm font-bold rounded-2xl px-4 py-2.5 active:scale-95 transition-transform">
+                  {{ 'PRODUCTS.CLEAR' | translate }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Sıralama -->
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Sıralama</p>
+            <div class="relative">
+              <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+                class="w-full appearance-none bg-surface-container-low text-on-surface text-sm rounded-2xl px-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option value="">Varsayılan</option>
+                <option value="newest">En Yeni</option>
+                <option value="oldest">En Eski</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Min. Yıldız -->
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-3">Min. Yıldız</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <button (click)="minRating = null; currentPage.set(0); loadProducts(0, true)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                [class.bg-primary]="minRating === null" [class.text-on-primary]="minRating === null"
+                [class.bg-surface-container-low]="minRating !== null" [class.text-on-surface-variant]="minRating !== null">
+                Tümü
+              </button>
+              @for (star of [1, 2, 3, 4]; track star) {
+                <button (click)="minRating = star; currentPage.set(0); loadProducts(0, true)"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                  [class.bg-primary]="minRating === star" [class.text-on-primary]="minRating === star"
+                  [class.bg-surface-container-low]="minRating !== star" [class.text-on-surface-variant]="minRating !== star">
+                  {{ star }}★+
+                </button>
+              }
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex-1 min-w-0">
+
+        <!-- Mobile header -->
+        <div class="md:hidden flex items-center gap-3 mb-6">
+          <button (click)="backToBrowse()"
+            class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div class="flex-1">
+            <h2 class="text-lg font-bold text-on-surface tracking-tight"
+              style="font-family:'Plus Jakarta Sans',sans-serif">
+              {{ selectedCategory() ? selectedCategory()!.name : (searchQuery || ('PRODUCTS.ALL_PRODUCTS' | translate)) }}
+            </h2>
+            <p class="text-outline text-xs font-medium">
+              {{ totalElements() }} ürün
+              @if (searching()) { <span class="text-primary"> · güncelleniyor...</span> }
+            </p>
+          </div>
+        </div>
+
+        <!-- Mobile filter chips -->
+        <div class="md:hidden mb-6">
+          <app-scroll-row rowClass="gap-3 pb-1">
+            <!-- Sıralama -->
+            <div class="relative flex-none">
+              <select [(ngModel)]="sortOrder" (ngModelChange)="currentPage.set(0); loadProducts(0, true)"
+                class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option value="">Sıralama</option>
+                <option value="newest">En Yeni</option>
+                <option value="oldest">En Eski</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+            <!-- Min. Yıldız -->
+            <div class="relative flex-none">
+              <select [ngModel]="minRating" (ngModelChange)="minRating = $event != null ? +$event : null; currentPage.set(0); loadProducts(0, true)"
+                class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option [ngValue]="null">Yıldız</option>
+                <option [ngValue]="1">1★+</option>
+                <option [ngValue]="2">2★+</option>
+                <option [ngValue]="3">3★+</option>
+                <option [ngValue]="4">4★+</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+            <div class="relative flex-none">
+              <select [ngModel]="selectedCategoryId"
+                (ngModelChange)="selectedCategoryId = $event; currentPage.set(0); loadProducts(0, true)"
+                class="appearance-none bg-surface-container-low text-on-surface text-sm font-medium rounded-full pl-4 pr-8 py-2.5 focus:outline-none cursor-pointer">
+                <option [ngValue]="null">{{ 'PRODUCTS.ALL_CATEGORIES' | translate }}</option>
+                @for (group of categoriesGrouped; track group.root.id) {
+                  @if (group.children.length > 0) {
+                    <optgroup [label]="group.root.name">
+                      <option [ngValue]="group.root.id">{{ group.root.name }}</option>
+                      @for (child of group.children; track child.id) {
+                        <option [ngValue]="child.id">↳ {{ child.name }}</option>
+                      }
+                    </optgroup>
+                  } @else {
+                    <option [ngValue]="group.root.id">{{ group.root.name }}</option>
+                  }
+                }
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
+            </div>
+            <input type="number" [ngModel]="minPrice" (ngModelChange)="onMinChange($event)"
+              [placeholder]="'PRODUCTS.MIN_PRICE' | translate"
+              class="flex-none w-28 bg-surface-container-low text-on-surface text-sm rounded-full px-4 py-2.5 focus:outline-none placeholder-outline" />
+            <input type="number" [ngModel]="maxPrice" (ngModelChange)="onMaxChange($event)"
+              [placeholder]="'PRODUCTS.MAX_PRICE' | translate"
+              class="flex-none w-28 bg-surface-container-low text-on-surface text-sm rounded-full px-4 py-2.5 focus:outline-none placeholder-outline" />
+            <button (click)="applyFilters()" [disabled]="priceError"
+              class="flex-none editorial-gradient text-white text-sm font-bold rounded-full px-5 py-2.5 active:scale-95 transition-transform disabled:opacity-40">
+              {{ 'PRODUCTS.FILTER' | translate }}
+            </button>
+            @if (hasActiveFilter) {
+              <button (click)="clearFilters()"
+                class="flex-none bg-surface-container-high text-on-surface text-sm font-bold rounded-full px-5 py-2.5 active:scale-95 transition-transform">
+                {{ 'PRODUCTS.CLEAR' | translate }}
+              </button>
+            }
+          </app-scroll-row>
+        </div>
+
+        <!-- Product grid -->
+        @if (initialLoading()) {
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            @for (i of [1,2,3,4,5,6]; track i) {
+              <div class="bg-surface-container-lowest rounded-3xl overflow-hidden animate-pulse">
+                <div class="aspect-square bg-surface-container-high"></div>
+                <div class="p-4 space-y-2">
+                  <div class="h-3 bg-surface-container-high rounded w-3/4"></div>
+                  <div class="h-5 bg-surface-container-high rounded w-1/3"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (products().length === 0) {
+          <div class="text-center py-20">
+            <span class="material-symbols-outlined text-outline text-6xl mb-4 block">inventory_2</span>
+            <p class="text-outline font-medium">{{ 'PRODUCTS.NOT_FOUND' | translate }}</p>
+            @if (hasActiveFilter) {
+              <button (click)="clearFilters()" class="mt-4 text-primary font-bold text-sm hover:opacity-70 transition-opacity">
+                {{ 'PRODUCTS.CLEAR_FILTERS' | translate }}
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" [class.opacity-60]="searching()">
+            @for (p of products(); track p.id) {
+              <div class="bg-surface-container-lowest rounded-3xl overflow-hidden cursor-pointer group"
+                (click)="goToProduct(p.id)"
+                style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+                <div class="relative aspect-square bg-surface-container-low overflow-hidden">
+                  <img [src]="getProductImage(p, 300, 300)" [alt]="p.name" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" (error)="onImgError($event, p)">
+                  <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
+                      <span class="material-symbols-outlined text-primary text-base">favorite_border</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4">
+                  @if (p.reviewCount > 0) {
+                    <div class="flex items-center gap-1 mb-1">
+                      <span class="material-symbols-outlined text-yellow-500 text-[12px]" style="font-variation-settings:'FILL' 1">star</span>
+                      <span class="text-[10px] font-bold text-on-surface">{{ p.avgRating.toFixed(1) }} ({{ p.reviewCount }})</span>
+                    </div>
+                  }
+                  <h4 class="text-sm font-bold text-on-surface truncate"
+                    style="font-family:'Plus Jakarta Sans',sans-serif">{{ p.name }}</h4>
+                  <p class="text-outline text-xs truncate mt-0.5">{{ p.category?.name ?? ('PRODUCTS.GENERAL' | translate) }}</p>
+                  <p class="text-primary font-bold text-base mt-2">{{ currency.format(p.unitPrice) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="flex items-center justify-center gap-2">
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0"
+                class="w-10 h-10 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center disabled:opacity-30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-lg">chevron_left</span>
+              </button>
+              @for (page of pages; track page) {
+                <button (click)="goToPage(page)"
+                  class="w-10 h-10 rounded-full text-sm font-bold transition-colors"
+                  [class.editorial-gradient]="page === currentPage()"
+                  [class.text-white]="page === currentPage()"
+                  [class.bg-surface-container-low]="page !== currentPage()"
+                  [class.text-on-surface-variant]="page !== currentPage()">
+                  {{ page + 1 }}
+                </button>
+              }
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1"
+                class="w-10 h-10 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center disabled:opacity-30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-lg">chevron_right</span>
+              </button>
+            </div>
+          }
+        }
+
+      </div>
+    </div>
+  }
+
+</div>

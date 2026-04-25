@@ -1,0 +1,194 @@
+<div class="bg-surface min-h-screen pb-8">
+
+  <!-- Header -->
+  <div class="editorial-gradient px-6 pt-6 pb-16 md:rounded-3xl relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+    <div class="relative z-10">
+      <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">Admin</p>
+      <h1 class="text-white font-extrabold text-2xl"
+        style="font-family:'Plus Jakarta Sans',sans-serif">System Settings</h1>
+      <p class="text-white/60 text-sm mt-1">Configure platform-wide settings and preferences</p>
+    </div>
+  </div>
+
+  <div class="mx-6 -mt-6 relative z-10 space-y-5">
+
+    <!-- Platform Info -->
+    <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+      style="box-shadow:0 8px 24px rgba(26,27,34,0.10)">
+      <div class="px-5 py-4 border-b border-outline-variant/20 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-lg">business</span>
+        </div>
+        <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">Platform Info</h3>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Platform Name</label>
+          <input type="text"
+            [value]="settings().platformName"
+            (input)="update('platformName', $any($event.target).value)"
+            class="w-full bg-surface-container-high rounded-2xl px-4 py-3 text-sm text-on-surface font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+            placeholder="Platform name" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Support Email</label>
+          <input type="email"
+            [value]="settings().supportEmail"
+            (input)="update('supportEmail', $any($event.target).value)"
+            class="w-full bg-surface-container-high rounded-2xl px-4 py-3 text-sm text-on-surface font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+            placeholder="support@example.com" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Default Currency</label>
+          <select
+            [value]="settings().platformCurrency"
+            (change)="update('platformCurrency', $any($event.target).value)"
+            class="w-full bg-surface-container-high rounded-2xl px-4 py-3 text-sm text-on-surface font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all appearance-none cursor-pointer">
+            @for (c of currencies; track c.code) {
+              <option [value]="c.code" [selected]="settings().platformCurrency === c.code">
+                {{ c.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Access Control -->
+    <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+      style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+      <div class="px-5 py-4 border-b border-outline-variant/20 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-secondary text-lg">lock</span>
+        </div>
+        <h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">Access Control</h3>
+      </div>
+
+      <div class="divide-y divide-outline-variant/10">
+
+        <!-- Toggle: Allow Registrations -->
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-bold text-on-surface">Allow New Registrations</p>
+            <p class="text-xs text-outline mt-0.5">Permit new users to create accounts</p>
+          </div>
+          <button type="button"
+            (click)="update('allowRegistrations', !settings().allowRegistrations)"
+            class="relative w-12 h-6 rounded-full transition-colors duration-200"
+            [class.bg-primary]="settings().allowRegistrations"
+            [class.bg-outline-variant]="!settings().allowRegistrations">
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+              [class.translate-x-6]="settings().allowRegistrations"
+              [class.translate-x-0]="!settings().allowRegistrations"></span>
+          </button>
+        </div>
+
+        <!-- Toggle: Email Verification -->
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-bold text-on-surface">Require Email Verification</p>
+            <p class="text-xs text-outline mt-0.5">New accounts must verify their email address</p>
+          </div>
+          <button type="button"
+            (click)="update('requireEmailVerification', !settings().requireEmailVerification)"
+            class="relative w-12 h-6 rounded-full transition-colors duration-200"
+            [class.bg-primary]="settings().requireEmailVerification"
+            [class.bg-outline-variant]="!settings().requireEmailVerification">
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+              [class.translate-x-6]="settings().requireEmailVerification"
+              [class.translate-x-0]="!settings().requireEmailVerification"></span>
+          </button>
+        </div>
+
+        <!-- Max Orders -->
+        <div class="px-5 py-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <p class="text-sm font-bold text-on-surface">Max Orders Per User</p>
+              <p class="text-xs text-outline mt-0.5">Lifetime order limit per individual account</p>
+            </div>
+            <span class="text-primary font-extrabold text-lg">{{ settings().maxOrdersPerUser }}</span>
+          </div>
+          <input type="range" min="10" max="500" step="10"
+            [value]="settings().maxOrdersPerUser"
+            (input)="update('maxOrdersPerUser', +$any($event.target).value)"
+            class="w-full accent-primary cursor-pointer" />
+          <div class="flex justify-between text-[10px] text-outline mt-1">
+            <span>10</span><span>500</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance Mode -->
+    <div class="rounded-3xl overflow-hidden border-2 transition-colors duration-300"
+      [class.border-error]="settings().maintenanceMode"
+      [class.border-outline-variant/20]="!settings().maintenanceMode"
+      [class.bg-error/5]="settings().maintenanceMode"
+      [class.bg-surface-container-lowest]="!settings().maintenanceMode"
+      style="box-shadow:0 4px 16px rgba(26,27,34,0.05)">
+      <div class="px-5 py-4 border-b border-outline-variant/20 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center"
+          [class.bg-error/10]="settings().maintenanceMode"
+          [class.bg-outline/10]="!settings().maintenanceMode">
+          <span class="material-symbols-outlined text-lg"
+            [class.text-error]="settings().maintenanceMode"
+            [class.text-outline]="!settings().maintenanceMode">construction</span>
+        </div>
+        <h3 class="text-sm font-bold uppercase tracking-widest"
+          [class.text-error]="settings().maintenanceMode"
+          [class.text-on-surface]="!settings().maintenanceMode">Maintenance Mode</h3>
+      </div>
+
+      <div class="flex items-start justify-between px-5 py-4 gap-4">
+        <div class="flex-1">
+          <p class="text-sm font-bold text-on-surface">Enable Maintenance Mode</p>
+          <p class="text-xs text-outline mt-0.5">
+            When enabled, the platform displays a maintenance page to all non-admin users.
+            Use this before running database migrations or major updates.
+          </p>
+          @if (settings().maintenanceMode) {
+            <div class="mt-3 flex items-center gap-2 bg-error/10 text-error px-3 py-2 rounded-xl text-xs font-bold">
+              <span class="material-symbols-outlined text-sm">warning</span>
+              Platform is currently in maintenance mode
+            </div>
+          }
+        </div>
+        <button type="button"
+          (click)="update('maintenanceMode', !settings().maintenanceMode)"
+          class="relative flex-none w-12 h-6 rounded-full transition-colors duration-200"
+          [class.bg-error]="settings().maintenanceMode"
+          [class.bg-outline-variant]="!settings().maintenanceMode">
+          <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+            [class.translate-x-6]="settings().maintenanceMode"
+            [class.translate-x-0]="!settings().maintenanceMode"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-3 pt-2">
+      <button (click)="saveSettings()" [disabled]="saving()"
+        class="flex-1 flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-3.5 rounded-2xl text-sm transition-all active:scale-95 disabled:opacity-60">
+        @if (saving()) {
+          <span class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+          Saving…
+        } @else if (saved()) {
+          <span class="material-symbols-outlined text-lg">check_circle</span>
+          Saved!
+        } @else {
+          <span class="material-symbols-outlined text-lg">save</span>
+          Save Settings
+        }
+      </button>
+      <button (click)="resetDefaults()"
+        class="px-5 py-3.5 rounded-2xl border border-outline-variant text-on-surface-variant text-sm font-bold transition-all active:scale-95 hover:bg-surface-container-high">
+        Reset
+      </button>
+    </div>
+
+  </div>
+</div>

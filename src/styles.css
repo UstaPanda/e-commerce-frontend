@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ====================================================
+   INDIGO VAULT — Design System Tokens
+   ==================================================== */
+
+@theme {
+  /* Brand Colors */
+  --color-primary:                  #2b3896;
+  --color-primary-container:        #4551af;
+  --color-on-primary:               #ffffff;
+  --color-on-primary-container:     #cbcfff;
+  --color-primary-fixed:            #dfe0ff;
+  --color-primary-fixed-dim:        #bcc2ff;
+  --color-on-primary-fixed:         #000c62;
+  --color-on-primary-fixed-variant: #303c9a;
+  --color-inverse-primary:          #bcc2ff;
+
+  --color-secondary:                #006e1c;
+  --color-secondary-container:      #98f994;
+  --color-on-secondary:             #ffffff;
+  --color-on-secondary-container:   #0c7521;
+  --color-secondary-fixed:          #98f994;
+  --color-secondary-fixed-dim:      #7ddc7a;
+  --color-on-secondary-fixed:       #002204;
+  --color-on-secondary-fixed-variant: #005313;
+
+  --color-tertiary:                 #673600;
+  --color-tertiary-container:       #894a00;
+  --color-on-tertiary:              #ffffff;
+  --color-on-tertiary-container:    #ffc799;
+  --color-tertiary-fixed:           #ffdcc2;
+  --color-tertiary-fixed-dim:       #ffb77a;
+  --color-on-tertiary-fixed:        #2e1500;
+  --color-on-tertiary-fixed-variant:#6d3a00;
+
+  /* Surfaces */
+  --color-background:               #fbf8ff;
+  --color-surface:                  #fbf8ff;
+  --color-surface-dim:              #dbd9e2;
+  --color-surface-bright:           #fbf8ff;
+  --color-surface-variant:          #e3e1ea;
+  --color-surface-tint:             #4955b3;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low:    #f4f2fc;
+  --color-surface-container:        #efedf6;
+  --color-surface-container-high:   #e9e7f0;
+  --color-surface-container-highest:#e3e1ea;
+  --color-inverse-surface:          #2f3037;
+  --color-inverse-on-surface:       #f2eff9;
+
+  /* On-surface text */
+  --color-on-surface:               #1a1b22;
+  --color-on-surface-variant:       #454652;
+  --color-on-background:            #1a1b22;
+
+  /* Utility */
+  --color-outline:                  #757684;
+  --color-outline-variant:          #c5c5d4;
+  --color-error:                    #ba1a1a;
+  --color-error-container:          #ffdad6;
+  --color-on-error:                 #ffffff;
+  --color-on-error-container:       #93000a;
+
+  /* Typography */
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Manrope", sans-serif;
+  --font-label: "Manrope", sans-serif;
+
+  /* Border Radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg:      0.5rem;
+  --radius-xl:      0.75rem;
+  --radius-2xl:     1rem;
+  --radius-3xl:     1.5rem;
+  --radius-4xl:     2rem;
+  --radius-full:    9999px;
+}
+
+/* ====================================================
+   BASE STYLES
+   ==================================================== */
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: "Manrope", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #fbf8ff;
+  color: #1a1b22;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+/* ====================================================
+   MATERIAL SYMBOLS
+   ==================================================== */
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+.material-symbols-filled {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+/* ====================================================
+   EDITORIAL GRADIENT (Primary CTA)
+   ==================================================== */
+
+.editorial-gradient {
+  background: linear-gradient(135deg, #2b3896 0%, #4551af 100%);
+}
+
+.editorial-shadow {
+  box-shadow: 0 20px 40px -10px rgba(43, 56, 150, 0.08);
+}
+
+/* ====================================================
+   SCROLLBAR HIDE
+   ==================================================== */
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ====================================================
+   FROSTED GLASS
+   ==================================================== */
+
+.frosted {
+  background: rgba(251, 248, 255, 0.80);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* ====================================================
+   AMBIENT CARD (Bento Grid Helper)
+   ==================================================== */
+
+.ambient-card {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 2rem;
+  box-shadow: 0 8px 24px rgba(26, 27, 34, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.ambient-card:hover {
+  box-shadow: 0 16px 40px rgba(43, 56, 150, 0.08);
+}
+
+/* ====================================================
+   ASYMMETRIC GRID (Editorial Layout)
+   ==================================================== */
+
+.asymmetric-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .asymmetric-grid {
+    grid-template-columns: 1fr;
+  }
+}

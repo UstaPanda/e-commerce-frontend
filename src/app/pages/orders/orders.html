@@ -1,0 +1,278 @@
+<div class="bg-surface min-h-screen">
+
+  <!-- ═══════════ MOBILE Header ═══════════ -->
+  <div class="md:hidden editorial-gradient px-6 pt-6 pb-10 relative overflow-hidden">
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+    <h1 class="text-white font-extrabold text-2xl relative z-10"
+      style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'ORDERS.TITLE' | translate }}</h1>
+    <p class="text-white/70 text-sm mt-1 relative z-10">{{ orders().length }} {{ 'ORDERS.UNIT' | translate }}</p>
+  </div>
+
+  <!-- ═══════════ MOBILE Order Cards ═══════════ -->
+  <div class="md:hidden px-6 -mt-4 pb-8 space-y-4 relative z-10">
+
+    @if (loading()) {
+      <div class="space-y-4">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-surface-container-lowest rounded-3xl p-5 animate-pulse"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-full bg-surface-container-high"></div>
+              <div class="flex-1">
+                <div class="h-3 bg-surface-container-high rounded w-1/3 mb-1.5"></div>
+                <div class="h-2 bg-surface-container-high rounded w-1/4"></div>
+              </div>
+              <div class="h-6 w-20 bg-surface-container-high rounded-full"></div>
+            </div>
+            <div class="h-4 bg-surface-container-high rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-surface-container-high rounded w-1/3"></div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!loading() && orders().length === 0) {
+      <div class="text-center py-16">
+        <div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-outline text-5xl">receipt_long</span>
+        </div>
+        <h3 class="text-on-surface font-bold text-lg mb-2"
+          style="font-family:'Plus Jakarta Sans',sans-serif">{{ 'ORDERS.EMPTY_TITLE' | translate }}</h3>
+        <p class="text-outline text-sm mb-6">{{ 'ORDERS.EMPTY_DESC' | translate }}</p>
+        <button (click)="router.navigate(['/app/products'])"
+          class="editorial-gradient text-white font-bold px-8 py-3 rounded-full text-sm active:scale-95 transition-transform"
+          style="box-shadow: 0 8px 24px rgba(43,56,150,0.25)">
+          {{ 'ORDERS.START_SHOPPING' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (!loading() && orders().length > 0) {
+      <div class="space-y-4">
+        @for (order of orders(); track order.id) {
+          <div class="bg-surface-container-lowest rounded-3xl overflow-hidden"
+            style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
+            <button (click)="toggleExpand(order.id)"
+              class="w-full p-5 flex items-start gap-3 text-left active:bg-surface-container-low hover:bg-surface-container-low/50 transition-colors">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                [class]="statusFor(order.status).bg">
+                <span class="material-symbols-outlined text-lg" [class]="statusFor(order.status).color">
+                  {{ statusFor(order.status).icon }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <span class="text-on-surface font-bold text-sm">#{{ order.id }}</span>
+                  <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full"
+                    [class]="statusFor(order.status).bg + ' ' + statusFor(order.status).color">
+                    {{ statusFor(order.status).labelKey | translate }}
+                  </span>
+                </div>
+                <p class="text-outline text-xs">{{ order.storeName }}</p>
+                <p class="text-outline text-xs mt-0.5">{{ formatDate(order.createdAt) }}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-primary font-extrabold text-base"
+                  style="font-family:'Plus Jakarta Sans',sans-serif">
+                  {{ currency.format(order.grandTotal) }}
+                </p>
+                <span class="material-symbols-outlined text-outline text-lg transition-transform inline-block"
+                  [class.rotate-180]="expandedId() === order.id">
+                  expand_more
+                </span>
+              </div>
+            </button>
+            @if (expandedId() === order.id) {
+              <div class="border-t border-outline-variant/20 px-5 pb-5">
+                <div class="space-y-3 mt-4">
+                  @for (item of order.items; track item.productId) {
+                    <div class="flex items-center gap-3">
+                      <div class="w-12 h-12 rounded-2xl bg-surface-container-low shrink-0 overflow-hidden">
+                        <img [src]="getItemImg(item.productId, item.productName)" [alt]="item.productName"
+                          class="w-full h-full object-cover"
+                          (error)="onItemImgError($event, item.productId)">
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-on-surface text-sm font-medium truncate">{{ item.productName }}</p>
+                        <p class="text-outline text-xs">{{ item.quantity }} {{ 'ORDERS.UNIT' | translate }} × {{ currency.format(item.unitPrice) }}</p>
+                      </div>
+                      <p class="text-on-surface font-bold text-sm shrink-0">{{ currency.format(item.subtotal) }}</p>
+                    </div>
+                  }
+                </div>
+                <div class="border-t border-outline-variant/20 mt-4 pt-4 space-y-2">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-outline">{{ 'ORDERS.PAYMENT_METHOD' | translate }}</span>
+                    <span class="text-on-surface font-medium">{{ paymentLabelKey(order.paymentMethod) | translate }}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-outline">{{ 'ORDERS.SHIPPING_ADDRESS' | translate }}</span>
+                    <span class="text-on-surface font-medium text-right max-w-[60%] leading-snug">{{ order.shippingAddress }}</span>
+                  </div>
+                  <div class="flex justify-between text-sm font-bold pt-2 border-t border-outline-variant/20">
+                    <span class="text-on-surface">{{ 'ORDERS.TOTAL' | translate }}</span>
+                    <span class="text-primary text-base">{{ currency.format(order.grandTotal) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ═══════════ DESKTOP Editorial Layout ═══════════ -->
+  <div class="hidden md:block w-full max-w-7xl mx-auto px-8 py-12">
+
+    <!-- Desktop Header -->
+    <div class="flex items-end justify-between mb-12 gap-6">
+      <div>
+        <h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">{{ 'ORDERS.TITLE' | translate }}</h1>
+        <p class="text-on-surface-variant font-body">{{ orders().length }} {{ 'ORDERS.UNIT' | translate }}</p>
+        <button (click)="router.navigate(['/app/shipments'])"
+          class="mt-2 text-sm text-primary font-bold flex items-center gap-1 hover:opacity-70 transition-opacity">
+          <span class="material-symbols-outlined text-base">local_shipping</span>
+          {{ 'ORDERS.TRACK_SHIPMENTS' | translate }}
+        </button>
+      </div>
+      <div class="flex bg-surface-container-low p-1 rounded-full">
+        <button class="px-6 py-2 rounded-full text-sm font-semibold bg-surface-container-lowest text-primary shadow-sm">
+          {{ 'ORDERS.FILTER_ALL' | translate }}
+        </button>
+        <button class="px-6 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-primary transition-all">
+          {{ 'ORDERS.FILTER_ACTIVE' | translate }}
+        </button>
+        <button class="px-6 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-primary transition-all">
+          {{ 'ORDERS.FILTER_COMPLETED' | translate }}
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-6">
+        @for (i of [1,2,3]; track i) {
+          <div class="bg-surface-container-lowest rounded-xl p-6 animate-pulse">
+            <div class="flex items-center gap-6">
+              <div class="w-20 h-20 rounded-lg bg-surface-container-high shrink-0"></div>
+              <div class="flex-1">
+                <div class="h-3 bg-surface-container-high rounded w-1/4 mb-3"></div>
+                <div class="h-5 bg-surface-container-high rounded w-1/3 mb-2"></div>
+                <div class="h-3 bg-surface-container-high rounded w-1/5"></div>
+              </div>
+              <div class="h-7 w-28 bg-surface-container-high rounded-full"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!loading() && orders().length === 0) {
+      <div class="text-center py-24">
+        <div class="w-28 h-28 rounded-full bg-surface-container-low flex items-center justify-center mx-auto mb-6">
+          <span class="material-symbols-outlined text-outline text-6xl">receipt_long</span>
+        </div>
+        <h3 class="font-headline text-2xl font-bold text-on-surface mb-3">{{ 'ORDERS.EMPTY_TITLE' | translate }}</h3>
+        <p class="text-on-surface-variant font-body mb-8">{{ 'ORDERS.EMPTY_DESC' | translate }}</p>
+        <button (click)="router.navigate(['/app/products'])"
+          class="editorial-gradient text-white font-bold px-10 py-4 rounded-full hover:scale-105 transition-transform">
+          {{ 'ORDERS.START_SHOPPING' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (!loading() && orders().length > 0) {
+      <div class="space-y-6">
+        @for (order of orders(); track order.id) {
+          <div class="bg-surface-container-lowest rounded-xl overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <button (click)="toggleExpand(order.id)"
+              class="w-full p-6 flex items-center justify-between gap-6 text-left hover:bg-surface-container-low/30 transition-colors">
+              <div class="flex items-center gap-6">
+                <div class="h-20 w-20 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+                  @if (order.items.length > 0) {
+                    <img [src]="getItemImg(order.items[0].productId, order.items[0].productName)"
+                      [alt]="order.items[0].productName"
+                      class="w-full h-full object-cover"
+                      (error)="onItemImgError($event, order.items[0].productId)">
+                  }
+                </div>
+                <div>
+                  <div class="flex items-center gap-3 mb-1">
+                    <span class="text-xs font-label uppercase tracking-widest text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded font-bold">
+                      #{{ order.id }}
+                    </span>
+                    <span class="flex items-center gap-1.5 text-xs font-bold"
+                      [class]="statusFor(order.status).color">
+                      <span class="material-symbols-outlined text-[14px]"
+                        style="font-variation-settings:'FILL' 1">{{ statusFor(order.status).icon }}</span>
+                      {{ statusFor(order.status).labelKey | translate }}
+                    </span>
+                  </div>
+                  <h3 class="font-headline font-bold text-lg text-on-surface">
+                    @if (order.items.length > 0) {
+                      {{ order.items[0].productName }}
+                      @if (order.items.length > 1) {
+                        <span class="text-on-surface-variant font-normal text-sm ml-2">+{{ order.items.length - 1 }}</span>
+                      }
+                    }
+                  </h3>
+                  <p class="text-sm text-on-surface-variant font-body mt-0.5">{{ order.storeName }} · {{ formatDate(order.createdAt) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-8 shrink-0">
+                <div class="text-right">
+                  <p class="text-xs font-label text-on-surface-variant uppercase mb-1">{{ 'ORDERS.TOTAL' | translate }}</p>
+                  <p class="text-xl font-headline font-bold text-on-surface">{{ currency.format(order.grandTotal) }}</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all">
+                  <span class="material-symbols-outlined transition-transform"
+                    [class.rotate-90]="expandedId() === order.id">chevron_right</span>
+                </div>
+              </div>
+            </button>
+
+            @if (expandedId() === order.id) {
+              <div class="border-t border-surface-container-high px-6 pb-6 pt-4">
+                <div class="grid grid-cols-2 gap-8">
+                  <div class="space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-outline mb-4">{{ 'ORDERS.ITEMS' | translate }}</h4>
+                    @for (item of order.items; track item.productId) {
+                      <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 overflow-hidden">
+                          <img [src]="getItemImg(item.productId, item.productName)" [alt]="item.productName"
+                            class="w-full h-full object-cover"
+                            (error)="onItemImgError($event, item.productId)">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-on-surface text-sm font-medium truncate">{{ item.productName }}</p>
+                          <p class="text-outline text-xs mt-0.5">{{ item.quantity }} {{ 'ORDERS.UNIT' | translate }} × {{ currency.format(item.unitPrice) }}</p>
+                        </div>
+                        <p class="text-on-surface font-bold text-sm shrink-0">{{ currency.format(item.subtotal) }}</p>
+                      </div>
+                    }
+                  </div>
+                  <div class="space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-outline mb-4">{{ 'ORDERS.DETAILS' | translate }}</h4>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-outline">{{ 'ORDERS.PAYMENT_METHOD' | translate }}</span>
+                      <span class="text-on-surface font-medium">{{ paymentLabelKey(order.paymentMethod) | translate }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-outline">{{ 'ORDERS.SHIPPING_ADDRESS' | translate }}</span>
+                      <span class="text-on-surface font-medium text-right max-w-[60%] leading-snug">{{ order.shippingAddress }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold pt-4 border-t border-surface-container-high">
+                      <span class="text-on-surface font-headline">{{ 'ORDERS.TOTAL' | translate }}</span>
+                      <span class="text-primary text-lg font-headline">{{ currency.format(order.grandTotal) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>
