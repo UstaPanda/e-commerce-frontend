@@ -577,11 +577,9 @@
           <div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden group"
             style="box-shadow: 0 4px 16px rgba(26,27,34,0.05)">
             <div class="aspect-square bg-surface-container-low flex items-center justify-center relative overflow-hidden">
-              @if (product.imageUrl) {
-                <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              } @else {
-                <span class="material-symbols-outlined text-outline text-5xl">image</span>
-              }
+              <img [src]="getProductImage(product)" [alt]="product.name"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                   (error)="$any($event.target).style.display='none'">
               <span class="absolute top-3 left-3 text-[10px] font-black px-2.5 py-1 rounded-full backdrop-blur-sm"
                 [class]="product.stockQuantity > 10
                   ? 'bg-secondary-container text-on-secondary-container'

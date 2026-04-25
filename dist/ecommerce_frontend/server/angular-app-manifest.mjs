@@ -321,8 +321,8 @@ export default {
 ],
   entryPointToBrowserMapping: undefined,
   assets: {
-    'index.csr.html': {size: 28665, hash: 'd029bfe2bcea9f01fb2c99edc8f497b3ac589c41ba37065760d4c8155f429599', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
-    'index.server.html': {size: 17630, hash: '2482249f98181d3c1cb8bd8c5b04ab9b301f56dc9cd5c3fa7ddf743b21ada7b2', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
-    'styles-PWDYKXCL.css': {size: 83897, hash: 'vS1phLXfCSk', text: () => import('./assets-chunks/styles-PWDYKXCL_css.mjs').then(m => m.default)}
+    'index.csr.html': {size: 27794, hash: 'cbe26b046c6f629ec4c2e7c2be073fbf787b55c3d6e9380d04e514917b8335a6', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
+    'index.server.html': {size: 17630, hash: '63921119290abb5841cb59efb728d082cac4c044794aba8983c59ed00550244c', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
+    'styles-G2RDZOOR.css': {size: 78693, hash: 'LYM1kZEm24c', text: () => import('./assets-chunks/styles-G2RDZOOR_css.mjs').then(m => m.default)}
   },
 };

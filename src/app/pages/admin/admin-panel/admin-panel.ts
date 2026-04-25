@@ -3,10 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyService } from '../../../services/currency.service';
-import {
-  AdminService, AdminUser, AdminStore, AdminOrder, AdminProduct, AdminCoupon,
-  PageResponse
-} from '../../../services/admin.service';
+import { AdminService, AdminUser, AdminStore, AdminOrder, AdminProduct, AdminCoupon, PageResponse } from '../../../services/admin.service';
+import { getProductImage } from '../../../services/product.service';
 import { environment } from '../../../../enviroments/enviroments';
 
 type Tab = 'analytics' | 'ai-support' | 'stores' | 'orders' | 'products' | 'users';
@@ -21,6 +19,10 @@ export class AdminPanelComponent implements OnInit {
   private adminService = inject(AdminService);
   private http = inject(HttpClient);
   currency = inject(CurrencyService);
+  
+  getProductImage(p: any): string {
+    return getProductImage(p);
+  }
 
   activeTab = signal<Tab>('analytics');
 
