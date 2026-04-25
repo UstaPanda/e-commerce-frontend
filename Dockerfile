@@ -1,15 +1,13 @@
-# Stage 1: Build
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
-COPY . .
-ENV NODE_OPTIONS=--max-old-space-size=4096
-RUN npm run build
-
-# Stage 2: Run
+# Use Node 22 Alpine for a small runtime image
 FROM node:22-alpine
+
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
+
+# Copy the pre-built dist folder from the local machine
+# This avoids doing a high-memory build on the 2GB server
+COPY dist ./dist
+
 EXPOSE 4200
+
+# Run the Angular SSR server
 CMD ["node", "dist/ecommerce_frontend/server/server.mjs"]
