@@ -40,12 +40,14 @@ export class LoginComponent {
     this.error = '';
     this.loading = true;
     try {
-      const recaptchaToken = await Promise.race([
-        this.recaptcha.execute('login'),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('reCAPTCHA zaman aşımı')), 10000)
-        ),
-      ]);
+      const recaptchaToken = await this.recaptcha.execute('login');
+      
+      if (!recaptchaToken) {
+        this.error = 'Lütfen "Ben robot değilim" kutucuğunu işaretleyin.';
+        this.loading = false;
+        return;
+      }
+
       this.auth.login({ email: this.email, password: this.password, rememberMe: this.rememberMe, recaptchaToken }).subscribe({
         next: (res) => {
           this.loading = false;
@@ -66,7 +68,7 @@ export class LoginComponent {
         },
       });
     } catch (err: any) {
-      this.error = err?.message || 'reCAPTCHA doğrulaması başarısız';
+      this.error = err?.message || 'Doğrulama hatası oluştu';
       this.loading = false;
     }
   }
