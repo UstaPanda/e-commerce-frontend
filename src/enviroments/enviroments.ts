@@ -2,7 +2,7 @@ export const environment = {
   production: true,
   apiUrl: '/api',
   aiUrl: '/ai-api',
-  recaptchaSiteKey: '6Lfm3Y8sAAAAACUKWhJxsvckBe5Yy1VObiiqy4M-',
+  recaptchaSiteKey: '6LflWMssAAAAAFsCZ4uLpjRu3sc0DCuaPNLzfIIR',
   // TODO: Kendi EVM cüzdan adresinizi buraya girin (application.properties ile aynı olmalı)
   merchantWallet: '0x0000000000000000000000000000000000000000',
   // TODO: Stripe Dashboard > Developers > API Keys > Publishable key
