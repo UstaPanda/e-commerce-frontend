@@ -1,4 +1,4 @@
-import { Component, inject, NgZone } from '@angular/core';
+import { Component, inject, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -15,13 +15,17 @@ import { environment } from '../../../../enviroments/enviroments';
   imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
   templateUrl: './login.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   readonly environment = environment;
   private auth = inject(AuthService);
   private recaptcha = inject(RecaptchaService);
   private router = inject(Router);
   private zone = inject(NgZone);
   lang = inject(LanguageService); // ensures translations are initialized on auth routes
+
+  ngOnInit() {
+    this.recaptcha.load();
+  }
 
   email = '';
   password = '';
