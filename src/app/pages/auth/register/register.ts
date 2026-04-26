@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -19,6 +19,7 @@ export class RegisterComponent {
   private auth = inject(AuthService);
   private recaptcha = inject(RecaptchaService);
   private router = inject(Router);
+  private zone = inject(NgZone);
 
   name = '';
   email = '';
@@ -35,30 +36,34 @@ export class RegisterComponent {
     try {
       const recaptchaToken = await this.recaptcha.execute('register');
       
-      if (!recaptchaToken) {
-        this.error = 'Lütfen "Ben robot değilim" kutucuğunu işaretleyin.';
-        this.loading = false;
-        return;
-      }
+      this.zone.run(() => {
+        if (!recaptchaToken) {
+          this.error = 'Lütfen "Ben robot değilim" kutucuğunu işaretleyin.';
+          this.loading = false;
+          return;
+        }
 
-      this.auth.register({ name: this.name, email: this.email, password: this.password, role: this.role, gender: this.gender, recaptchaToken }).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/auth/verify'], { state: { email: this.email } });
-        },
-        error: (err) => {
-          try {
-            const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
-            this.error = body?.message || 'Kayıt başarısız';
-          } catch {
-            this.error = 'Kayıt başarısız';
-          }
-          this.loading = false;
-        },
+        this.auth.register({ name: this.name, email: this.email, password: this.password, role: this.role, gender: this.gender, recaptchaToken }).subscribe({
+          next: () => {
+            this.loading = false;
+            this.router.navigate(['/auth/verify'], { state: { email: this.email } });
+          },
+          error: (err) => {
+            try {
+              const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
+              this.error = body?.message || 'Kayıt başarısız';
+            } catch {
+              this.error = 'Kayıt başarısız';
+            }
+            this.loading = false;
+          },
+        });
       });
     } catch (err: any) {
-      this.error = err?.message || 'Doğrulama hatası oluştu';
-      this.loading = false;
+      this.zone.run(() => {
+        this.error = err?.message || 'Doğrulama hatası oluştu';
+        this.loading = false;
+      });
     }
   }
 }
