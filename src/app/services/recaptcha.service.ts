@@ -10,8 +10,11 @@ export class RecaptchaService {
   load(): Promise<void> {
     if (this.loaded) return Promise.resolve();
     return new Promise((resolve) => {
+      // Use the base API URL without 'render' parameter for v2 compatibility
       const script = document.createElement('script');
-      script.src = `https://www.google.com/recaptcha/api.js?render=${environment.recaptchaSiteKey}`;
+      script.src = `https://www.google.com/recaptcha/api.js`;
+      script.async = true;
+      script.defer = true;
       script.onload = () => {
         this.loaded = true;
         resolve();
