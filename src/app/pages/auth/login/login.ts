@@ -7,6 +7,8 @@ import { AuthService } from '../../../services/auth.service';
 import { RecaptchaService } from '../../../services/recaptcha.service';
 import { LanguageService } from '../../../services/language.service';
 
+import { environment } from '../../../../enviroments/enviroments';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -14,6 +16,7 @@ import { LanguageService } from '../../../services/language.service';
   templateUrl: './login.html',
 })
 export class LoginComponent {
+  readonly environment = environment;
   private auth = inject(AuthService);
   private recaptcha = inject(RecaptchaService);
   private router = inject(Router);

@@ -143,6 +143,11 @@
           </div>
         </div>
 
+        <!-- reCAPTCHA v2 Checkbox -->
+        <div class="flex justify-center my-4 overflow-hidden rounded-2xl">
+          <div class="g-recaptcha" [attr.data-sitekey]="environment.recaptchaSiteKey"></div>
+        </div>
+
         <!-- Submit -->
         <button type="submit" [disabled]="loading"
           class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mt-2"

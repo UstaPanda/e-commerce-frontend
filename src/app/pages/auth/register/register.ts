@@ -6,6 +6,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../../services/auth.service';
 import { RecaptchaService } from '../../../services/recaptcha.service';
 
+import { environment } from '../../../../enviroments/enviroments';
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -13,6 +15,7 @@ import { RecaptchaService } from '../../../services/recaptcha.service';
   templateUrl: './register.html',
 })
 export class RegisterComponent {
+  readonly environment = environment;
   private auth = inject(AuthService);
   private recaptcha = inject(RecaptchaService);
   private router = inject(Router);
