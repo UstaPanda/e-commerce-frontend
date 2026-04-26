@@ -24,8 +24,21 @@ export class RecaptchaService {
     await this.load();
     return new Promise((resolve) => {
       grecaptcha.ready(() => {
-        grecaptcha.execute(environment.recaptchaSiteKey, { action }).then(resolve);
+        // v3 pattern
+        if (grecaptcha.execute) {
+          grecaptcha.execute(environment.recaptchaSiteKey, { action }).then(resolve);
+        } else {
+          // fallback or v2
+          resolve(this.getResponse());
+        }
       });
     });
+  }
+
+  getResponse(): string {
+    if (typeof grecaptcha !== 'undefined' && grecaptcha.getResponse) {
+      return grecaptcha.getResponse();
+    }
+    return '';
   }
 }
