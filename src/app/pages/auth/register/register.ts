@@ -1,4 +1,4 @@
-import { Component, inject, NgZone, OnInit } from '@angular/core';
+import { Component, inject, NgZone, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -21,52 +21,62 @@ export class RegisterComponent implements OnInit {
   private router = inject(Router);
   private zone = inject(NgZone);
 
+  name = signal('');
+  email = signal('');
+  password = signal('');
+  role = signal<'INDIVIDUAL' | 'CORPORATE'>('INDIVIDUAL');
+  gender = signal<'M' | 'F'>('M');
+  loading = signal(false);
+  error = signal('');
+  showPassword = signal(false);
+
   ngOnInit() {
     this.recaptcha.load();
   }
 
-  name = '';
-  email = '';
-  password = '';
-  role: 'INDIVIDUAL' | 'CORPORATE' = 'INDIVIDUAL';
-  gender: 'M' | 'F' = 'M';
-  loading = false;
-  error = '';
-  showPassword = false;
-
   async onSubmit() {
-    this.error = '';
-    this.loading = true;
+    if (this.loading()) return;
+    
+    this.error.set('');
+    this.loading.set(true);
+    
     try {
       const recaptchaToken = await this.recaptcha.execute('register');
       
       this.zone.run(() => {
         if (!recaptchaToken) {
-          this.error = 'Lütfen "Ben robot değilim" kutucuğunu işaretleyin.';
-          this.loading = false;
+          this.error.set('Lütfen "Ben robot değilim" kutucuğunu işaretleyin.');
+          this.loading.set(false);
           return;
         }
 
-        this.auth.register({ name: this.name, email: this.email, password: this.password, role: this.role, gender: this.gender, recaptchaToken }).subscribe({
+        this.auth.register({ 
+          name: this.name(), 
+          email: this.email(), 
+          password: this.password(), 
+          role: this.role(), 
+          gender: this.gender(), 
+          recaptchaToken 
+        }).subscribe({
           next: () => {
-            this.loading = false;
-            this.router.navigate(['/auth/verify'], { state: { email: this.email } });
+            this.loading.set(false);
+            this.router.navigate(['/auth/verify'], { state: { email: this.email() } });
           },
           error: (err) => {
             try {
               const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
-              this.error = body?.message || 'Kayıt başarısız';
+              this.error.set(body?.message || 'Kayıt başarısız');
             } catch {
-              this.error = 'Kayıt başarısız';
+              this.error.set('Kayıt başarısız');
             }
-            this.loading = false;
+            this.loading.set(false);
           },
         });
       });
     } catch (err: any) {
       this.zone.run(() => {
-        this.error = err?.message || 'Doğrulama hatası oluştu';
-        this.loading = false;
+        this.error.set(err?.message || 'Doğrulama hatası oluştu');
+        this.loading.set(false);
       });
     }
   }

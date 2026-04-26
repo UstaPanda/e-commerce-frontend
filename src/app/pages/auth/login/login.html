@@ -64,10 +64,10 @@
       <form (ngSubmit)="onSubmit()" #f="ngForm" class="space-y-5">
 
         <!-- Error -->
-        @if (error) {
+        @if (error()) {
           <div class="p-4 bg-error-container rounded-2xl flex items-center gap-3">
             <span class="material-symbols-outlined text-error text-xl">error</span>
-            <p class="text-on-error-container text-sm font-medium">{{ error }}</p>
+            <p class="text-on-error-container text-sm font-medium">{{ error() }}</p>
           </div>
         }
 
@@ -78,7 +78,8 @@
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
             <input
               type="email"
-              [(ngModel)]="email"
+              [ngModel]="email()"
+              (ngModelChange)="email.set($event)"
               name="email"
               required
               [placeholder]="'AUTH.LOGIN.EMAIL_PLACEHOLDER' | translate"
@@ -93,16 +94,17 @@
           <div class="relative">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
             <input
-              [type]="showPassword ? 'text' : 'password'"
-              [(ngModel)]="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
               name="password"
               required
               placeholder="••••••••"
               class="w-full bg-surface-container-low rounded-full pl-12 pr-12 py-4 text-sm text-on-surface placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium"
             />
-            <button type="button" (click)="showPassword = !showPassword"
+            <button type="button" (click)="showPassword.set(!showPassword())"
               class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
-              <span class="material-symbols-outlined text-xl">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              <span class="material-symbols-outlined text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
         </div>
@@ -110,12 +112,12 @@
         <!-- Remember me + Forgot password -->
         <div class="flex items-center justify-between">
           <label class="flex items-center gap-2 cursor-pointer">
-            <div (click)="rememberMe = !rememberMe"
+            <div (click)="rememberMe.set(!rememberMe())"
               class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer"
-              [class.bg-primary]="rememberMe"
-              [class.border-primary]="rememberMe"
-              [class.border-outline-variant]="!rememberMe">
-              @if (rememberMe) {
+              [class.bg-primary]="rememberMe()"
+              [class.border-primary]="rememberMe()"
+              [class.border-outline-variant]="!rememberMe()">
+              @if (rememberMe()) {
                 <span class="material-symbols-outlined text-white text-sm">check</span>
               }
             </div>
@@ -134,10 +136,10 @@
         <!-- Submit -->
         <button
           type="submit"
-          [disabled]="loading || !email || !password"
+          [disabled]="loading() || !email() || !password()"
           class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           style="box-shadow: 0 8px 24px rgba(43,56,150,0.30)">
-          {{ loading ? ('AUTH.LOGIN.LOADING' | translate) : ('AUTH.LOGIN.SUBMIT' | translate) }}
+          {{ loading() ? ('AUTH.LOGIN.LOADING' | translate) : ('AUTH.LOGIN.SUBMIT' | translate) }}
         </button>
 
         <!-- Divider -->

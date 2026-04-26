@@ -76,10 +76,10 @@
 
       <form (ngSubmit)="onSubmit()" class="space-y-4">
 
-        @if (error) {
+        @if (error()) {
           <div class="p-4 bg-error-container rounded-2xl flex items-center gap-3">
             <span class="material-symbols-outlined text-error text-xl">error</span>
-            <p class="text-on-error-container text-sm font-medium">{{ error }}</p>
+            <p class="text-on-error-container text-sm font-medium">{{ error() }}</p>
           </div>
         }
 
@@ -88,7 +88,7 @@
           <label class="text-xs font-bold uppercase tracking-widest text-outline mb-2 block">{{ 'AUTH.REGISTER.FULL_NAME' | translate }}</label>
           <div class="relative">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">person</span>
-            <input type="text" [(ngModel)]="name" name="name" required [placeholder]="'AUTH.REGISTER.FULL_NAME' | translate"
+            <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" required [placeholder]="'AUTH.REGISTER.FULL_NAME' | translate"
               class="w-full bg-surface-container-low rounded-full pl-12 pr-5 py-4 text-sm text-on-surface placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium" />
           </div>
         </div>
@@ -98,7 +98,7 @@
           <label class="text-xs font-bold uppercase tracking-widest text-outline mb-2 block">{{ 'AUTH.REGISTER.EMAIL' | translate }}</label>
           <div class="relative">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
-            <input type="email" [(ngModel)]="email" name="email" required [placeholder]="'AUTH.REGISTER.EMAIL_PLACEHOLDER' | translate"
+            <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" required [placeholder]="'AUTH.REGISTER.EMAIL_PLACEHOLDER' | translate"
               class="w-full bg-surface-container-low rounded-full pl-12 pr-5 py-4 text-sm text-on-surface placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium" />
           </div>
         </div>
@@ -108,11 +108,11 @@
           <label class="text-xs font-bold uppercase tracking-widest text-outline mb-2 block">{{ 'AUTH.REGISTER.PASSWORD' | translate }}</label>
           <div class="relative">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
-            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" required [placeholder]="'AUTH.REGISTER.PASSWORD_PLACEHOLDER' | translate"
+            <input [type]="showPassword() ? 'text' : 'password'" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password" required [placeholder]="'AUTH.REGISTER.PASSWORD_PLACEHOLDER' | translate"
               class="w-full bg-surface-container-low rounded-full pl-12 pr-12 py-4 text-sm text-on-surface placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium" />
-            <button type="button" (click)="showPassword = !showPassword"
+            <button type="button" (click)="showPassword.set(!showPassword())"
               class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
-              <span class="material-symbols-outlined text-xl">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              <span class="material-symbols-outlined text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
         </div>
@@ -123,7 +123,7 @@
             <label class="text-xs font-bold uppercase tracking-widest text-outline mb-2 block">{{ 'AUTH.REGISTER.ACCOUNT_TYPE' | translate }}</label>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">badge</span>
-              <select [(ngModel)]="role" name="role"
+              <select [ngModel]="role()" (ngModelChange)="role.set($event)" name="role"
                 class="w-full bg-surface-container-low rounded-2xl pl-9 pr-3 py-4 text-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium appearance-none">
                 <option value="INDIVIDUAL">{{ 'AUTH.REGISTER.INDIVIDUAL' | translate }}</option>
                 <option value="CORPORATE">{{ 'AUTH.REGISTER.CORPORATE' | translate }}</option>
@@ -134,7 +134,7 @@
             <label class="text-xs font-bold uppercase tracking-widest text-outline mb-2 block">{{ 'AUTH.REGISTER.GENDER' | translate }}</label>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">wc</span>
-              <select [(ngModel)]="gender" name="gender"
+              <select [ngModel]="gender()" (ngModelChange)="gender.set($event)" name="gender"
                 class="w-full bg-surface-container-low rounded-2xl pl-9 pr-3 py-4 text-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors font-medium appearance-none">
                 <option value="M">{{ 'AUTH.REGISTER.MALE' | translate }}</option>
                 <option value="F">{{ 'AUTH.REGISTER.FEMALE' | translate }}</option>
@@ -149,10 +149,17 @@
         </div>
 
         <!-- Submit -->
-        <button type="submit" [disabled]="loading"
+        <button type="submit" [disabled]="loading()"
           class="w-full editorial-gradient text-white font-bold py-4 rounded-full text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mt-2"
           style="box-shadow: 0 8px 24px rgba(43,56,150,0.30)">
-          {{ loading ? ('AUTH.REGISTER.LOADING' | translate) : ('AUTH.REGISTER.SUBMIT' | translate) }}
+          @if (loading()) {
+            <div class="flex items-center justify-center gap-3">
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+              <span>{{ 'AUTH.REGISTER.LOADING' | translate }}</span>
+            </div>
+          } @else {
+            {{ 'AUTH.REGISTER.SUBMIT' | translate }}
+          }
         </button>
 
       </form>
