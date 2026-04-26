@@ -30,16 +30,17 @@ export class LoginComponent implements OnInit {
   error = signal('');
   showPassword = signal(false);
 
-  ngOnInit() {
-    this.recaptcha.load();
-  }
-
   readonly features = [
     { icon: 'storefront', key: 'AUTH.LOGIN.FEATURES.STORES' },
     { icon: 'local_shipping', key: 'AUTH.LOGIN.FEATURES.SHIPPING' },
     { icon: 'smart_toy', key: 'AUTH.LOGIN.FEATURES.AI' },
     { icon: 'verified', key: 'AUTH.LOGIN.FEATURES.PAYMENT' },
   ];
+
+  async ngOnInit() {
+    await this.recaptcha.load();
+    this.recaptcha.render('recaptcha-v2-container');
+  }
 
   async onSubmit() {
     if (this.loading()) return;
@@ -72,6 +73,7 @@ export class LoginComponent implements OnInit {
             }
           },
           error: (err) => {
+            this.recaptcha.reset(); // Reset captcha on error
             try {
               const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
               this.error.set(body?.message || 'Giriş başarısız');
@@ -84,6 +86,7 @@ export class LoginComponent implements OnInit {
       });
     } catch (err: any) {
       this.zone.run(() => {
+        this.recaptcha.reset();
         this.error.set(err?.message || 'Doğrulama hatası oluştu');
         this.loading.set(false);
       });

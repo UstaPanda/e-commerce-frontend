@@ -30,8 +30,9 @@ export class RegisterComponent implements OnInit {
   error = signal('');
   showPassword = signal(false);
 
-  ngOnInit() {
-    this.recaptcha.load();
+  async ngOnInit() {
+    await this.recaptcha.load();
+    this.recaptcha.render('recaptcha-v2-container');
   }
 
   async onSubmit() {
@@ -63,6 +64,7 @@ export class RegisterComponent implements OnInit {
             this.router.navigate(['/auth/verify'], { state: { email: this.email() } });
           },
           error: (err) => {
+            this.recaptcha.reset();
             try {
               const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
               this.error.set(body?.message || 'Kayıt başarısız');
@@ -75,6 +77,7 @@ export class RegisterComponent implements OnInit {
       });
     } catch (err: any) {
       this.zone.run(() => {
+        this.recaptcha.reset();
         this.error.set(err?.message || 'Doğrulama hatası oluştu');
         this.loading.set(false);
       });

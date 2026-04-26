@@ -11,8 +11,13 @@ export class RecaptchaService {
   load(): Promise<void> {
     if (this.loaded) return Promise.resolve();
     return new Promise((resolve) => {
+      if (typeof grecaptcha !== 'undefined') {
+        this.loaded = true;
+        resolve();
+        return;
+      }
       const script = document.createElement('script');
-      script.src = `https://www.google.com/recaptcha/api.js`;
+      script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -23,6 +28,27 @@ export class RecaptchaService {
       };
       document.head.appendChild(script);
     });
+  }
+
+  render(containerId: string): void {
+    grecaptcha.ready(() => {
+      this.zone.run(() => {
+        try {
+          grecaptcha.render(containerId, {
+            sitekey: environment.recaptchaSiteKey,
+            theme: 'light'
+          });
+        } catch (e) {
+          // Already rendered or error, ignore
+        }
+      });
+    });
+  }
+
+  reset(): void {
+    if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
+      grecaptcha.reset();
+    }
   }
 
   async execute(action: string): Promise<string> {
